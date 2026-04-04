@@ -1,3 +1,4 @@
+// Design Ref: mockup/screens/login.html
 import { BASE_URL } from '@/lib/config';
 import useAuthStore from '@/lib/store/auth';
 import { Stack, useNavigation } from 'expo-router';
@@ -5,15 +6,13 @@ import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Image,
-  ImageBackground,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   StyleSheet,
   TextInput,
   Text,
-  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -45,11 +44,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <ImageBackground
-      resizeMode="cover"
-      source={require('../../assets/images/log-in-bg.png')}
-      style={{ height: '100%' }}
-    >
+    <View style={s.screen}>
       <Stack.Screen options={{ title: 'login', headerShown: false }} />
 
       <SafeAreaView style={{ flex: 1 }}>
@@ -58,104 +53,139 @@ export default function LoginScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.container}>
-              <View>
-                <ImageBackground
-                  resizeMode="contain"
-                  source={require('../../assets/images/log-in-id.png')}
-                  style={styles.inputBg}
-                >
-                  <TextInput
-                    autoCapitalize="none"
-                    style={styles.input}
-                    placeholder="아이디"
-                    placeholderTextColor="#392f31"
-                    onChangeText={setLoginId}
-                    value={loginId}
-                    editable={!isLoading}
-                  />
-                </ImageBackground>
-                <ImageBackground
-                  resizeMode="contain"
-                  source={require('../../assets/images/log-in-pw.png')}
-                  style={styles.inputBg}
-                >
-                  <TextInput
-                    autoCapitalize="none"
-                    style={styles.input}
-                    placeholder="비밀번호"
-                    placeholderTextColor="#392f31"
-                    secureTextEntry={true}
-                    onChangeText={setPassword}
-                    value={password}
-                    onSubmitEditing={handleLogin}
-                    editable={!isLoading}
-                  />
-                </ImageBackground>
+            <View style={s.container}>
+              {/* 로고 */}
+              <View style={s.logoWrap}>
+                <View style={s.logoIcon}>
+                  <Text style={s.logoIconText}>AG</Text>
+                </View>
+                <Text style={s.logoTitle}>농지현장조사</Text>
+                <Text style={s.logoSub}>현장 조사원 전용 앱</Text>
+              </View>
 
-                <TouchableOpacity
-                  style={{ width: '100%', height: 60 }}
+              {/* 폼 */}
+              <View style={s.form}>
+                <TextInput
+                  autoCapitalize="none"
+                  style={s.input}
+                  placeholder="아이디"
+                  placeholderTextColor="#ced4da"
+                  onChangeText={setLoginId}
+                  value={loginId}
+                  editable={!isLoading}
+                />
+                <TextInput
+                  autoCapitalize="none"
+                  style={s.input}
+                  placeholder="비밀번호"
+                  placeholderTextColor="#ced4da"
+                  secureTextEntry
+                  onChangeText={setPassword}
+                  value={password}
+                  onSubmitEditing={handleLogin}
+                  editable={!isLoading}
+                />
+                <Pressable
+                  style={({ pressed }) => [s.btn, pressed && { opacity: 0.85 }]}
                   onPress={handleLogin}
                   disabled={isLoading}
                 >
                   {isLoading ? (
-                    <View style={styles.loadingBtn}>
-                      <ActivityIndicator color="#fff" />
-                    </View>
+                    <ActivityIndicator color="#fff" />
                   ) : (
-                    <Image
-                      resizeMode="contain"
-                      style={{ width: '100%', height: '100%' }}
-                      source={require('../../assets/images/log-in-login.png')}
-                    />
+                    <Text style={s.btnText}>로그인</Text>
                   )}
-                </TouchableOpacity>
+                </Pressable>
               </View>
-              <View>
-                <TouchableOpacity
-                  onPress={async () => {
-                    await WebBrowser.openBrowserAsync(
-                      `${BASE_URL}/login/signup`
-                    );
-                  }}
-                >
-                  <Text style={styles.signupLink}>회원가입</Text>
-                </TouchableOpacity>
-              </View>
+
+              {/* 회원가입 */}
+              <Pressable
+                style={s.signupWrap}
+                onPress={() => WebBrowser.openBrowserAsync(`${BASE_URL}/auth/signup`)}
+              >
+                <Text style={s.signupText}>회원가입</Text>
+              </Pressable>
             </View>
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </ImageBackground>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
+const s = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
   container: {
-    flexGrow: 1,
-    padding: 30,
+    flex: 1,
+    paddingHorizontal: 24,
     justifyContent: 'center',
   },
-  inputBg: {
-    width: '100%',
-    marginBottom: 15,
+  // 로고
+  logoWrap: {
+    alignItems: 'center',
+    marginBottom: 48,
+  },
+  logoIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 18,
+    backgroundColor: '#228be6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  logoIconText: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  logoTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#212529',
+  },
+  logoSub: {
+    fontSize: 14,
+    color: '#868e96',
+    marginTop: 4,
+  },
+  // 폼
+  form: {
+    gap: 16,
   },
   input: {
-    marginLeft: 100,
-    height: 50,
-    color: 'black',
-  },
-  loadingBtn: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#228be6',
+    height: 48,
+    borderWidth: 1.5,
+    borderColor: '#dee2e6',
     borderRadius: 8,
+    paddingHorizontal: 16,
+    fontSize: 15,
+    color: '#212529',
+    backgroundColor: '#fff',
+  },
+  btn: {
+    height: 56,
+    borderRadius: 10,
+    backgroundColor: '#228be6',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  signupLink: {
-    color: '#228be6',
-    textAlign: 'center',
+  btnText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  // 회원가입
+  signupWrap: {
+    marginTop: 16,
+    alignItems: 'center',
     padding: 10,
+  },
+  signupText: {
+    fontSize: 14,
+    color: '#228be6',
   },
 });
