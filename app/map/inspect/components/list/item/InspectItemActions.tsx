@@ -2,8 +2,7 @@ import inspectInputStore from '@/store/inspectInputStore';
 import inspectStore from '@/store/inspectStore';
 import shelterStore from '@/store/shelterStore';
 import { Ionicons } from '@expo/vector-icons';
-import { HStack, IconButton, useTheme } from 'native-base';
-import { Alert } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 interface InspectItemActionsProps {
   item: any;
@@ -20,13 +19,14 @@ export default function InspectItemActions({ item }: InspectItemActionsProps) {
   const { fieldInfo } = inspectStore();
   const { setIsFacility, setIsFarm, setInspectInput } = inspectInputStore();
   const { fetchShelter } = shelterStore();
-  const theme = useTheme();
+
   return (
-    <HStack style={{ right: 0 }}>
-      <IconButton
-        variant="ghost"
-        icon={<Ionicons name="create-outline" size={22} color="#339af0" />}
-        _pressed={{ bg: 'coolGray.100' }}
+    <View style={styles.container}>
+      <Pressable
+        style={({ pressed }) => [
+          styles.iconButton,
+          pressed && styles.pressedEdit,
+        ]}
         onPress={async () => {
           setSelectedItem(item);
           setIsEdit(true);
@@ -47,11 +47,14 @@ export default function InspectItemActions({ item }: InspectItemActionsProps) {
             await fetchShelter(item.inspectId);
           }
         }}
-      />
-      <IconButton
-        variant="ghost"
-        icon={<Ionicons name="trash-outline" size={22} color="#ff4d4d" />}
-        _pressed={{ bg: 'red.50' }}
+      >
+        <Ionicons name="create-outline" size={22} color="#339af0" />
+      </Pressable>
+      <Pressable
+        style={({ pressed }) => [
+          styles.iconButton,
+          pressed && styles.pressedDelete,
+        ]}
         onPress={() => {
           Alert.alert('조사내용 삭제', '선택한 조사내역을 삭제하시겠습니까?', [
             {
@@ -69,7 +72,26 @@ export default function InspectItemActions({ item }: InspectItemActionsProps) {
             },
           ]);
         }}
-      />
-    </HStack>
+      >
+        <Ionicons name="trash-outline" size={22} color="#ff4d4d" />
+      </Pressable>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    right: 0,
+  },
+  iconButton: {
+    padding: 8,
+    borderRadius: 4,
+  },
+  pressedEdit: {
+    backgroundColor: '#f1f3f5',
+  },
+  pressedDelete: {
+    backgroundColor: '#fff5f5',
+  },
+});

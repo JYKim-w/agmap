@@ -6,8 +6,8 @@ import NullView from '@/src/map/components/nullView';
 import { useRefContext } from '@/app/refContext';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { BottomSheetFlatList, TouchableOpacity as BSTouchable } from '@gorhom/bottom-sheet';
-import { HStack } from 'native-base';
+import { TouchableOpacity } from 'react-native';
+import { BottomSheetFlatList } from '@/components/BottomSheet';
 import { useCallback, useRef, useState } from 'react';
 import {
   Keyboard,
@@ -16,7 +16,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import { ActivityIndicator } from 'react-native-paper';
+import { ActivityIndicator } from 'react-native';
 import SearchItem from './components/searchItem';
 
 /**
@@ -25,7 +25,7 @@ import SearchItem from './components/searchItem';
  */
 function SelectedBar({ item, onPress }: { item: any; onPress: () => void }) {
   return (
-    <BSTouchable style={styles.selectedBar} onPress={onPress} activeOpacity={0.7}>
+    <TouchableOpacity style={styles.selectedBar} onPress={onPress} activeOpacity={0.7}>
       <Ionicons name="location" size={16} color="#339AF0" style={{ marginRight: 8 }} />
       <Text style={styles.selectedBarName} numberOfLines={1} ellipsizeMode="tail">
         {item['place_name']}
@@ -34,7 +34,7 @@ function SelectedBar({ item, onPress }: { item: any; onPress: () => void }) {
         {item['road_address_name'] || item['address_name']}
       </Text>
       <Ionicons name="chevron-forward" size={16} color="#999" />
-    </BSTouchable>
+    </TouchableOpacity>
   );
 }
 
@@ -93,7 +93,7 @@ export default function SearchView() {
     <View style={{ flex: 1 }}>
       {/* 검색 입력창 */}
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <HStack style={{ padding: 5 }}>
+        <View style={{ flexDirection: 'row', padding: 5 }}>
           <TextInput
             style={{ borderRadius: 30, height: 45 }}
             left={<Ionicons name="search-outline" size={20} color="black" />}
@@ -106,7 +106,7 @@ export default function SearchView() {
               fetchSearchData(searchQuery);
             }}
           />
-        </HStack>
+        </View>
       </TouchableWithoutFeedback>
 
       {/* 선택 아이템 요약 바 (고정, 스크롤 무관) */}
@@ -127,33 +127,32 @@ export default function SearchView() {
       {/* 검색 결과 리스트 */}
       <View style={{ flex: 1, width: '100%' }}>
         <BtBody>
-            {results.length === 0 ? (
-              <NullView>검색 결과가 없습니다.</NullView>
-            ) : (
-              <BottomSheetFlatList
-                data={results}
-                contentContainerStyle={{ flexGrow: 1, paddingTop: 4 }}
-                keyExtractor={(item: any, index) => 'search_' + item.id + '_' + index}
-                renderItem={renderItem}
-                ListHeaderComponent={
+            <BottomSheetFlatList
+              data={results}
+              contentContainerStyle={{ flexGrow: 1, paddingTop: 4 }}
+              keyExtractor={(item: any, index) => 'search_' + item.id + '_' + index}
+              renderItem={renderItem}
+              ListHeaderComponent={
+                results.length > 0 ? (
                   <Text style={styles.listHeader}>
                     검색결과 <Text style={styles.listHeaderCount}>{results.length}</Text>건
                   </Text>
+                ) : null
+              }
+              ListEmptyComponent={<NullView>검색 결과가 없습니다.</NullView>}
+              onEndReached={() => {
+                if (!onEndReachedCalledDuringMomentum.current) {
+                  fetchSearchData(searchQuery, true);
+                  onEndReachedCalledDuringMomentum.current = true;
                 }
-                onEndReached={() => {
-                  if (!onEndReachedCalledDuringMomentum.current) {
-                    fetchSearchData(searchQuery, true);
-                    onEndReachedCalledDuringMomentum.current = true;
-                  }
-                }}
-                onEndReachedThreshold={0.1}
-                onMomentumScrollEnd={() => {
-                  onEndReachedCalledDuringMomentum.current = false;
-                }}
-                ListFooterComponent={loading && <ActivityIndicator />}
-                extraData={selectedIndex}
-              />
-            )}
+              }}
+              onEndReachedThreshold={0.1}
+              onMomentumScrollEnd={() => {
+                onEndReachedCalledDuringMomentum.current = false;
+              }}
+              ListFooterComponent={loading && <ActivityIndicator />}
+              extraData={selectedIndex}
+            />
           </BtBody>
         </View>
     </View>

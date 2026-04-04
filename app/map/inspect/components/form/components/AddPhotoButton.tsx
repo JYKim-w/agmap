@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { Button, Center, Text } from 'native-base';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 interface AddPhotoButtonProps {
   style?: any;
   iconsSize?: number;
@@ -69,18 +68,23 @@ export default function AddPhotoButton({
 
   return (
     <View style={[styles.imageBox, style]}>
-      <Button
-        width="100%"
-        height="100%"
-        colorScheme="primary"
-        variant="outline"
+      <Pressable
         onPress={onAddPhotoClick}
+        style={{
+          width: '100%',
+          height: '100%',
+          borderWidth: 1,
+          borderColor: '#0ea5e9',
+          borderRadius: 4,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
       >
-        <Center>
+        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
           <Ionicons name="camera-outline" size={iconsSize} color="black" />
-          <Text fontSize={fontSize}>사진 추가</Text>
-        </Center>
-      </Button>
+          <Text style={{ fontSize: fontSize }}>사진 추가</Text>
+        </View>
+      </Pressable>
     </View>
   );
 }

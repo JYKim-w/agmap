@@ -1,17 +1,13 @@
-import { useAppTheme } from '@/app/theme/theme';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useCameraPermissions } from 'expo-camera';
 import * as Location from 'expo-location';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { NativeBaseProvider } from 'native-base';
 import { useEffect, useState } from 'react';
-import { Alert, Linking, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import VersionCheck from 'react-native-version-check';
 import Login from './js/login';
 import { RefProvider } from './refContext';
 import appStatusStore from '@/store/appStatus';
@@ -73,80 +69,11 @@ export default function RootLayout() {
       };
     }
   };
-  //version check
-  function updateVersionCheck(storeVersion, currentVersion) {
-    let result = false;
-
-    if (typeof storeVersion != 'undefined') {
-      let sv = storeVersion.split('.');
-      let cv = currentVersion.split('.');
-
-      let cnt = Math.max(sv.length, cv.length);
-
-      for (let i = 0; i < cnt; i++) {
-        let v1 = sv[i] ? parseInt(sv[i]) : 0;
-        let v2 = cv[i] ? parseInt(cv[i]) : 0;
-
-        if (v1 > v2) {
-          result = true;
-          break;
-        }
-      }
-    }
-
-    return result;
-  }
-  const versionStoreNm = Platform.select({
-    ios: 'appStore',
-    android: 'playStore',
-  });
+  // version check — expo-constants 기반 (스토어 최신 버전 조회는 추후 구현)
   const checkVersion = async () => {
-    try {
-      const latestVersion = await VersionCheck.getLatestVersion({
-        provider: versionStoreNm,
-      });
-      const currentVersion = VersionCheck.getCurrentVersion();
-
-      if (!updateVersionCheck(latestVersion, currentVersion)) {
-        return false; // 업데이트 불필요
-      }
-
-      return new Promise((resolve) => {
-        Alert.alert(
-          '업데이트',
-          '최신 버전으로 업데이트 하시겠습니까?',
-          [
-            {
-              text: 'OK',
-              onPress: async () => {
-                const appURL =
-                  Platform.OS === 'ios'
-                    ? 'https://apps.apple.com/kr/app/id6496601839'
-                    : 'https://play.google.com/store/apps/details?id=com.agmap';
-
-                try {
-                  await Linking.openURL(appURL);
-                  resolve(true); // 업데이트 버튼 클릭 후 완료
-                } catch (error) {
-                  console.warn('Failed to open URL:', error);
-                  resolve(false); // URL 열기 실패
-                }
-              },
-            },
-            {
-              text: 'Cancel',
-              onPress: () => {
-                resolve(false); // 취소 버튼 클릭 후 완료
-              },
-            },
-          ],
-          { cancelable: false }
-        );
-      });
-    } catch (error) {
-      console.warn('Version check failed:', error);
-      return false; // 버전 확인 실패
-    }
+    // TODO: 스토어 최신 버전 비교 로직 추후 구현
+    // 현재 버전: Constants.expoConfig?.version
+    return false;
   };
 
   useEffect(() => {
@@ -180,8 +107,6 @@ export default function RootLayout() {
     }
   }, [isReady]);
 
-  const theme = useAppTheme();
-
   // 준비 완료 전까지 스플래시 화면 유지
   if (!isReady) {
     return null;
@@ -189,26 +114,22 @@ export default function RootLayout() {
 
   return (
     <RefProvider>
-      <NativeBaseProvider theme={theme}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <BottomSheetModalProvider>
-            <StatusBar style="dark" translucent backgroundColor="transparent" />
-            <Stack
-              screenOptions={{
-                animation: 'fade',
-                headerShown: false,
-                navigationBarColor: 'transparent',
-                navigationBarHidden: true,
-              }}
-              initialRouteName={userId ? 'map/index' : 'login/index'}
-            >
-              <Stack.Screen name="map/index" />
-              <Stack.Screen name="login/index" />
-            </Stack>
-            <Toast />
-          </BottomSheetModalProvider>
-        </GestureHandlerRootView>
-      </NativeBaseProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <StatusBar style="dark" translucent backgroundColor="transparent" />
+        <Stack
+          screenOptions={{
+            animation: 'fade',
+            headerShown: false,
+            navigationBarColor: 'transparent',
+            navigationBarHidden: true,
+          }}
+          initialRouteName={userId ? 'map/index' : 'login/index'}
+        >
+          <Stack.Screen name="map/index" />
+          <Stack.Screen name="login/index" />
+        </Stack>
+        <Toast />
+      </GestureHandlerRootView>
     </RefProvider>
   );
 }

@@ -1,6 +1,5 @@
 import STYLE from '@/app/style/style';
-import { Box, FormControl, HStack } from 'native-base';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import AddPhotoButton from '../AddPhotoButton';
 import PressablePhoto from '../PressablePhoto';
@@ -32,17 +31,17 @@ export default function ShelterPhotoInput({
     });
   };
   return (
-    <Box style={[STYLE.box, { marginBottom: 10 }]}>
-      <FormControl.Label style={STYLE.label}>{title}</FormControl.Label>
+    <View style={[STYLE.box, { marginBottom: 10 }]}>
+      <Text style={STYLE.label}>{title}</Text>
 
-      <HStack flex={1}>
+      <View style={{ flexDirection: 'row', flex: 1 }}>
         <AddPhotoButton style={styles.imageBox} onSelectImage={onSelectImage} />
 
         <ScrollView horizontal>
-          <HStack flex={1}>{renderPhoto(data)}</HStack>
+          <View style={{ flexDirection: 'row', flex: 1 }}>{renderPhoto(data)}</View>
         </ScrollView>
-      </HStack>
-    </Box>
+      </View>
+    </View>
   );
 }
 

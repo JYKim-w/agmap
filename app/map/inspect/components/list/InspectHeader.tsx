@@ -2,7 +2,6 @@ import { useRefContext } from '@/app/refContext';
 import bottomStore from '@/store/bottomStore';
 import codeStore from '@/store/codeStore';
 import inspectStore from '@/store/inspectStore';
-import { Text } from 'native-base';
 import { Keyboard } from 'react-native';
 import BtHeader from '@/src/map/components/btHeader';
 

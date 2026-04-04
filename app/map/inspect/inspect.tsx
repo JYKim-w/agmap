@@ -1,10 +1,9 @@
 import codeStore from '@/store/codeStore';
 import inspectInputStore from '@/store/inspectInputStore';
 import inspectStore from '@/store/inspectStore';
-import { BottomSheetView } from '@gorhom/bottom-sheet';
-import { Text } from 'native-base';
+import { View as RNView } from 'react-native';
 import { useEffect } from 'react';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import NullView from '@/src/map/components/nullView';
 import InspectFormView from './components/form/inspectFormView';
 import InspectListView from './components/list/inspectListView';
@@ -30,7 +29,7 @@ export default function InspectView() {
 
   return (
     <View style={{ flex: 1 }}>
-      <BottomSheetView style={{ height: '100%' }}>
+      <RNView style={{ height: '100%' }}>
         {!fieldInfo ? (
           <NullView>
             <Text>선택된 조사지가 없습니다.</Text>
@@ -40,7 +39,7 @@ export default function InspectView() {
         ) : (
           <InspectListView />
         )}
-      </BottomSheetView>
+      </RNView>
     </View>
   );
 }

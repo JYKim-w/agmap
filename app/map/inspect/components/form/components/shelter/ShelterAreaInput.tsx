@@ -1,6 +1,6 @@
 import shelterStore from '@/store/shelterStore';
 import STYLE from '@/app/style/style';
-import { Box, FormControl, VStack } from 'native-base';
+import { Text, View } from 'react-native';
 import AreaInput from '../AreaInput';
 
 export default function ShelterAreaInput() {
@@ -13,9 +13,9 @@ export default function ShelterAreaInput() {
     setBuildingArea,
   } = shelterStore();
   return (
-    <Box style={[STYLE.box, { marginBottom: 10, backgroundColor: 'white' }]}>
-      <FormControl.Label style={STYLE.label}>농지면적</FormControl.Label>
-      <VStack space={2}>
+    <View style={[STYLE.box, { marginBottom: 10, backgroundColor: 'white' }]}>
+      <Text style={STYLE.label}>농지면적</Text>
+      <View style={{ flexDirection: 'column', gap: 8 }}>
         <AreaInput
           title={'농지면적'}
           left={'농지면적'}
@@ -44,7 +44,7 @@ export default function ShelterAreaInput() {
             setBuildingArea(Number(v));
           }}
         />
-      </VStack>
-    </Box>
+      </View>
+    </View>
   );
 }

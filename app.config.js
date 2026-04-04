@@ -2,11 +2,11 @@ import packageJson from './package.json';
 module.exports = ({ config }) => {
   const appVersion = packageJson.version;
   const easBuildNumber = process.env.EAS_BUILD_NUMBER || '1';
-  const androidVersionCode = 12 + Number(easBuildNumber || 1); // easBuildNumber가 없으면 1로 가정
+  const androidVersionCode = Number(easBuildNumber || 1);
   const iosBuildNumber = easBuildNumber;
   return {
     expo: {
-      name: '농지현장조사',
+      name: '농지전수조사',
       slug: 'agmap',
       version: appVersion,
       runtimeVersion: appVersion,
@@ -38,7 +38,7 @@ module.exports = ({ config }) => {
       },
       android: {
         versionCode: androidVersionCode,
-        package: 'com.agmap',
+        package: 'com.mgis.agmap',
         adaptiveIcon: {
           foregroundImage: './assets/images/icon2.png',
           backgroundColor: '#ffffff',

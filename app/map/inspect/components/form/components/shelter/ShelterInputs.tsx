@@ -1,4 +1,4 @@
-import { View } from 'native-base';
+import { View } from 'react-native';
 import React from 'react';
 import LivingFacilitiesInput from './LivingFacilitiesInput';
 import ShelterAreaInput from './ShelterAreaInput';

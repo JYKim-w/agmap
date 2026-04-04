@@ -9,11 +9,11 @@ import {
   Platform,
   StyleSheet,
   TextInput,
+  Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import { Button, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import Config from '../js/config.js';
@@ -66,7 +66,6 @@ export default function LoginScreen() {
     });
     navigation.navigate('map/index' as never);
   };
-  const theme = useTheme();
   return (
     <ImageBackground
       resizeMode="cover"
@@ -134,15 +133,15 @@ export default function LoginScreen() {
                 </TouchableOpacity>
               </View>
               <View>
-                <Button
+                <TouchableOpacity
                   onPress={async () => {
                     await WebBrowser.openBrowserAsync(
                       Config.url + 'login/signup'
                     );
                   }}
                 >
-                  회원가입
-                </Button>
+                  <Text style={{ color: '#228be6', textAlign: 'center', padding: 10 }}>회원가입</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </TouchableWithoutFeedback>

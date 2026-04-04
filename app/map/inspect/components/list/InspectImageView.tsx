@@ -1,9 +1,16 @@
 import Config from '@/app/js/config';
 import { Ionicons } from '@expo/vector-icons';
-import { HStack, IconButton } from 'native-base';
-import React from 'react';
-import { ActivityIndicator, Modal } from 'react-native';
-import ImageViewer from 'react-native-image-zoom-viewer';
+import React, { useState } from 'react';
+import {
+  ActivityIndicator,
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
+
 interface InspectImageViewProps {
   data?: any[];
   dataType?: 'file' | 'url';
@@ -19,12 +26,15 @@ export default function InspectImageView({
   index,
   onRemove,
 }: InspectImageViewProps) {
-  if (!data) {
-    return;
-  }
-  const images = [];
+  const [currentIndex, setCurrentIndex] = useState(index);
+  const [loading, setLoading] = useState(true);
 
-  data.map((v) => {
+  if (!data) {
+    return null;
+  }
+  const images: { url: string }[] = [];
+
+  data.forEach((v) => {
     if (v.fileId) {
       images.push({ url: Config.url + 'lot/file/get?fileId=' + v.fileId });
     } else {
@@ -32,47 +42,36 @@ export default function InspectImageView({
     }
   });
 
+  const uri = images[currentIndex]?.url;
+
   return (
     <Modal visible={isVisible} transparent={true}>
-      <ImageViewer
-        index={index}
-        imageUrls={images}
-        backgroundColor={'rgba(0,0,0,1)'}
-        enableSwipeDown={true}
-        onSwipeDown={() => {
-          setIsVisible(false);
-        }}
-        //TODO 삭제기능 추가
-        loadingRender={() => {
-          return <ActivityIndicator />;
-        }}
-        renderFooter={(index) => (
-          <HStack
-            style={{ width: '100%' }}
-            flex={1}
-            justifyContent="flex-end"
-            safeAreaBottom
-          >
-            {/* <Button
-              variant="outline"
-              colorScheme="secondary"
-              style={{ marginRight: 10, backgroundColor: 'white' }}
-              onPress={() => {
-                onRemove(data[index], index);
-              }}
-            >
-              삭제
-            </Button> */}
-            <IconButton
-              icon={<Ionicons name="trash" size={20} color="white" />}
-              shadow={1}
-              onPress={() => {
-                onRemove(data[index], index);
-              }}
-            />
-          </HStack>
+      <View style={imgStyles.container}>
+        <Pressable style={imgStyles.closeBtn} onPress={() => setIsVisible(false)}>
+          <Ionicons name="close" size={28} color="white" />
+        </Pressable>
+        {loading && <ActivityIndicator style={StyleSheet.absoluteFill} color="white" />}
+        {uri && (
+          <Image
+            source={{ uri }}
+            style={imgStyles.image}
+            resizeMode="contain"
+            onLoadEnd={() => setLoading(false)}
+          />
         )}
-      />
+        <View style={imgStyles.footer}>
+          <Pressable onPress={() => onRemove(data[currentIndex], currentIndex)}>
+            <Ionicons name="trash" size={20} color="white" />
+          </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }
+
+const imgStyles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: 'rgba(0,0,0,1)', justifyContent: 'center' },
+  closeBtn: { position: 'absolute', top: 50, right: 16, zIndex: 10, padding: 8 },
+  image: { width: '100%', height: '80%' },
+  footer: { flexDirection: 'row', justifyContent: 'flex-end', padding: 16 },
+});

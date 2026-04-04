@@ -8,10 +8,13 @@ import inspectStore from '@/store/inspectStore';
 import shelterStore from '@/store/shelterStore';
 import userStore from '@/store/userStore';
 import STYLE from '@/app/style/style';
-import { Button, HStack, ScrollView, Spinner, Box, Text } from 'native-base';
 import {
+  ActivityIndicator,
   Keyboard,
+  Pressable,
+  ScrollView,
   StyleSheet,
+  Text,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -186,44 +189,58 @@ export default function InspectFormView() {
         </TouchableWithoutFeedback>
 
         {validationMsg ? (
-          <Box
-            bg="red.50"
-            px={4}
-            py={3}
-            mx={4}
-            mb={4}
-            borderRadius="xl"
-            borderWidth={1}
-            borderColor="red.100"
+          <View
+            style={{
+              backgroundColor: '#fff5f5',
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              marginHorizontal: 16,
+              marginBottom: 16,
+              borderRadius: 16,
+              borderWidth: 1,
+              borderColor: '#fee2e2',
+            }}
           >
-            <HStack alignItems="center" space={2}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Ionicons name="alert-circle" size={18} color="#e03131" />
-              <Text color="#e03131" fontSize="14px" fontWeight="700">
+              <Text style={{ color: '#e03131', fontSize: 14, fontWeight: '700' }}>
                 {validationMsg}
               </Text>
-            </HStack>
-          </Box>
+            </View>
+          </View>
         ) : null}
 
-        <Box px={4} pb={4}>
-          <Button
-            bg="primary.500"
-            _text={{ fontWeight: '800', fontSize: '18px', color: 'white' }}
-            h="60px"
-            borderRadius="18px"
+        <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
+          <Pressable
             onPress={onSubmitClick}
-            shadow={4}
-            _pressed={{ opacity: 0.9, bg: 'primary.600' }}
+            style={({ pressed }) => [
+              {
+                backgroundColor: pressed ? '#0284c7' : '#0ea5e9',
+                height: 60,
+                borderRadius: 18,
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.15,
+                shadowRadius: 8,
+                elevation: 4,
+              },
+              pressed && { opacity: 0.9 },
+            ]}
           >
-            기록 저장하기
-          </Button>
-        </Box>
+            <Text style={{ fontWeight: '800', fontSize: 18, color: 'white' }}>
+              기록 저장하기
+            </Text>
+          </Pressable>
+        </View>
       </BtBody>
       {isLoading && (
-        <HStack
-          space={2}
-          justifyContent="center"
+        <View
           style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
             position: 'absolute',
             top: 0,
             left: 0,
@@ -231,8 +248,8 @@ export default function InspectFormView() {
             bottom: 0,
           }}
         >
-          <Spinner accessibilityLabel="Loading posts" />
-        </HStack>
+          <ActivityIndicator />
+        </View>
       )}
     </View>
   );

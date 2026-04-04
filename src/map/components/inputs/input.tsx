@@ -1,12 +1,12 @@
 import Ionicons from '@expo/vector-icons/build/Ionicons';
-import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
-import { HStack } from 'native-base';
+import { TextInput as RNTextInput } from 'react-native';
 import {
   KeyboardTypeOptions,
   Pressable,
   StyleProp,
   StyleSheet,
   Text,
+  View,
   ViewStyle,
 } from 'react-native';
 
@@ -39,9 +39,9 @@ export default function TextInput({
   textAlign,
 }: TextInputProps) {
   return (
-    <HStack style={[styles.container, style]}>
+    <View style={[styles.container, style]}>
       {left ? <Text style={styles.textLeft}>{left}</Text> : null}
-      <BottomSheetTextInput
+      <RNTextInput
         style={styles.input}
         placeholder={placeholder}
         onChangeText={onChangeText}
@@ -60,7 +60,7 @@ export default function TextInput({
           <Ionicons name="close-outline" size={20} color="black" />
         </Pressable>
       ) : null}
-    </HStack>
+    </View>
   );
 }
 

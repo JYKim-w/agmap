@@ -1,6 +1,6 @@
 import shelterStore from '@/store/shelterStore';
 import STYLE from '@/app/style/style';
-import { Box, FormControl, VStack } from 'native-base';
+import { Text, View } from 'react-native';
 import AreaInput from '../AreaInput';
 
 export default function ShelterDetailAreaInput() {
@@ -13,9 +13,9 @@ export default function ShelterDetailAreaInput() {
     setParkingArea,
   } = shelterStore();
   return (
-    <Box style={[STYLE.box, { marginBottom: 10, backgroundColor: 'white' }]}>
-      <FormControl.Label style={STYLE.label}>면적상세</FormControl.Label>
-      <VStack space={2}>
+    <View style={[STYLE.box, { marginBottom: 10, backgroundColor: 'white' }]}>
+      <Text style={STYLE.label}>면적상세</Text>
+      <View style={{ flexDirection: 'column', gap: 8 }}>
         <AreaInput
           left={'정화조'}
           value={septicArea}
@@ -42,7 +42,7 @@ export default function ShelterDetailAreaInput() {
             setParkingArea(Number(v));
           }}
         />
-      </VStack>
-    </Box>
+      </View>
+    </View>
   );
 }

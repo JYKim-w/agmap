@@ -1,6 +1,5 @@
 import React, { memo, useCallback } from 'react';
-import { StyleSheet } from 'react-native';
-import { HStack, IconButton, Box } from 'native-base';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import useMeasureStore from '@/store/measureStore';
@@ -23,43 +22,39 @@ const MeasureControlBar = memo(({ onAdd, onUndo, onReset, onFinish }: MeasureCon
   }, [onAdd]);
 
   return (
-    <Box style={styles.container}>
-      <HStack space={4} alignItems="center" justifyContent="center">
-        <IconButton
-          icon={<Ionicons name="refresh-outline" size={24} color="#4b5563" />}
+    <View style={styles.container}>
+      <View style={styles.row}>
+        <Pressable
           onPress={onReset}
-          style={styles.actionButton}
-          bg="white"
-          _pressed={{ bg: 'gray.100' }}
-        />
-        
-        <IconButton
-          icon={<Ionicons name="arrow-undo-outline" size={24} color={canUndo ? "#4b5563" : "#d1d5db"} />}
+          style={[styles.actionButton, { backgroundColor: 'white' }]}
+        >
+          <Ionicons name="refresh-outline" size={24} color="#4b5563" />
+        </Pressable>
+
+        <Pressable
           onPress={onUndo}
-          isDisabled={!canUndo}
-          style={styles.actionButton}
-          bg="white"
-          _pressed={{ bg: 'gray.100' }}
-        />
+          disabled={!canUndo}
+          style={[styles.actionButton, { backgroundColor: 'white', opacity: canUndo ? 1 : 0.5 }]}
+        >
+          <Ionicons name="arrow-undo-outline" size={24} color={canUndo ? "#4b5563" : "#d1d5db"} />
+        </Pressable>
 
-        <IconButton
-          icon={<Ionicons name="add" size={36} color="white" />}
+        <Pressable
           onPress={handleAdd}
-          style={styles.addButton}
-          bg="#339af0"
-          _pressed={{ bg: '#228be6' }}
-        />
+          style={[styles.addButton, { backgroundColor: '#339af0' }]}
+        >
+          <Ionicons name="add" size={36} color="white" />
+        </Pressable>
 
-        <IconButton
-          icon={<Ionicons name="checkmark" size={26} color={canFinish ? "#339af0" : "#d1d5db"} />}
+        <Pressable
           onPress={onFinish}
-          isDisabled={!canFinish}
-          style={styles.actionButton}
-          bg="white"
-          _pressed={{ bg: 'gray.100' }}
-        />
-      </HStack>
-    </Box>
+          disabled={!canFinish}
+          style={[styles.actionButton, { backgroundColor: 'white', opacity: canFinish ? 1 : 0.5 }]}
+        >
+          <Ionicons name="checkmark" size={26} color={canFinish ? "#339af0" : "#d1d5db"} />
+        </Pressable>
+      </View>
+    </View>
   );
 });
 
@@ -72,10 +67,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
   },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
   actionButton: {
     width: 60,
     height: 60,
     borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -86,6 +89,8 @@ const styles = StyleSheet.create({
     width: 76,
     height: 76,
     borderRadius: 38,
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#339af0',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,

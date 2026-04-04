@@ -1,8 +1,7 @@
 import Config from '@/app/js/config';
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Pressable, Skeleton, View } from 'native-base';
 import { useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 interface PressablePhotoProps {
   data?: any;
@@ -24,22 +23,25 @@ export default function PressablePhoto({
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.imageBox, style, { cursor: 'pointer', padding: 0 }]}
-      _pressed={{
-        opacity: 0.5,
-      }}
+      style={({ pressed }) => [
+        styles.imageBox,
+        style,
+        { padding: 0 },
+        pressed && { opacity: 0.5 },
+      ]}
     >
-      <View flex={1}>
+      <View style={{ flex: 1 }}>
         {loading && (
-          <Skeleton
-            startColor="coolGray.200"
-            endColor="coolGray.300"
-            height={boxSize}
-            width={boxSize}
+          <View
+            style={{
+              backgroundColor: '#e9ecef',
+              height: boxSize,
+              width: boxSize,
+            }}
           />
         )}
         <Image
-          alt={alt}
+          accessibilityLabel={alt}
           style={styles.image}
           source={{
             uri: data.fileId

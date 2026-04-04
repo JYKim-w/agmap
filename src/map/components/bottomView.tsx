@@ -1,4 +1,4 @@
-import BottomSheet, { useBottomSheetSpringConfigs } from '@gorhom/bottom-sheet';
+import BottomSheet, { useBottomSheetSpringConfigs } from '@/components/BottomSheet';
 
 import InspectView from '@/app/map/inspect/inspect';
 import SearchView from '@/app/map/search/search';
@@ -38,22 +38,21 @@ export default function BottomView() {
   useEffect(() => {
     if (isExpand) {
       bottomSheetRef.current?.expand();
-    } else {
-      bottomSheetRef.current?.snapToIndex(0);
     }
+    // isExpand가 false가 되어도 현재 snap을 유지 — 제스처/버튼이 snap을 제어
   }, [isExpand]);
 
   // 3단계 스냅: peek(80px) → mid(45%) → full(90%)
   const snapPoints = useMemo(() => [80, '45%', '90%'], []);
 
-  // 스프링 물리 애니메이션 — 빠른 스냅 + 살짝 바운스
+  // 스프링 물리 애니메이션 — 부드러운 스냅, overshoot 방지
   const animationConfigs = useBottomSheetSpringConfigs({
-    damping: 80,
-    overshootClamping: false,
-    restDisplacementThreshold: 0.1,
-    restSpeedThreshold: 0.1,
-    stiffness: 400,
-    mass: 0.5,
+    damping: 25,
+    overshootClamping: true,
+    restDisplacementThreshold: 0.5,
+    restSpeedThreshold: 0.5,
+    stiffness: 180,
+    mass: 0.8,
   });
 
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

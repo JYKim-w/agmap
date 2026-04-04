@@ -1,6 +1,5 @@
 import React, { memo } from 'react';
-import { StyleSheet } from 'react-native';
-import { Box, Text, HStack, VStack } from 'native-base';
+import { StyleSheet, View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import useMeasureStore from '@/store/measureStore';
 
@@ -9,41 +8,41 @@ const MeasureInfoCard = memo(() => {
   const areaVal = useMeasureStore((s) => s.measureArea);
 
   return (
-    <Box style={styles.container}>
-      <VStack space={2}>
-        <HStack alignItems="center" space={3}>
-            <Box bg="rgba(51, 154, 240, 0.1)" p={1.5} borderRadius="lg">
+    <View style={styles.container}>
+      <View style={{flexDirection:'column', gap: 8}}>
+        <View style={{flexDirection:'row', alignItems:'center', gap: 12}}>
+            <View style={styles.iconBox}>
                 <Ionicons name="resize-outline" size={18} color="#339af0" />
-            </Box>
-            <VStack>
-                <Text fontSize="xs" color="gray.500" fontWeight="bold">총 거리</Text>
-                <HStack alignItems="baseline" space={1}>
-                    <Text fontSize="lg" fontWeight="bold" color="gray.800">
+            </View>
+            <View style={{flexDirection:'column'}}>
+                <Text style={styles.labelText}>총 거리</Text>
+                <View style={{flexDirection:'row', alignItems:'baseline', gap: 4}}>
+                    <Text style={styles.valueText}>
                         {distanceVal.toLocaleString(undefined, { maximumFractionDigits: 1 })}
                     </Text>
-                    <Text fontSize="xs" color="gray.600">m</Text>
-                </HStack>
-            </VStack>
-        </HStack>
+                    <Text style={styles.unitText}>m</Text>
+                </View>
+            </View>
+        </View>
 
-        <Box h="1px" bg="gray.100" />
+        <View style={styles.divider} />
 
-        <HStack alignItems="center" space={3}>
-            <Box bg="rgba(51, 154, 240, 0.1)" p={1.5} borderRadius="lg">
+        <View style={{flexDirection:'row', alignItems:'center', gap: 12}}>
+            <View style={styles.iconBox}>
                 <Ionicons name="layers-outline" size={18} color="#339af0" />
-            </Box>
-            <VStack>
-                <Text fontSize="xs" color="gray.500" fontWeight="bold">면적 크기</Text>
-                <HStack alignItems="baseline" space={1}>
-                    <Text fontSize="lg" fontWeight="bold" color="gray.800">
+            </View>
+            <View style={{flexDirection:'column'}}>
+                <Text style={styles.labelText}>면적 크기</Text>
+                <View style={{flexDirection:'row', alignItems:'baseline', gap: 4}}>
+                    <Text style={styles.valueText}>
                         {areaVal.toLocaleString(undefined, { maximumFractionDigits: 1 })}
                     </Text>
-                    <Text fontSize="xs" color="gray.600">㎡</Text>
-                </HStack>
-            </VStack>
-        </HStack>
-      </VStack>
-    </Box>
+                    <Text style={styles.unitText}>㎡</Text>
+                </View>
+            </View>
+        </View>
+      </View>
+    </View>
   );
 });
 
@@ -63,6 +62,29 @@ const styles = StyleSheet.create({
     elevation: 5,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  iconBox: {
+    backgroundColor: 'rgba(51, 154, 240, 0.1)',
+    padding: 6,
+    borderRadius: 8,
+  },
+  labelText: {
+    fontSize: 12,
+    color: '#6b7280',
+    fontWeight: 'bold',
+  },
+  valueText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1f2937',
+  },
+  unitText: {
+    fontSize: 12,
+    color: '#4b5563',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#f3f4f6',
   },
 });
 

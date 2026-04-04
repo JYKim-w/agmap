@@ -1,21 +1,19 @@
 import React from 'react';
 
 import useAppTheme from '@/app/theme/theme';
-import { HStack } from 'native-base';
 
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomBarButton from './bottomBarButton';
 export default function BottomBar() {
   const { colors } = useAppTheme();
+  const insets = useSafeAreaInsets();
 
   return (
-    <HStack
-      safeAreaBottom
-      space={2}
-      alignItems="center"
+    <View
       style={[
         styles.fixedContainer,
-        Platform.OS === 'android' ? styles.android : {},
+        Platform.OS === 'android' ? styles.android : { paddingBottom: insets.bottom },
       ]}
     >
       <BottomBarButton
@@ -36,7 +34,7 @@ export default function BottomBar() {
         activeIcon="settings"
         inActiveIcon="settings-outline"
       />
-    </HStack>
+    </View>
   );
 }
 

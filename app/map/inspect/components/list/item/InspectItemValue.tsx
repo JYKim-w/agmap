@@ -1,4 +1,4 @@
-import { Badge, Text, VStack } from 'native-base';
+import { View, Text, StyleSheet } from 'react-native';
 
 interface InspectItemValueProps {
   title: string;
@@ -12,9 +12,27 @@ export default function InspectItemValue({
   width,
 }: InspectItemValueProps) {
   return (
-    <VStack alignItems="flex-start" style={{ width: width }}>
-      <Text fontSize="10px" fontWeight="700" color="coolGray.400" mb={1}>{title}</Text>
-      <Text fontSize="13px" fontWeight="600" color="coolGray.800">{value}</Text>
-    </VStack>
+    <View style={[styles.container, { width }]}>
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.value}>{value}</Text>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
+  title: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#9ca3af',
+    marginBottom: 4,
+  },
+  value: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#343a40',
+  },
+});

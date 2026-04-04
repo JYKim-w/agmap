@@ -10,21 +10,17 @@ import userStore from '@/store/userStore';
 
 import { router } from 'expo-router';
 import {
-  Button,
-  HStack,
-  Image,
-  Text,
-  View,
-  VStack
-} from 'native-base';
-import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
-
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { BottomSheetScrollView } from '@/components/BottomSheet';
 
 export default function SettingView() {
   const options = optionStore((state) => state.options);
@@ -89,51 +85,38 @@ export default function SettingView() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <BottomSheetScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-          <VStack flex={1} p={4} space={6}>
+          <View style={ss.section}>
             <View>
-              <Text bold fontSize="lg" mb={3}>배경지도</Text>
-              <HStack space={4} justifyContent="center">
+              <Text style={ss.sectionTitle}>배경지도</Text>
+              <View style={ss.mapTypeRow}>
                 {[
                   { id: 'base', label: '일반', image: require('../../../assets/images/map_bg_sel01.png') },
                   { id: 'satellite', label: '위성', image: require('../../../assets/images/map_bg_sel02.png') },
                   { id: 'hybrid', label: '하이브리드', image: require('../../../assets/images/map_bg_sel03.png') },
                 ].map((type) => (
-                  <Button
+                  <Pressable
                     key={type.id}
-                    variant="unstyled"
+                    style={ss.mapTypeBtn}
                     onPress={() => optionStore.getState().setOptions({ ...options, mapType: type.id as any })}
-                    alignItems="center"
-                    flex={1}
                   >
-                    <VStack alignItems="center">
-                      <View
-                        borderRadius="xl"
-                        bg="gray.100"
-                        borderWidth={2}
-                        borderColor={options.mapType === type.id ? 'primary.500' : 'transparent'}
-                        style={{ width: '100%', aspectRatio: 1, overflow: 'hidden' }}
-                        alignItems="center"
-                      >
-                        <Image
-                          source={type.image}
-                          alt={type.label}
-                          width="100%"
-                          height="100%"
-                          resizeMode="cover"
-                        />
-                      </View>
-                      <Text mt={1} fontSize="xs" fontWeight={options.mapType === type.id ? 'bold' : 'normal'} color={options.mapType === type.id ? 'primary.600' : 'gray.600'}>
-                        {type.label}
-                      </Text>
-                    </VStack>
-                  </Button>
+                    <View style={[ss.mapTypeImageWrap, options.mapType === type.id && ss.mapTypeImageActive]}>
+                      <Image
+                        source={type.image}
+                        style={ss.mapTypeImage}
+                        resizeMode="cover"
+                      />
+                    </View>
+                    <Text style={[ss.mapTypeLabel, options.mapType === type.id && ss.mapTypeLabelActive]}>
+                      {type.label}
+                    </Text>
+                  </Pressable>
                 ))}
-              </HStack>
+              </View>
             </View>
 
             <View>
-              <Text bold fontSize="lg" mb={3}>레이어</Text>
-              <HStack space={4} flexWrap="wrap" justifyContent="flex-start">
+              <Text style={ss.sectionTitle}>레이어</Text>
+              <View style={ss.layerGrid}>
                 {[
                   { id: 'jijuk', label: '연속지적도', icon: (color: string) => <JijukIcon color={color} /> },
                   { id: 'road', label: '도로경계', icon: (color: string) => <RoadIcon color={color} /> },
@@ -156,73 +139,66 @@ export default function SettingView() {
                     onPress={() => optionStore.getState().setOptions({ ...options, [layer.id]: !options[layer.id] })}
                   />
                 ))}
-              </HStack>
+              </View>
             </View>
 
-            <View mt={4} pt={4} borderTopWidth={1} borderTopColor="gray.200">
-              <Button
-                size="md"
-                width="100%"
-                height={50}
-                colorScheme="error"
-                variant="solid"
-                onPress={onLogoutPress}
-                mb={2}
-              >
-                로그아웃
-              </Button>
+            <View style={ss.logoutSection}>
+              <Pressable style={ss.logoutBtn} onPress={onLogoutPress}>
+                <Text style={ss.logoutBtnText}>로그아웃</Text>
+              </Pressable>
               {Platform.OS === 'ios' ? (
-                <Button
-                  size="md"
-                  width="100%"
-                  colorScheme="error"
-                  variant="link"
-                  height={50}
-                  onPress={onUserDeletePress}
-                >
-                  회원탈퇴
-                </Button>
+                <Pressable style={ss.deleteBtn} onPress={onUserDeletePress}>
+                  <Text style={ss.deleteBtnText}>회원탈퇴</Text>
+                </Pressable>
               ) : null}
             </View>
-          </VStack>
+          </View>
         </BottomSheetScrollView>
       </KeyboardAvoidingView>
     </View>
   );
 }
 
+const LayerButton = ({ label, icon, isActive, onPress }: { label: string, icon: any, isActive: boolean, onPress: () => void }) => (
+  <Pressable style={ss.layerBtn} onPress={onPress}>
+    <View style={[ss.layerIcon, isActive && ss.layerIconActive]}>
+      {icon}
+    </View>
+    <Text style={[ss.layerLabel, isActive && ss.layerLabelActive]}>{label}</Text>
+  </Pressable>
+);
 
-const LayerButton = ({ label, icon, isActive, onPress }: { label: string, icon: any, isActive: boolean, onPress: () => void }) => {
-  return (
-    <Button
-      variant="unstyled"
-      onPress={onPress}
-      p={0}
-      m={0}
-      mb={4}
-      width="20%"
-      alignItems="center"
-    >
-      <VStack alignItems="center" space={1}>
-        <View
-          p={3}
-          borderRadius="full"
-          bg={isActive ? 'primary.500' : 'gray.100'}
-          mb={1}
-          alignItems="center"
-          justifyContent="center"
-          width={50}
-          height={50}
-        >
-          {icon}
-        </View>
-        <Text fontSize="2xs" fontWeight={isActive ? 'bold' : 'normal'} color={isActive ? 'primary.600' : 'gray.600'} textAlign="center">
-          {label}
-        </Text>
-      </VStack>
-    </Button>
-  );
-};
+const ss = StyleSheet.create({
+  section: { padding: 16, gap: 24 },
+  sectionTitle: { fontWeight: '700', fontSize: 17, marginBottom: 12 },
+  mapTypeRow: { flexDirection: 'row', justifyContent: 'center', gap: 16 },
+  mapTypeBtn: { flex: 1, alignItems: 'center' },
+  mapTypeImageWrap: {
+    width: '100%', aspectRatio: 1, borderRadius: 12, overflow: 'hidden',
+    backgroundColor: '#f1f3f5', borderWidth: 2, borderColor: 'transparent',
+  },
+  mapTypeImageActive: { borderColor: '#339af0' },
+  mapTypeImage: { width: '100%', height: '100%' },
+  mapTypeLabel: { marginTop: 4, fontSize: 12, color: '#868e96' },
+  mapTypeLabelActive: { fontWeight: '700', color: '#228be6' },
+  layerGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', gap: 16 },
+  layerBtn: { width: '18%', alignItems: 'center', marginBottom: 4 },
+  layerIcon: {
+    width: 50, height: 50, borderRadius: 25, backgroundColor: '#f1f3f5',
+    alignItems: 'center', justifyContent: 'center', marginBottom: 4,
+  },
+  layerIconActive: { backgroundColor: '#339af0' },
+  layerLabel: { fontSize: 10, color: '#868e96', textAlign: 'center' },
+  layerLabelActive: { fontWeight: '700', color: '#228be6' },
+  logoutSection: { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#e9ecef' },
+  logoutBtn: {
+    width: '100%', height: 50, borderRadius: 6, backgroundColor: '#fa5252',
+    alignItems: 'center', justifyContent: 'center', marginBottom: 8,
+  },
+  logoutBtnText: { color: '#fff', fontWeight: '600', fontSize: 15 },
+  deleteBtn: { width: '100%', height: 50, alignItems: 'center', justifyContent: 'center' },
+  deleteBtnText: { color: '#fa5252', fontWeight: '600', fontSize: 15 },
+});
 
 // SVG Icons for Layers
 

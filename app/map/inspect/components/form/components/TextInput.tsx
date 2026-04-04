@@ -1,7 +1,6 @@
 import STYLE from '@/app/style/style';
-import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
-import { Box, FormControl, HStack } from 'native-base';
 import React from 'react';
+import { Text, TextInput as RNTextInput, View } from 'react-native';
 interface TextInputProps {
   value: any;
   onChangeText?: (text: string) => void;
@@ -13,15 +12,14 @@ export default function TextInput({
   title,
 }: TextInputProps) {
   return (
-    <Box
-      flex={1}
-      style={[STYLE.box, { marginBottom: 10, backgroundColor: 'white' }]}
+    <View
+      style={[STYLE.box, { flex: 1, marginBottom: 10, backgroundColor: 'white' }]}
     >
-      <FormControl.Label style={STYLE.label}>
+      <Text style={STYLE.label}>
         {title ? title : '입력'}
-      </FormControl.Label>
-      <HStack style={STYLE.row} alignItems={'center'}>
-        <BottomSheetTextInput
+      </Text>
+      <View style={[STYLE.row, { flexDirection: 'row', alignItems: 'center' }]}>
+        <RNTextInput
           returnKeyType="done"
           style={[STYLE.input]}
           value={value.toString()}
@@ -29,7 +27,7 @@ export default function TextInput({
             onChangeText(text);
           }}
         />
-      </HStack>
-    </Box>
+      </View>
+    </View>
   );
 }

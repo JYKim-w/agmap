@@ -1,7 +1,7 @@
 import useInspectInputStore from '@/store/inspectInputStore';
 import STYLE from '@/app/style/style';
-import { Box, Button, FormControl, View } from 'native-base';
 import React from 'react';
+import { Pressable, Text, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 
 export default function SelectFarm() {
@@ -11,38 +11,47 @@ export default function SelectFarm() {
     return row.map((v, j) => {
       const isSelected = fmlUseSitu === v;
       return (
-        <Button
+        <Pressable
           key={`${i}-${j}`}
-          bg={isSelected ? 'primary.500' : 'coolGray.100'}
-          _text={{ 
-            color: isSelected ? 'white' : 'coolGray.700', 
-            fontWeight: '700', 
-            fontSize: '13px' 
-          }}
-          px={4}
-          py={3}
-          m={1}
-          borderRadius="12px"
           onPress={() => setFmlUseSitu(v)}
-          shadow={isSelected ? 2 : 0}
-          _pressed={{ opacity: 0.8 }}
+          style={({ pressed }) => ({
+            backgroundColor: isSelected ? '#0ea5e9' : '#f3f4f6',
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            margin: 4,
+            borderRadius: 12,
+            shadowColor: isSelected ? '#000' : 'transparent',
+            shadowOffset: { width: 0, height: isSelected ? 2 : 0 },
+            shadowOpacity: isSelected ? 0.1 : 0,
+            shadowRadius: isSelected ? 4 : 0,
+            elevation: isSelected ? 2 : 0,
+            opacity: pressed ? 0.8 : 1,
+          })}
         >
-          {v}
-        </Button>
+          <Text
+            style={{
+              color: isSelected ? 'white' : '#374151',
+              fontWeight: '700',
+              fontSize: 13,
+            }}
+          >
+            {v}
+          </Text>
+        </Pressable>
       );
     });
   });
 
   return (
-    <View mb={4}>
-      <Box style={[STYLE.box, { backgroundColor: '#ffffff', borderColor: 'rgba(0,0,0,0.05)', borderWidth: 1 }]}>
-        <FormControl.Label _text={{ fontSize: '14px', fontWeight: '700', color: 'coolGray.500', mb: 2 }}>
+    <View style={{ marginBottom: 16 }}>
+      <View style={[STYLE.box, { backgroundColor: '#ffffff', borderColor: 'rgba(0,0,0,0.05)', borderWidth: 1 }]}>
+        <Text style={{ fontSize: 14, fontWeight: '700', color: '#6b7280', marginBottom: 8 }}>
           재배 종류
-        </FormControl.Label>
-        <Box flexDirection="row" flexWrap="wrap">
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
           {result}
-        </Box>
-      </Box>
+        </View>
+      </View>
     </View>
   );
 }

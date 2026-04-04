@@ -1,8 +1,8 @@
 import NullView from '@/src/map/components/nullView';
 import inspectStore from '@/store/inspectStore';
-import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import React, { useCallback, useMemo } from 'react';
 import { RefreshControl, StyleSheet, View } from 'react-native';
+import { BottomSheetFlatList as FlatList } from '@/components/BottomSheet';
 import InspectProgressBar from './InspectProgressBar';
 import InspectCard from './inspectItem';
 import PhotoStrip from './inspectPhotoList';
@@ -95,7 +95,7 @@ export default function InspectListContent({
         usedArea={usedArea}
         totalArea={totalArea}
       />
-      <BottomSheetFlatList
+      <FlatList
         data={listData}
         renderItem={renderItem}
         keyExtractor={keyExtractor}

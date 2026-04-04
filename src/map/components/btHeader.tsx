@@ -1,51 +1,98 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Badge, HStack, IconButton, Text, VStack } from 'native-base';
 import React from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+
 export default function BtHeader({ onPress, fieldInfo, jimkCodeList }: { onPress: any; fieldInfo?: any; jimkCodeList?: any[] }) {
   // Find current jimk name before rendering to avoid complex inline logic
   const jimkName = jimkCodeList?.find(v => Number(v.code) === Number(fieldInfo?.rlnd_jimk_code))?.code_nm || '정보없음';
 
   return (
-    <VStack bg="white" borderBottomWidth={1} borderColor="rgba(0,0,0,0.05)" px={2} pt={2} pb={1.5}>
-      <HStack alignItems="center" space={1}>
-        <IconButton
-          icon={<Ionicons name="chevron-back" size={24} color="#1a1d1e" />}
+    <View style={styles.outerContainer}>
+      <View style={styles.headerRow}>
+        <Pressable
           onPress={onPress}
-          variant="ghost"
-          _pressed={{ bg: 'coolGray.100' }}
-          p={2}
-        />
-        <VStack flex={1}>
+          style={styles.backButton}
+        >
+          <Ionicons name="chevron-back" size={24} color="#1a1d1e" />
+        </Pressable>
+        <View style={{flexDirection:'column', flex: 1}}>
           {fieldInfo ? (
-            <VStack space={0.5}>
-              <HStack alignItems="center" space={2}>
-                <Badge 
-                  bg="primary.500" 
-                  _text={{ color: 'white', fontWeight: '800', fontSize: '10px' }} 
-                  borderRadius="md" 
-                  px={1.5} 
-                  py={0.5}
-                >
-                  {jimkName}
-                </Badge>
-                <Text fontSize="14px" fontWeight="800" color="coolGray.800" flex={1} numberOfLines={1}>
+            <View style={{flexDirection:'column', gap: 2}}>
+              <View style={{flexDirection:'row', alignItems:'center', gap: 8}}>
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{jimkName}</Text>
+                </View>
+                <Text style={styles.addressText} numberOfLines={1}>
                   {fieldInfo?.emd_nm} {fieldInfo?.ri_nm} {fieldInfo?.jibun}
                 </Text>
-              </HStack>
-              <HStack alignItems="center" space={1.5}>
-                <Text fontSize="12px" fontWeight="700" color="primary.500">
+              </View>
+              <View style={{flexDirection:'row', alignItems:'center', gap: 6}}>
+                <Text style={styles.areaText}>
                   {fieldInfo?.rlnd_area?.toLocaleString() || fieldInfo?.area?.toLocaleString() || '0'}㎡
                 </Text>
-                <Text fontSize="10px" color="coolGray.400" fontWeight="500">
+                <Text style={styles.pnuText}>
                   PNU: {fieldInfo?.pnu}
                 </Text>
-              </HStack>
-            </VStack>
+              </View>
+            </View>
           ) : (
-            <Text fontSize="md" fontWeight="700" color="#1a1d1e" ml={1}>조사내용</Text>
+            <Text style={styles.fallbackText}>조사내용</Text>
           )}
-        </VStack>
-      </HStack>
-    </VStack>
+        </View>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  outerContainer: {
+    flexDirection: 'column',
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+    paddingHorizontal: 8,
+    paddingTop: 8,
+    paddingBottom: 6,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  backButton: {
+    padding: 8,
+  },
+  badge: {
+    backgroundColor: '#339af0',
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  badgeText: {
+    color: 'white',
+    fontWeight: '800',
+    fontSize: 10,
+  },
+  addressText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#374151',
+    flex: 1,
+  },
+  areaText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#339af0',
+  },
+  pnuText: {
+    fontSize: 10,
+    color: '#9ca3af',
+    fontWeight: '500',
+  },
+  fallbackText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1a1d1e',
+    marginLeft: 4,
+  },
+});

@@ -1,6 +1,6 @@
 import codeStore from '@/store/codeStore';
 import inspectStore from '@/store/inspectStore';
-import { View } from 'native-base';
+import { View } from 'react-native';
 import { useCallback } from 'react';
 import BtBody from '@/src/map/components/btBody';
 import InspectHeader from './InspectHeader';

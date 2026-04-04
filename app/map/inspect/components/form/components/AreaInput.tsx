@@ -1,6 +1,5 @@
-import { Box, Button, HStack, Text } from 'native-base';
 import React from 'react';
-import { View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import TextInput from '@/src/map/components/inputs/input';
 import STYLE from '@/app/style/style';
@@ -42,7 +41,7 @@ export default function AreaInput({
 
   const contents = (
     <View>
-      <HStack alignItems="center" space={3} mb={remainArea && opt.remain ? 3 : 0}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: remainArea && opt.remain ? 12 : 0 }}>
         <TextInput
           left={left || title}
           textAlign="right"
@@ -58,75 +57,87 @@ export default function AreaInput({
           ]}
         />
         {opt.measure ? (
-          <Button
-            bg="primary.500"
-            _text={{ fontWeight: '800', color: 'white' }}
-            h="52px"
-            px={4}
-            borderRadius="14px"
+          <Pressable
             onPress={onPressMeasure}
-            shadow={2}
+            style={{
+              backgroundColor: '#0ea5e9',
+              height: 52,
+              paddingHorizontal: 16,
+              borderRadius: 14,
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              elevation: 2,
+            }}
           >
-            측정
-          </Button>
+            <Text style={{ fontWeight: '800', color: 'white' }}>측정</Text>
+          </Pressable>
         ) : null}
-      </HStack>
+      </View>
       {isOverArea && (
-        <HStack
-          alignItems="center"
-          bg="red.50"
-          px={3}
-          py={2}
-          mb={remainArea && opt.remain ? 2 : 0}
-          borderRadius="10px"
-          borderWidth={1}
-          borderColor="red.200"
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: '#fff5f5',
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            marginBottom: remainArea && opt.remain ? 8 : 0,
+            borderRadius: 10,
+            borderWidth: 1,
+            borderColor: '#fecaca',
+          }}
         >
-          <Text fontSize="xs" fontWeight="700" color="red.600">
+          <Text style={{ fontSize: 12, fontWeight: '700', color: '#dc2626' }}>
             남은 면적({availableArea.toFixed(1)}㎡)을 초과했습니다. 면적을 수정해주세요.
           </Text>
-        </HStack>
+        </View>
       )}
       {displayRemain != null && opt.remain ? (
-        <HStack
-          alignItems="center"
-          justifyContent="space-between"
-          bg="coolGray.50"
-          px={3}
-          py={2}
-          borderRadius="10px"
-          borderWidth={1}
-          borderColor="coolGray.100"
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backgroundColor: '#f9fafb',
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            borderRadius: 10,
+            borderWidth: 1,
+            borderColor: '#f3f4f6',
+          }}
         >
-          <HStack alignItems="center" space={1}>
-            <Text fontSize="xs" fontWeight="700" color="coolGray.500">사용 가능 면적</Text>
-            <Text fontSize="sm" fontWeight="800" color="primary.500">{displayRemain.toLocaleString()} ㎡</Text>
-          </HStack>
-          <Button
-            size="xs"
-            variant="solid"
-            bg="coolGray.200"
-            _text={{ color: 'coolGray.700', fontWeight: '800', fontSize: '11px' }}
-            borderRadius="lg"
-            px={3}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Text style={{ fontSize: 12, fontWeight: '700', color: '#6b7280' }}>사용 가능 면적</Text>
+            <Text style={{ fontSize: 14, fontWeight: '800', color: '#0ea5e9' }}>{displayRemain.toLocaleString()} ㎡</Text>
+          </View>
+          <Pressable
             onPress={() => {
               onChangeText((totalAvailable || 0).toString());
             }}
+            style={{
+              backgroundColor: '#e5e7eb',
+              borderRadius: 12,
+              paddingHorizontal: 12,
+              paddingVertical: 4,
+            }}
           >
-            모두 채우기
-          </Button>
-        </HStack>
+            <Text style={{ color: '#374151', fontWeight: '800', fontSize: 11 }}>모두 채우기</Text>
+          </Pressable>
+        </View>
       ) : null}
     </View>
   );
   if (opt.box) {
     return (
-      <Box
-        flex={1}
-        style={[STYLE.box, { marginBottom: 16, backgroundColor: '#ffffff', borderColor: isOverArea ? '#ef4444' : 'rgba(0,0,0,0.05)', borderWidth: isOverArea ? 1.5 : 1 }]}
+      <View
+        style={[STYLE.box, { flex: 1, marginBottom: 16, backgroundColor: '#ffffff', borderColor: isOverArea ? '#ef4444' : 'rgba(0,0,0,0.05)', borderWidth: isOverArea ? 1.5 : 1 }]}
       >
         {contents}
-      </Box>
+      </View>
     );
   } else {
     return contents;

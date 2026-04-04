@@ -1,10 +1,9 @@
 import bottomStore from '@/store/bottomStore';
 import inspectStore from '@/store/inspectStore';
 import useAppTheme from '@/app/theme/theme';
-import { Pressable, StyleSheet, Text as RNText, View as RNView } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import Toast from 'react-native-toast-message';
-import { Center, Text } from 'native-base';
 
 export default function BottomBarButton({
   menu,
@@ -52,17 +51,19 @@ export default function BottomBarButton({
         justifyContent: 'center',
       }}
     >
-      <Center>
+      <View style={{alignItems:'center', justifyContent:'center'}}>
         <NavIcon menu={menu} isActive={btStore.activeMenu === KEY} />
-        <Text 
-          color={btStore.activeMenu === KEY ? '#339af0' : '#8e8e93'} 
-          fontSize="11px" 
-          fontWeight={btStore.activeMenu === KEY ? '700' : '500'}
-          mt={1}
+        <Text
+          style={{
+            color: btStore.activeMenu === KEY ? '#339af0' : '#8e8e93',
+            fontSize: 11,
+            fontWeight: btStore.activeMenu === KEY ? '700' : '500',
+            marginTop: 4,
+          }}
         >
           {text}
         </Text>
-      </Center>
+      </View>
     </Pressable>
   );
 }

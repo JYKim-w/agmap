@@ -1,15 +1,9 @@
-import { View } from 'native-base';
-import { Image } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 export default function NullView({ children }) {
   return (
     <View
-      flex={1}
-      flexGrow={1}
-      justifyContent="center"
-      alignItems="center"
-      minHeight={200}
+      style={styles.container}
     >
       <Image
         source={require('../../../assets/images/ic_search_white.png')}
@@ -25,3 +19,13 @@ export default function NullView({ children }) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 200,
+  },
+});

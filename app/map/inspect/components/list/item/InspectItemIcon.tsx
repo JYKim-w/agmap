@@ -1,5 +1,4 @@
-import { HStack } from 'native-base';
-import { Image, StyleSheet } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 
 interface InspectItemIconProps {
   category: string;
@@ -7,32 +6,36 @@ interface InspectItemIconProps {
 
 export default function InspectItemIcon({ category }: InspectItemIconProps) {
   return (
-    <HStack
-      justifyItems={'center'}
-      style={{ margin: 'auto' }}
-      alignItems={'center'}
+    <View
+      style={styles.container}
     >
       {category === 'facility' ? (
         <Image
-          style={style.icon}
+          style={styles.icon}
           source={require('../../../../../../assets/images/icon-inspect-facility.png')}
         />
       ) : category === 'farm' ? (
         <Image
-          style={style.icon}
+          style={styles.icon}
           source={require('../../../../../../assets/images/icon-inspect-farm.png')}
         />
       ) : (
         <Image
-          style={style.icon}
+          style={styles.icon}
           source={require('../../../../../../assets/images/icon-inspect-none.png')}
         />
       )}
-    </HStack>
+    </View>
   );
 }
 
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 'auto' as any,
+  },
   icon: {
     resizeMode: 'cover',
     width: 25,

@@ -2,8 +2,8 @@ import Config from '@/app/js/config';
 import useInspectInputStore from '@/store/inspectInputStore';
 import userStore from '@/store/userStore';
 import STYLE from '@/app/style/style';
-import { Box, Button, FormControl, View } from 'native-base';
 import React from 'react';
+import { Pressable, Text, View } from 'react-native';
 
 export default function SelectFacility() {
   const fmlUseSitu = useInspectInputStore((s) => s.fmlUseSitu);
@@ -13,51 +13,60 @@ export default function SelectFacility() {
     userId === 'admin' ? Config.facilityListAdmin : Config.facilityList;
 
   return (
-    <View mb={4}>
-      <Box style={[STYLE.box, { backgroundColor: '#ffffff', borderColor: 'rgba(0,0,0,0.05)', borderWidth: 1 }]}>
-        <FormControl.Label _text={{ fontSize: '14px', fontWeight: '700', color: 'coolGray.500', mb: 2 }}>
+    <View style={{ marginBottom: 16 }}>
+      <View style={[STYLE.box, { backgroundColor: '#ffffff', borderColor: 'rgba(0,0,0,0.05)', borderWidth: 1 }]}>
+        <Text style={{ fontSize: 14, fontWeight: '700', color: '#6b7280', marginBottom: 8 }}>
           설치된 시설
-        </FormControl.Label>
+        </Text>
         {list.map((row, i) => (
-          <Box
+          <View
             key={i}
-            flexDirection="row"
-            flexWrap="wrap"
-            mt={i > 0 ? 2 : 0}
-            pt={i > 0 ? 2 : 0}
-            borderTopWidth={i > 0 ? 1 : 0}
-            borderTopColor="coolGray.100"
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              marginTop: i > 0 ? 8 : 0,
+              paddingTop: i > 0 ? 8 : 0,
+              borderTopWidth: i > 0 ? 1 : 0,
+              borderTopColor: '#f3f4f6',
+            }}
           >
             {row.map((v, j) => {
               const isSelected = fmlUseSitu === v;
               return (
-                <Button
+                <Pressable
                   key={`${i}-${j}`}
-                  bg={isSelected ? 'primary.500' : 'coolGray.100'}
-                  _text={{
-                    color: isSelected ? 'white' : 'coolGray.700',
-                    fontWeight: '600',
-                    fontSize: '12px',
-                  }}
-                  _pressed={{
-                    bg: isSelected ? 'primary.600' : 'primary.100',
-                    _text: { color: isSelected ? 'white' : 'primary.700' },
-                  }}
-                  px={2.5}
-                  py={1.5}
-                  mr={1.5}
-                  mb={1}
-                  borderRadius="8px"
                   onPress={() => setFmlUseSitu(v)}
-                  shadow={isSelected ? 1 : 0}
+                  style={({ pressed }) => ({
+                    backgroundColor: isSelected
+                      ? (pressed ? '#0284c7' : '#0ea5e9')
+                      : (pressed ? '#dbeafe' : '#f3f4f6'),
+                    paddingHorizontal: 10,
+                    paddingVertical: 6,
+                    marginRight: 6,
+                    marginBottom: 4,
+                    borderRadius: 8,
+                    shadowColor: isSelected ? '#000' : 'transparent',
+                    shadowOffset: { width: 0, height: isSelected ? 1 : 0 },
+                    shadowOpacity: isSelected ? 0.08 : 0,
+                    shadowRadius: isSelected ? 2 : 0,
+                    elevation: isSelected ? 1 : 0,
+                  })}
                 >
-                  {v}
-                </Button>
+                  <Text
+                    style={{
+                      color: isSelected ? 'white' : '#374151',
+                      fontWeight: '600',
+                      fontSize: 12,
+                    }}
+                  >
+                    {v}
+                  </Text>
+                </Pressable>
               );
             })}
-          </Box>
+          </View>
         ))}
-      </Box>
+      </View>
     </View>
   );
 }

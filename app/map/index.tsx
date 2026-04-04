@@ -1,9 +1,8 @@
 import MapLibreGL from '@maplibre/maplibre-react-native';
 import { area, length, polygon as turfPolygon, lineString as turfLineString } from '@turf/turf';
 import { Stack } from 'expo-router';
-import { IconButton, View } from 'native-base';
 import React, { memo, useEffect } from 'react';
-import { Alert, View as RNView, StyleSheet } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 import Config from '../js/config';
 import { useRefContext } from '../refContext';
@@ -85,33 +84,33 @@ const MapControls = memo(
     const showCompass = trackingMode === 'compass' || Math.abs(mapBearing) > 2;
 
     return (
-      <RNView style={styles.fabContainer}>
-        <IconButton
-          style={styles.glassFab}
-          icon={<LayersIcon />}
+      <View style={styles.fabContainer}>
+        <Pressable
+          style={({ pressed }) => [styles.glassFab, pressed && { backgroundColor: 'rgba(255, 255, 255, 0.4)' }]}
           onPress={() => {
             setActiveMenu('setting');
             setIndex(1);
           }}
-          _pressed={{ bg: 'rgba(255, 255, 255, 0.4)' }}
-        />
+        >
+          <LayersIcon />
+        </Pressable>
 
-        <IconButton
-          style={styles.glassFab}
-          icon={<LocationIcon mode={trackingMode} />}
+        <Pressable
+          style={({ pressed }) => [styles.glassFab, pressed && { backgroundColor: 'rgba(255, 255, 255, 0.4)' }]}
           onPress={onTrackingPress}
-          _pressed={{ bg: 'rgba(255, 255, 255, 0.4)' }}
-        />
+        >
+          <LocationIcon mode={trackingMode} />
+        </Pressable>
 
         {showCompass && (
-          <IconButton
-            style={styles.glassFab}
-            icon={<CompassButton bearing={mapBearing} />}
+          <Pressable
+            style={({ pressed }) => [styles.glassFab, pressed && { backgroundColor: 'rgba(255, 255, 255, 0.4)' }]}
             onPress={onCompassPress}
-            _pressed={{ bg: 'rgba(255, 255, 255, 0.4)' }}
-          />
+          >
+            <CompassButton bearing={mapBearing} />
+          </Pressable>
         )}
-      </RNView>
+      </View>
     );
   }
 );
@@ -427,7 +426,7 @@ export default function MapScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <RNView style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
         <Stack.Screen
           options={{
             title: 'map',
@@ -528,7 +527,7 @@ export default function MapScreen() {
             />
           </>
         )}
-      </RNView>
+      </View>
       <BottomView />
       <BottomBar />
     </View>

@@ -1,41 +1,59 @@
 import useInspectInputStore from '@/store/inspectInputStore';
 import STYLE from '@/app/style/style';
-import { Box, Button, FormControl, HStack } from 'native-base';
 import React from 'react';
+import { Pressable, Text, View } from 'react-native';
 
 export default function SunInput() {
   const { sunlgtEsbYn, setSunlgtEsbYn } = useInspectInputStore();
   return (
-    <Box style={[STYLE.box, { marginBottom: 10, backgroundColor: '#ffffff', borderColor: 'rgba(0,0,0,0.05)', borderWidth: 1 }]}>
-      <FormControl.Label _text={{ fontSize: '14px', fontWeight: '700', color: 'coolGray.500', mb: 2 }}>
+    <View style={[STYLE.box, { marginBottom: 10, backgroundColor: '#ffffff', borderColor: 'rgba(0,0,0,0.05)', borderWidth: 1 }]}>
+      <Text style={{ fontSize: 14, fontWeight: '700', color: '#6b7280', marginBottom: 8 }}>
         태양광 설치 여부
-      </FormControl.Label>
-      <HStack space={3}>
-        <Button
-          flex={1}
-          bg={sunlgtEsbYn === 'Y' ? 'primary.500' : 'coolGray.100'}
-          _text={{ color: sunlgtEsbYn === 'Y' ? 'white' : 'coolGray.500', fontWeight: '800', fontSize: '14px' }}
-          h="48px"
-          borderRadius="12px"
+      </Text>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
+        <Pressable
           onPress={() => setSunlgtEsbYn('Y')}
-          shadow={sunlgtEsbYn === 'Y' ? 2 : 0}
-          _pressed={{ opacity: 0.8 }}
+          style={({ pressed }) => ({
+            flex: 1,
+            backgroundColor: sunlgtEsbYn === 'Y' ? '#0ea5e9' : '#f3f4f6',
+            height: 48,
+            borderRadius: 12,
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: sunlgtEsbYn === 'Y' ? '#000' : 'transparent',
+            shadowOffset: { width: 0, height: sunlgtEsbYn === 'Y' ? 2 : 0 },
+            shadowOpacity: sunlgtEsbYn === 'Y' ? 0.1 : 0,
+            shadowRadius: sunlgtEsbYn === 'Y' ? 4 : 0,
+            elevation: sunlgtEsbYn === 'Y' ? 2 : 0,
+            opacity: pressed ? 0.8 : 1,
+          })}
         >
-          설치
-        </Button>
-        <Button
-          flex={1}
-          bg={sunlgtEsbYn === 'N' ? 'primary.500' : 'coolGray.100'}
-          _text={{ color: sunlgtEsbYn === 'N' ? 'white' : 'coolGray.500', fontWeight: '800', fontSize: '14px' }}
-          h="48px"
-          borderRadius="12px"
+          <Text style={{ color: sunlgtEsbYn === 'Y' ? 'white' : '#6b7280', fontWeight: '800', fontSize: 14 }}>
+            설치
+          </Text>
+        </Pressable>
+        <Pressable
           onPress={() => setSunlgtEsbYn('N')}
-          shadow={sunlgtEsbYn === 'N' ? 2 : 0}
-          _pressed={{ opacity: 0.8 }}
+          style={({ pressed }) => ({
+            flex: 1,
+            backgroundColor: sunlgtEsbYn === 'N' ? '#0ea5e9' : '#f3f4f6',
+            height: 48,
+            borderRadius: 12,
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: sunlgtEsbYn === 'N' ? '#000' : 'transparent',
+            shadowOffset: { width: 0, height: sunlgtEsbYn === 'N' ? 2 : 0 },
+            shadowOpacity: sunlgtEsbYn === 'N' ? 0.1 : 0,
+            shadowRadius: sunlgtEsbYn === 'N' ? 4 : 0,
+            elevation: sunlgtEsbYn === 'N' ? 2 : 0,
+            opacity: pressed ? 0.8 : 1,
+          })}
         >
-          미설치
-        </Button>
-      </HStack>
-    </Box>
+          <Text style={{ color: sunlgtEsbYn === 'N' ? 'white' : '#6b7280', fontWeight: '800', fontSize: 14 }}>
+            미설치
+          </Text>
+        </Pressable>
+      </View>
+    </View>
   );
 }
