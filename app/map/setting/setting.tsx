@@ -1,4 +1,4 @@
-import Login from '@/app/js/login';
+import useAuthStore from '@/lib/store/auth';
 import bottomStore from '@/store/bottomStore';
 import codeStore from '@/store/codeStore';
 import inspectStore from '@/store/inspectStore';
@@ -6,7 +6,6 @@ import measureStore from '@/store/measureStore';
 import optionStore from '@/store/optionStore';
 import searchStore from '@/store/searchStore';
 import shelterStore from '@/store/shelterStore';
-import userStore from '@/store/userStore';
 
 import { router } from 'expo-router';
 import {
@@ -25,6 +24,18 @@ import { BottomSheetScrollView } from '@/components/BottomSheet';
 export default function SettingView() {
   const options = optionStore((state) => state.options);
 
+  const logout = useAuthStore((s) => s.logout);
+
+  const resetAllStore = () => {
+    codeStore.getState().reset();
+    bottomStore.getState().reset();
+    optionStore.getState().reset();
+    inspectStore.getState().reset();
+    searchStore.getState().reset();
+    shelterStore.getState().reset();
+    measureStore.getState().reset();
+  };
+
   const onLogoutPress = () => {
     Alert.alert(
       '로그아웃',
@@ -33,7 +44,7 @@ export default function SettingView() {
         {
           text: 'OK',
           onPress: async () => {
-            const result = await Login.logout();
+            await logout();
             resetAllStore();
             router.replace('/login');
           },
@@ -52,29 +63,16 @@ export default function SettingView() {
         {
           text: 'Ok',
           onPress: async () => {
-            const result = await Login.deleteUser();
+            // TODO: 계정 삭제 API 연동
+            await logout();
             resetAllStore();
             router.replace('/login');
             Alert.alert('계정 삭제 완료', '계정 복구는 관리자에게 문의하세요.');
           },
         },
-        {
-          text: 'Cancel',
-          onPress: () => {},
-        },
+        { text: 'Cancel' },
       ]
     );
-  };
-
-  const resetAllStore = () => {
-    codeStore.getState().reset();
-    bottomStore.getState().reset();
-    userStore.getState().reset();
-    optionStore.getState().reset();
-    inspectStore.getState().reset();
-    searchStore.getState().reset();
-    shelterStore.getState().reset();
-    measureStore.getState().reset();
   };
 
 

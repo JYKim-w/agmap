@@ -34,6 +34,9 @@ module.exports = ({ config }) => {
             '필지 조사 시 현장 사진을 촬영하기 위해 카메라 사용이 필요합니다.',
           NSPhotoLibraryAddUsageDescription:
             '필지 조사 시 현장 사진을 업로드하기 위해 갤러리 접근이 필요합니다.',
+          NSAppTransportSecurity: {
+            NSAllowsArbitraryLoads: true,
+          },
         },
       },
       android: {

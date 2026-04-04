@@ -8,11 +8,10 @@ import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import Login from './js/login';
 import { RefProvider } from './refContext';
 import appStatusStore from '@/store/appStatus';
 import usePermissionStore from '@/store/permissionStore';
-import userStore from '@/store/userStore';
+import useAuthStore from '@/lib/store/auth';
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
@@ -31,7 +30,8 @@ export default function RootLayout() {
   const [isReady, setIsReady] = useState(false);
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const { setPermissions } = usePermissionStore();
-  const { userId, setUser } = userStore();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const loadStoredToken = useAuthStore((s) => s.loadStoredToken);
   const { setInsets, reset } = appStatusStore();
   const insets = useSafeAreaInsets();
   useEffect(() => {
@@ -82,15 +82,9 @@ export default function RootLayout() {
         await Promise.all([
           checkPermissions(),
           checkVersion(),
+          loadStoredToken(),
           new Promise((resolve) => setTimeout(resolve, 1000)),
         ]);
-        const info = await Login.getLoginInfo();
-        if (info) {
-          const loginInfo = await Login.chkLoginNetwork(info);
-          if (loginInfo) {
-            setUser(loginInfo);
-          }
-        }
       } catch (e) {
         console.warn(e);
       } finally {
@@ -123,7 +117,7 @@ export default function RootLayout() {
             navigationBarColor: 'transparent',
             navigationBarHidden: true,
           }}
-          initialRouteName={userId ? 'map/index' : 'login/index'}
+          initialRouteName={isAuthenticated ? 'map/index' : 'login/index'}
         >
           <Stack.Screen name="map/index" />
           <Stack.Screen name="login/index" />

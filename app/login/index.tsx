@@ -1,7 +1,10 @@
+import { BASE_URL } from '@/lib/config';
+import useAuthStore from '@/lib/store/auth';
 import { Stack, useNavigation } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 import {
+  ActivityIndicator,
   Image,
   ImageBackground,
   Keyboard,
@@ -16,56 +19,31 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import Config from '../js/config.js';
-import Login from '../js/login';
-import userStore from '@/store/userStore';
+
 export default function LoginScreen() {
-  const [userId, setUserId] = useState('');
-  const [pwd, setPwd] = useState('');
-
-  const { setUser } = userStore();
+  const [loginId, setLoginId] = useState('');
+  const [password, setPassword] = useState('');
+  const login = useAuthStore((s) => s.login);
+  const isLoading = useAuthStore((s) => s.isLoading);
   const navigation = useNavigation();
-  /* useEffect(() => {
-    async function login() {
-      const info = await Login.getLoginInfo();
-      if (info) {
-        Login.chkLoginNetwork(info).then((loginInfo) => {
-          loginSucces(loginInfo);
-        });
-      }
+
+  const handleLogin = async () => {
+    if (!loginId.trim() || !password.trim()) {
+      Toast.show({ type: 'error', text1: '아이디와 비밀번호를 입력하세요' });
+      return;
     }
 
-    login();
-    return function clenup() {
-      setPwd('');
-    };
-  }, []); */
+    Keyboard.dismiss();
+    const result = await login(loginId.trim(), password);
 
-  //로그인 버튼
-  const clickLoginEvt = () => {
-    if (
-      Login.isLoginInfoValidation({
-        userId: userId,
-        pwd: pwd,
-      })
-    ) {
-      Login.chkLoginNetwork({
-        userId: userId,
-        pwd: pwd,
-      }).then((loginInfo) => {
-        // console.log('loginInfo', loginInfo);
-        loginSucces(loginInfo);
-      });
+    if (result.success) {
+      Toast.show({ type: 'success', text1: '로그인 완료' });
+      navigation.navigate('map/index' as never);
+    } else {
+      Toast.show({ type: 'error', text1: '로그인 실패', text2: result.message });
     }
   };
-  const loginSucces = (loginInfo) => {
-    setUser(loginInfo);
-    Toast.show({
-      type: 'success',
-      text1: '로그인 완료',
-    });
-    navigation.navigate('map/index' as never);
-  };
+
   return (
     <ImageBackground
       resizeMode="cover"
@@ -80,18 +58,7 @@ export default function LoginScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View
-              style={{
-                // width: '100%',
-                // height: '100%',
-
-                flexGrow: 1,
-                padding: 30,
-                justifyContent: 'center',
-                // margin: 'auto',
-                // backgroundColor: 'orange',
-              }}
-            >
+            <View style={styles.container}>
               <View>
                 <ImageBackground
                   resizeMode="contain"
@@ -103,7 +70,9 @@ export default function LoginScreen() {
                     style={styles.input}
                     placeholder="아이디"
                     placeholderTextColor="#392f31"
-                    onChangeText={(id) => setUserId(id)}
+                    onChangeText={setLoginId}
+                    value={loginId}
+                    editable={!isLoading}
                   />
                 </ImageBackground>
                 <ImageBackground
@@ -117,30 +86,40 @@ export default function LoginScreen() {
                     placeholder="비밀번호"
                     placeholderTextColor="#392f31"
                     secureTextEntry={true}
-                    onChangeText={(pwd) => setPwd(pwd)}
+                    onChangeText={setPassword}
+                    value={password}
+                    onSubmitEditing={handleLogin}
+                    editable={!isLoading}
                   />
                 </ImageBackground>
 
                 <TouchableOpacity
                   style={{ width: '100%', height: 60 }}
-                  onPress={clickLoginEvt}
+                  onPress={handleLogin}
+                  disabled={isLoading}
                 >
-                  <Image
-                    resizeMode="contain"
-                    style={{ width: '100%', height: '100%' }}
-                    source={require('../../assets/images/log-in-login.png')}
-                  />
+                  {isLoading ? (
+                    <View style={styles.loadingBtn}>
+                      <ActivityIndicator color="#fff" />
+                    </View>
+                  ) : (
+                    <Image
+                      resizeMode="contain"
+                      style={{ width: '100%', height: '100%' }}
+                      source={require('../../assets/images/log-in-login.png')}
+                    />
+                  )}
                 </TouchableOpacity>
               </View>
               <View>
                 <TouchableOpacity
                   onPress={async () => {
                     await WebBrowser.openBrowserAsync(
-                      Config.url + 'login/signup'
+                      `${BASE_URL}/login/signup`
                     );
                   }}
                 >
-                  <Text style={{ color: '#228be6', textAlign: 'center', padding: 10 }}>회원가입</Text>
+                  <Text style={styles.signupLink}>회원가입</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -152,6 +131,11 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    padding: 30,
+    justifyContent: 'center',
+  },
   inputBg: {
     width: '100%',
     marginBottom: 15,
@@ -161,14 +145,17 @@ const styles = StyleSheet.create({
     height: 50,
     color: 'black',
   },
-  bottomLogo: {
-    // position: 'absolute',
-    height: 60,
-    marginTop: 30,
-    // bottom: 60,
+  loadingBtn: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#228be6',
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  signin: {
-    // position: 'relative',
-    textAlign: 'right',
+  signupLink: {
+    color: '#228be6',
+    textAlign: 'center',
+    padding: 10,
   },
 });
