@@ -6,7 +6,7 @@ import useAssignmentStore from '@/lib/store/assignments';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import ValidationModal from '@/components/ValidationModal';
@@ -45,7 +45,7 @@ export default function SurveyWizard() {
     }
     setWarnings(w);
     if (hasBlockingWarnings(w)) {
-      Alert.alert('필수 항목 누락', w.filter((x) => x.blocking).map((x) => x.message).join('\n'));
+      Toast.show({ type: 'error', text1: '필수 항목 누락', text2: w.filter((x) => x.blocking).map((x) => x.message).join(', ') });
       return;
     }
     setShowValidation(true);
@@ -85,7 +85,7 @@ export default function SurveyWizard() {
 
       const res = await submitResult(body);
       if (!res.success) {
-        Alert.alert('오류', res.message || '제출 실패');
+        Toast.show({ type: 'error', text1: '제출 실패', text2: res.message });
         return;
       }
 
@@ -109,7 +109,7 @@ export default function SurveyWizard() {
       formState.reset();
       router.back();
     } catch (e: any) {
-      Alert.alert('오류', e?.message || '서버 연결 실패');
+      Toast.show({ type: 'error', text1: '서버 연결 실패', text2: e?.message });
     } finally {
       setIsSubmitting(false);
     }
@@ -138,34 +138,26 @@ export default function SurveyWizard() {
 
   /** Step별 필수값 검증 — 통과 시 true */
   const validateCurrentStep = (): boolean => {
+    const warn = (msg: string) => {
+      Toast.show({ type: 'error', text1: msg });
+      return false;
+    };
     switch (currentStep) {
-      case 1: return true; // 읽기전용
+      case 1: return true;
       case 2:
-        if (formState.cultivationYn === null) {
-          Alert.alert('필수 입력', '경작 여부를 선택해주세요');
-          return false;
-        }
+        if (formState.cultivationYn === null) return warn('경작 여부를 선택해주세요');
         return true;
       case 3:
-        if (formState.fallowYn === null) {
-          Alert.alert('필수 입력', '휴경 여부를 선택해주세요');
-          return false;
-        }
+        if (formState.fallowYn === null) return warn('휴경 여부를 선택해주세요');
         return true;
       case 4:
-        if (formState.facilityYn === null) {
-          Alert.alert('필수 입력', '시설물 유무를 선택해주세요');
-          return false;
-        }
+        if (formState.facilityYn === null) return warn('시설물 유무를 선택해주세요');
         return true;
-      case 5: return true; // 선택 항목
+      case 5: return true;
       case 6:
-        if (!formState.surveyorOpinion) {
-          Alert.alert('필수 입력', '조사원 의견을 선택해주세요');
-          return false;
-        }
+        if (!formState.surveyorOpinion) return warn('조사원 의견을 선택해주세요');
         return true;
-      case 7: return true; // 제출 시 사진 검증
+      case 7: return true;
       default: return true;
     }
   };
