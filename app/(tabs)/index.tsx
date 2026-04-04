@@ -121,7 +121,7 @@ function ResultCard({ item }: { item: Assignment }) {
         <Text style={s.cardSummary}>{summary}</Text>
       ) : null}
       {item.surveyedAt && (
-        <Text style={s.cardDate}>제출: {item.surveyedAt.replace('T', ' ').slice(0, 16)}</Text>
+        <Text style={s.cardDate}>제출: {String(item.surveyedAt).replace('T', ' ').slice(0, 16)}</Text>
       )}
     </View>
   );
