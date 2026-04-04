@@ -136,6 +136,46 @@ export default function SurveyWizard() {
     }
   };
 
+  /** Step별 필수값 검증 — 통과 시 true */
+  const validateCurrentStep = (): boolean => {
+    switch (currentStep) {
+      case 1: return true; // 읽기전용
+      case 2:
+        if (formState.cultivationYn === null) {
+          Alert.alert('필수 입력', '경작 여부를 선택해주세요');
+          return false;
+        }
+        return true;
+      case 3:
+        if (formState.fallowYn === null) {
+          Alert.alert('필수 입력', '휴경 여부를 선택해주세요');
+          return false;
+        }
+        return true;
+      case 4:
+        if (formState.facilityYn === null) {
+          Alert.alert('필수 입력', '시설물 유무를 선택해주세요');
+          return false;
+        }
+        return true;
+      case 5: return true; // 선택 항목
+      case 6:
+        if (!formState.surveyorOpinion) {
+          Alert.alert('필수 입력', '조사원 의견을 선택해주세요');
+          return false;
+        }
+        return true;
+      case 7: return true; // 제출 시 사진 검증
+      default: return true;
+    }
+  };
+
+  const handleNext = () => {
+    if (validateCurrentStep()) {
+      nextStep();
+    }
+  };
+
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
       {/* 헤더 */}
@@ -167,7 +207,7 @@ export default function SurveyWizard() {
           </Pressable>
         )}
         {currentStep < TOTAL_STEPS ? (
-          <Pressable style={[s.nextBtn, currentStep === 1 && { flex: 1 }]} onPress={nextStep}>
+          <Pressable style={[s.nextBtn, currentStep === 1 && { flex: 1 }]} onPress={handleNext}>
             <Text style={s.nextBtnText}>다음</Text>
           </Pressable>
         ) : (
