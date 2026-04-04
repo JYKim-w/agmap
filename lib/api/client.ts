@@ -53,9 +53,42 @@ async function request<T>(
   return res.json();
 }
 
+/** multipart/form-data 업로드 */
+async function uploadFile<T>(
+  path: string,
+  formData: FormData,
+): Promise<ApiResponse<T>> {
+  const url = `${BASE_URL}${path}`;
+  const headers: Record<string, string> = {};
+
+  const token = getToken?.();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (res.status === 401) {
+    onUnauthorized?.();
+    throw new Error('Unauthorized');
+  }
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`HTTP ${res.status}: ${text}`);
+  }
+
+  return res.json();
+}
+
 export const api = {
   get: <T>(path: string) => request<T>('GET', path),
   post: <T>(path: string, body?: any) => request<T>('POST', path, body),
   put: <T>(path: string, body?: any) => request<T>('PUT', path, body),
   del: <T>(path: string) => request<T>('DELETE', path),
+  upload: <T>(path: string, formData: FormData) => uploadFile<T>(path, formData),
 };

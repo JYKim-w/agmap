@@ -15,3 +15,31 @@ export async function getMyAssignments(date?: string, status?: string) {
 export async function getRejected() {
   return api.get<Assignment[]>(API.REJECTED);
 }
+
+/** 조사 결과 제출 (신규 또는 수정) */
+export async function submitResult(data: Record<string, any>) {
+  return api.post<number>(API.RESULT, data);
+}
+
+/** 조사 결과 수정 */
+export async function updateResult(resultId: number, data: Record<string, any>) {
+  return api.put<void>(`${API.RESULT}/${resultId}`, data);
+}
+
+/** 사진 업로드 (multipart) */
+export async function uploadPhoto(resultId: number, photoType: string, uri: string) {
+  const formData = new FormData();
+  formData.append('resultId', String(resultId));
+  formData.append('photoType', photoType);
+  formData.append('file', {
+    uri,
+    name: `${photoType}_${Date.now()}.jpg`,
+    type: 'image/jpeg',
+  } as any);
+  return api.upload<any>(API.PHOTO_UPLOAD, formData);
+}
+
+/** 재제출 */
+export async function resubmitResult(resultId: number, data: Record<string, any>) {
+  return api.post<void>(`${API.RESULT}/${resultId}/resubmit`, data);
+}

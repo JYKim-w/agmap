@@ -1,12 +1,14 @@
 // Design Ref: mockup/screens/survey-step*.html
 // 조사 위저드 — 7단계 폼
 import useSurveyFormStore from '@/lib/store/surveyForm';
+import { submitResult, uploadPhoto } from '@/lib/api/survey';
+import useAssignmentStore from '@/lib/store/assignments';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import useAssignmentStore from '@/lib/store/assignments';
+import Toast from 'react-native-toast-message';
 import StepInfo from './steps/StepInfo';
 import StepCultivation from './steps/StepCultivation';
 import StepFallow from './steps/StepFallow';
@@ -25,7 +27,73 @@ export default function SurveyWizard() {
   const initForm = useSurveyFormStore((s) => s.initForm);
   const nextStep = useSurveyFormStore((s) => s.nextStep);
   const prevStep = useSurveyFormStore((s) => s.prevStep);
+  const formState = useSurveyFormStore();
   const assignments = useAssignmentStore((s) => s.assignments);
+  const fetchMyAssignments = useAssignmentStore((s) => s.fetchMyAssignments);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (status: 'DRAFT' | 'SUBMITTED') => {
+    setIsSubmitting(true);
+    try {
+      const body = {
+        assignmentId: formState.assignmentId,
+        cultivationYn: formState.cultivationYn,
+        cropType: formState.cropType,
+        cropCondition: formState.cropCondition,
+        cultivatorType: formState.cultivatorType,
+        leaseYn: formState.leaseYn,
+        lesseeInfo: formState.lesseeInfo || null,
+        fallowYn: formState.fallowYn,
+        fallowPeriod: formState.fallowPeriod,
+        fallowReason: formState.fallowReason,
+        neglectLevel: formState.neglectLevel,
+        facilityYn: formState.facilityYn,
+        facilityType: formState.facilityType,
+        facilityDetail: formState.facilityDetail,
+        facilityPermitted: formState.facilityPermitted,
+        facilityArea: formState.facilityArea ? Number(formState.facilityArea) : null,
+        facilityRatio: formState.facilityRatio ? Number(formState.facilityRatio) : null,
+        conversionYn: formState.conversionYn,
+        conversionUse: formState.conversionUse,
+        conversionScale: formState.conversionScale,
+        conversionPermitted: formState.conversionPermitted,
+        surveyorOpinion: formState.surveyorOpinion,
+        ownerContact: formState.ownerContact,
+        memo: formState.memo || null,
+        resultStatus: status,
+      };
+
+      const res = await submitResult(body);
+      if (!res.success) {
+        Alert.alert('오류', res.message || '제출 실패');
+        return;
+      }
+
+      const resultId = res.data;
+
+      // 사진 업로드
+      for (const photo of formState.photos) {
+        try {
+          await uploadPhoto(resultId, photo.photoType, photo.uri);
+        } catch (e) {
+          console.warn('Photo upload failed:', photo.photoType, e);
+        }
+      }
+
+      Toast.show({
+        type: 'success',
+        text1: status === 'SUBMITTED' ? '제출 완료' : '임시저장 완료',
+      });
+
+      fetchMyAssignments();
+      formState.reset();
+      router.back();
+    } catch (e: any) {
+      Alert.alert('오류', e?.message || '서버 연결 실패');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     const assignmentId = Number(id);
@@ -74,18 +142,24 @@ export default function SurveyWizard() {
       {/* 하단 버튼 */}
       <View style={s.footer}>
         {currentStep > 1 && (
-          <Pressable style={s.prevBtn} onPress={prevStep}>
+          <Pressable style={s.prevBtn} onPress={prevStep} disabled={isSubmitting}>
             <Text style={s.prevBtnText}>이전</Text>
           </Pressable>
         )}
-        <Pressable
-          style={[s.nextBtn, currentStep === 1 && { flex: 1 }]}
-          onPress={currentStep < TOTAL_STEPS ? nextStep : undefined}
-        >
-          <Text style={s.nextBtnText}>
-            {currentStep < TOTAL_STEPS ? '다음' : '제출'}
-          </Text>
-        </Pressable>
+        {currentStep < TOTAL_STEPS ? (
+          <Pressable style={[s.nextBtn, currentStep === 1 && { flex: 1 }]} onPress={nextStep}>
+            <Text style={s.nextBtnText}>다음</Text>
+          </Pressable>
+        ) : (
+          <View style={{ flex: 2, gap: 8 }}>
+            <Pressable style={s.nextBtn} onPress={() => handleSubmit('SUBMITTED')} disabled={isSubmitting}>
+              {isSubmitting ? <ActivityIndicator color="#fff" /> : <Text style={s.nextBtnText}>제출</Text>}
+            </Pressable>
+            <Pressable style={s.draftBtn} onPress={() => handleSubmit('DRAFT')} disabled={isSubmitting}>
+              <Text style={s.draftBtnText}>임시저장</Text>
+            </Pressable>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -104,4 +178,6 @@ const s = StyleSheet.create({
   prevBtnText: { fontSize: 16, fontWeight: '600', color: '#495057' },
   nextBtn: { flex: 2, height: 52, borderRadius: 10, backgroundColor: '#228be6', alignItems: 'center', justifyContent: 'center' },
   nextBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
+  draftBtn: { height: 44, borderRadius: 10, borderWidth: 1.5, borderColor: '#dee2e6', alignItems: 'center', justifyContent: 'center' },
+  draftBtnText: { fontSize: 14, fontWeight: '600', color: '#868e96' },
 });
