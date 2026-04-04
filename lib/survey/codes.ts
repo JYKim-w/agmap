@@ -1,11 +1,11 @@
-// 마스터코드 하드코딩 (C-1: /admin/ 경로라 SURVEYOR 접근 불가)
-// 추후 GET /mobile/api/survey/codes API 구현되면 교체
+// 마스터코드 — 서버 DB (tb_survey_code) 기준
+// 추후 GET /mobile/api/survey/codes API로 동적 로딩 전환
 
 type CodeItem = { value: string; label: string };
 
 export const CROP_TYPE: CodeItem[] = [
   { value: 'RICE', label: '벼' },
-  { value: 'FIELD', label: '밭작물' },
+  { value: 'FIELD_CROP', label: '밭작물' },
   { value: 'FRUIT', label: '과수' },
   { value: 'VEGETABLE', label: '채소' },
   { value: 'FLOWER', label: '화훼' },
@@ -16,7 +16,7 @@ export const CROP_TYPE: CodeItem[] = [
 export const CROP_CONDITION: CodeItem[] = [
   { value: 'GOOD', label: '양호' },
   { value: 'NORMAL', label: '보통' },
-  { value: 'BAD', label: '불량' },
+  { value: 'POOR', label: '불량' },
 ];
 
 export const CULTIVATOR_TYPE: CodeItem[] = [
@@ -26,76 +26,68 @@ export const CULTIVATOR_TYPE: CodeItem[] = [
   { value: 'UNKNOWN', label: '확인불가' },
 ];
 
+export const FACILITY_TYPE: CodeItem[] = [
+  { value: 'AGRICULTURE', label: '농업시설' },
+  { value: 'NON_AGRICULTURE', label: '비농업시설' },
+  { value: 'MIXED', label: '혼합' },
+];
+
+export const FACILITY_DETAIL: CodeItem[] = [
+  { value: 'GREENHOUSE', label: '비닐하우스' },
+  { value: 'WAREHOUSE', label: '창고' },
+  { value: 'HOUSE', label: '주택' },
+  { value: 'FACTORY', label: '공장' },
+  { value: 'SOLAR', label: '태양광' },
+  { value: 'ETC', label: '기타' },
+];
+
 export const FALLOW_PERIOD: CodeItem[] = [
   { value: 'UNDER_1Y', label: '1년 미만' },
-  { value: '1_3Y', label: '1~3년' },
-  { value: '3_5Y', label: '3~5년' },
-  { value: 'OVER_5Y', label: '5년 이상' },
+  { value: '1_TO_3Y', label: '1~3년' },
+  { value: 'OVER_3Y', label: '3년 이상' },
 ];
 
 export const FALLOW_REASON: CodeItem[] = [
-  { value: 'LABOR', label: '노동력 부족' },
-  { value: 'PROFIT', label: '수익성 낮음' },
-  { value: 'WATER', label: '용수 부족' },
-  { value: 'SOIL', label: '토양 불량' },
+  { value: 'ELDERLY', label: '고령' },
+  { value: 'ABSENT', label: '부재' },
+  { value: 'ECONOMIC', label: '경제적 사유' },
   { value: 'ETC', label: '기타' },
 ];
 
 export const NEGLECT_LEVEL: CodeItem[] = [
-  { value: 'LIGHT', label: '경미' },
-  { value: 'MODERATE', label: '보통' },
+  { value: 'MILD', label: '경미' },
   { value: 'SEVERE', label: '심각' },
-  { value: 'COMPLETE', label: '완전 방치' },
-];
-
-export const FACILITY_TYPE: CodeItem[] = [
-  { value: 'GREENHOUSE', label: '비닐하우스' },
-  { value: 'FIXED_GREENHOUSE', label: '고정식온실' },
-  { value: 'MUSHROOM', label: '버섯재배사' },
-  { value: 'FARM_HUT', label: '농막' },
-  { value: 'LIVESTOCK', label: '축사' },
-  { value: 'WAREHOUSE', label: '창고' },
-  { value: 'ETC', label: '기타' },
-];
-
-export const FACILITY_DETAIL: CodeItem[] = [
-  { value: 'CULTIVATION', label: '재배용' },
-  { value: 'STORAGE', label: '저장용' },
-  { value: 'PROCESSING', label: '가공용' },
-  { value: 'RESIDENTIAL', label: '거주용' },
-  { value: 'ETC', label: '기타' },
-];
-
-export const PERMIT_STATUS: CodeItem[] = [
-  { value: 'PERMITTED', label: '허가' },
-  { value: 'NOT_PERMITTED', label: '미허가' },
-  { value: 'UNKNOWN', label: '확인불가' },
+  { value: 'TOTAL', label: '완전 방치' },
 ];
 
 export const CONVERSION_USE: CodeItem[] = [
-  { value: 'BUILDING', label: '건축물' },
+  { value: 'RESIDENTIAL', label: '주거' },
+  { value: 'COMMERCIAL', label: '상업' },
+  { value: 'INDUSTRIAL', label: '공업' },
   { value: 'PARKING', label: '주차장' },
-  { value: 'ROAD', label: '도로' },
-  { value: 'YARD', label: '야적장' },
+  { value: 'STORAGE_YARD', label: '야적장' },
   { value: 'ETC', label: '기타' },
 ];
 
 export const CONVERSION_SCALE: CodeItem[] = [
-  { value: 'PARTIAL', label: '일부' },
-  { value: 'MOST', label: '대부분' },
-  { value: 'ALL', label: '전체' },
+  { value: 'PARTIAL', label: '부분' },
+  { value: 'FULL', label: '전체' },
+];
+
+export const PERMIT_STATUS: CodeItem[] = [
+  { value: 'PERMITTED', label: '허가' },
+  { value: 'UNPERMITTED', label: '무허가' },
+  { value: 'UNKNOWN', label: '확인불가' },
+];
+
+export const OWNER_CONTACT: CodeItem[] = [
+  { value: 'CONTACTED', label: '접촉함' },
+  { value: 'ABSENT', label: '부재' },
+  { value: 'REFUSED', label: '거부' },
 ];
 
 export const SURVEYOR_OPINION: CodeItem[] = [
   { value: 'NORMAL', label: '정상' },
-  { value: 'FALLOW', label: '휴경' },
-  { value: 'FACILITY', label: '시설물' },
-  { value: 'VIOLATION', label: '불법전용' },
-  { value: 'ETC', label: '기타' },
-];
-
-export const OWNER_CONTACT: CodeItem[] = [
-  { value: 'CONTACTED', label: '연락됨' },
-  { value: 'NOT_CONTACTED', label: '연락안됨' },
-  { value: 'NOT_NEEDED', label: '불필요' },
+  { value: 'MINOR_VIOLATION', label: '경미 위반(계도)' },
+  { value: 'VIOLATION', label: '위반(처분 필요)' },
 ];

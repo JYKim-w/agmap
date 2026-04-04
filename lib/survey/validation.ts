@@ -99,7 +99,7 @@ function validateLogic(form: SurveyFormData): ValidationWarning[] {
   const warnings: ValidationWarning[] = [];
 
   // 경작중인데 완전 방치
-  if (form.cultivationYn === true && form.neglectLevel === 'COMPLETE') {
+  if (form.cultivationYn === true && form.neglectLevel === 'TOTAL') {
     warnings.push({ type: 'logic', message: '경작중이면서 완전 방치는 모순입니다', blocking: false });
   }
 

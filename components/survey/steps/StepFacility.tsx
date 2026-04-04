@@ -22,7 +22,7 @@ export default function StepFacility() {
       {facilityYn === true && (
         <>
           <ConditionalDivider label="시설물 상세" />
-          <FormSelect label="시설 유형" items={FACILITY_TYPE} value={facilityType} onChange={(v) => setField('facilityType', v)} />
+          <FormSelect label="시설 유형" items={FACILITY_TYPE} value={facilityType} onChange={(v) => setField('facilityType', v)} columns={3} />
           <FormSelect label="시설 용도" items={FACILITY_DETAIL} value={facilityDetail} onChange={(v) => setField('facilityDetail', v)} />
           <FormSelect label="허가 여부" items={PERMIT_STATUS} value={facilityPermitted} onChange={(v) => setField('facilityPermitted', v)} columns={3} />
           <FormNumberInput label="시설 면적" value={facilityArea} onChange={(v) => setField('facilityArea', v)} suffix="m²" />
