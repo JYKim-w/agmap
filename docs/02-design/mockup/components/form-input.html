@@ -1,0 +1,20 @@
+<!-- components/form-input.html — RN: components/FormTextInput.tsx, FormNumberInput.tsx -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.form-label{font-size:14px;font-weight:600;color:var(--gray-800);margin-bottom:var(--sm)}.req{color:var(--error)}
+.form-input{width:100%;height:var(--input-h);border:1.5px solid var(--gray-300);border-radius:var(--input-r);padding:0 var(--md);font-size:15px;color:var(--gray-900);outline:none}
+.form-input:focus{border-color:var(--primary-600);box-shadow:var(--shadow-sm)}
+.form-input::placeholder{color:var(--gray-400)}
+.form-input.error{border-color:var(--error)}
+.form-error{font-size:13px;color:var(--error);margin-top:var(--xs)}
+.form-textarea{width:100%;height:120px;border:1.5px solid var(--gray-300);border-radius:var(--input-r);padding:12px var(--md);font-size:15px;font-family:inherit;color:var(--gray-900);resize:none;outline:none}
+.input-suffix{display:flex}.input-suffix .form-input{border-radius:var(--input-r) 0 0 var(--input-r)}
+.input-suffix .suffix{height:var(--input-h);padding:0 12px;display:flex;align-items:center;background:var(--gray-100);border:1.5px solid var(--gray-300);border-left:none;border-radius:0 var(--input-r) var(--input-r) 0;font-size:13px;color:var(--gray-600)}
+</style>
+<h3>Form Inputs</h3>
+<div style="max-width:340px;display:flex;flex-direction:column;gap:24px">
+  <div><div class="form-label">텍스트 입력</div><input class="form-input" placeholder="내용을 입력하세요"></div>
+  <div><div class="form-label">숫자 + 단위</div><div class="input-suffix"><input class="form-input" type="number" value="150" style="text-align:right"><div class="suffix">m&sup2;</div></div></div>
+  <div><div class="form-label">에러 상태</div><input class="form-input error" value=""><div class="form-error">필수 항목입니다.</div></div>
+  <div><div class="form-label">특이사항 메모</div><textarea class="form-textarea" placeholder="현장에서 확인한 특이사항">정상 경작 확인</textarea></div>
+</div>

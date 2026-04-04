@@ -1,0 +1,31 @@
+<!-- components/badges.html — RN: components/StatusBadge.tsx -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.badge{display:inline-flex;align-items:center;padding:var(--xs) var(--sm);border-radius:var(--badge-r);font-size:12px;font-weight:600;white-space:nowrap}
+.badge-unsurveyed{background:#fff5f5;color:#fa5252}
+.badge-in-progress{background:#fff9db;color:#f08c00}
+.badge-completed{background:var(--success-light);color:#2b8a3e}
+.badge-rejected{background:var(--warning-light);color:#e8590c}
+.badge-submitted{background:var(--info-light);color:var(--primary-600)}
+.badge-reviewing{background:var(--reviewing-light);color:var(--reviewing)}
+.badge-approved{background:var(--success-light);color:#2b8a3e}
+.badge-high{background:var(--error-light);color:var(--error)}
+.badge-medium{background:var(--warning-light);color:var(--warning)}
+.badge-low{background:var(--info-light);color:var(--info)}
+</style>
+<h3>Status Badges</h3>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+  <span class="badge badge-unsurveyed">미조사</span>
+  <span class="badge badge-in-progress">진행중</span>
+  <span class="badge badge-completed">완료</span>
+  <span class="badge badge-rejected">반려</span>
+  <span class="badge badge-submitted">제출완료</span>
+  <span class="badge badge-reviewing">검수중</span>
+  <span class="badge badge-approved">승인</span>
+</div>
+<h4 style="margin-top:16px">Risk Badges</h4>
+<div style="display:flex;gap:8px">
+  <span class="badge badge-high">HIGH</span>
+  <span class="badge badge-medium">MEDIUM</span>
+  <span class="badge badge-low">LOW</span>
+</div>

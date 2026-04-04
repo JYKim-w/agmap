@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agmap Mockup Index</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f8f9fa;color:#212529;padding:32px;max-width:800px;margin:0 auto}
+h1{font-size:24px;margin-bottom:8px}
+.sub{font-size:14px;color:#868e96;margin-bottom:32px}
+h2{font-size:17px;margin:24px 0 12px;color:#495057;border-bottom:1px solid #e9ecef;padding-bottom:8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+a{display:block;padding:10px 16px;background:#fff;border:1px solid #e9ecef;border-radius:8px;text-decoration:none;color:#212529;font-size:14px;transition:all .15s}
+a:hover{background:#e7f5ff;border-color:#228be6}
+a .path{font-size:11px;color:#adb5bd;margin-top:2px}
+.note{font-size:12px;color:#868e96;margin-top:32px;padding:12px;background:#fff;border-radius:8px;border:1px solid #e9ecef}
+</style>
+</head>
+<body>
+<h1>Agmap UI Mockup</h1>
+<div class="sub">현장조사 Mobile 앱 — 컴포넌트 + 화면 목업 인덱스</div>
+
+<h2>Base</h2>
+<div class="grid">
+  <a href="base.css">Design Tokens (CSS Variables)<div class="path">base.css — ~35줄</div></a>
+</div>
+
+<h2>Components (= RN components/)</h2>
+<div class="grid">
+  <a href="components/buttons.html">Buttons (Primary/Secondary/Outline/Pair)<div class="path">components/buttons.html</div></a>
+  <a href="components/form-select.html">FormSelect (버튼 그리드 2열/3열)<div class="path">components/form-select.html</div></a>
+  <a href="components/form-yesno.html">FormYesNo (예/아니오)<div class="path">components/form-yesno.html</div></a>
+  <a href="components/form-input.html">FormInput (텍스트/숫자/에러)<div class="path">components/form-input.html</div></a>
+  <a href="components/form-section.html">FormSection (섹션 래퍼 + 조건부)<div class="path">components/form-section.html</div></a>
+  <a href="components/badges.html">StatusBadge (7종 상태 + 3종 위험도)<div class="path">components/badges.html</div></a>
+  <a href="components/cards.html">Cards (진행률/할당/반려/제출)<div class="path">components/cards.html</div></a>
+  <a href="components/bottom-sheet.html">BottomSheet (peek/half)<div class="path">components/bottom-sheet.html</div></a>
+  <a href="components/action-sheet.html">ActionSheet (카메라/앨범)<div class="path">components/action-sheet.html</div></a>
+  <a href="components/search-bar.html">SearchBar (홈용/지도용 + 결과)<div class="path">components/search-bar.html</div></a>
+  <a href="components/photo-capture.html">PhotoCapture (썸네일 + 추가)<div class="path">components/photo-capture.html</div></a>
+  <a href="components/validation-modal.html">ValidationModal (경고 + 무시/수정)<div class="path">components/validation-modal.html</div></a>
+  <a href="components/wizard-header.html">WizardHeader (스텝 인디케이터)<div class="path">components/wizard-header.html</div></a>
+  <a href="components/layer-sheet.html">LayerSheet (배경지도 + 레이어 토글)<div class="path">components/layer-sheet.html</div></a>
+  <a href="components/toast.html">Toast (success/error/warning)<div class="path">components/toast.html</div></a>
+  <a href="components/empty-state.html">EmptyState (빈 상태)<div class="path">components/empty-state.html</div></a>
+  <a href="components/loading.html">LoadingOverlay (스피너)<div class="path">components/loading.html</div></a>
+</div>
+
+<h2>Screens (= RN app/)</h2>
+<div class="grid">
+  <a href="screens/login.html">Login (로그인)<div class="path">app/login.tsx</div></a>
+  <a href="screens/home.html">Home - 할당 목록 탭<div class="path">app/(tabs)/index.tsx</div></a>
+  <a href="screens/home-submitted.html">Home - 제출 현황 탭<div class="path">app/(tabs)/index.tsx</div></a>
+  <a href="screens/map-peek.html">Map (peek + FAB + 범례)<div class="path">app/(tabs)/map.tsx</div></a>
+  <a href="screens/profile.html">Profile (내정보)<div class="path">app/(tabs)/profile.tsx</div></a>
+</div>
+
+<h2>Screens — Survey Wizard (= RN app/(tabs)/survey/[id].tsx)</h2>
+<div class="grid">
+  <a href="screens/survey-step1.html">Step 1: 필지 정보 (읽기전용)<div class="path">StepInfo</div></a>
+  <a href="screens/survey-step2.html">Step 2: 실경작 확인<div class="path">StepCultivation</div></a>
+  <a href="screens/survey-step3.html">Step 3: 휴경 확인<div class="path">StepFallow</div></a>
+  <a href="screens/survey-step4.html">Step 4: 시설물 확인<div class="path">StepFacility</div></a>
+  <a href="screens/survey-step5.html">Step 5: 불법 전용<div class="path">StepConversion</div></a>
+  <a href="screens/survey-step6.html">Step 6: 종합 판단 + 메모<div class="path">StepOpinion</div></a>
+  <a href="screens/survey-step7.html">Step 7: 증빙 사진<div class="path">StepPhotos</div></a>
+  <a href="screens/survey-confirm.html">Confirm: 입력 확인 + 제출<div class="path">StepConfirm</div></a>
+</div>
+
+<div class="note">
+  <strong>구현 시 사용법:</strong> 컴포넌트 구현 시 해당 HTML 파일만 읽으면 됩니다 (각 30~50줄).<br>
+  디자인 토큰은 base.css 참조. CSS 변수명이 RN theme.ts 토큰명과 1:1 대응합니다.<br>
+  각 컴포넌트 HTML의 CSS class명은 RN StyleSheet 구현 시 참고용입니다.
+</div>
+</body>
+</html>

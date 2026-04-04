@@ -1,0 +1,29 @@
+<!-- screens/profile.html — RN: app/(tabs)/profile.tsx -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.profile-header{background:var(--white);padding:var(--lg);display:flex;align-items:center;gap:var(--md);border-bottom:1px solid var(--gray-200)}
+.avatar{width:56px;height:56px;border-radius:50%;background:var(--primary-100);color:var(--primary-600);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700}
+.name{font-size:20px;font-weight:700}.role{font-size:14px;color:var(--gray-600);margin-top:2px}
+.menu{background:var(--white)}
+.menu-item{padding:16px var(--lg);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--gray-100);font-size:16px;cursor:pointer}
+.menu-item:hover{background:var(--gray-50)}
+.menu-item .icon{margin-right:12px;font-size:18px}.menu-item .chevron{color:var(--gray-400)}
+.menu-item.danger{color:var(--error)}
+.gap{height:8px;background:var(--gray-50)}
+</style>
+<div style="max-width:340px">
+  <div class="profile-header"><div class="avatar">김</div><div><div class="name">김현장</div><div class="role">SURVEYOR &middot; 조사업체A</div></div></div>
+  <div class="gap"></div>
+  <div class="menu">
+    <div class="menu-item"><span><span class="icon">&#128202;</span>조사 실적</span><span class="chevron">&#8250;</span></div>
+    <div class="menu-item"><span><span class="icon">&#128214;</span>조사 매뉴얼</span><span class="chevron">&#8250;</span></div>
+    <div class="menu-item"><span><span class="icon">&#128247;</span>오프라인 지도</span><span style="font-size:13px;color:var(--gray-400)">준비중</span></div>
+  </div>
+  <div class="gap"></div>
+  <div class="menu">
+    <div class="menu-item"><span><span class="icon">&#9881;</span>설정</span><span class="chevron">&#8250;</span></div>
+    <div class="menu-item"><span><span class="icon">&#8505;</span>앱 정보</span><span style="font-size:13px;color:var(--gray-400)">v1.0.0</span></div>
+  </div>
+  <div class="gap"></div>
+  <div class="menu"><div class="menu-item danger"><span><span class="icon">&#8617;</span>로그아웃</span></div></div>
+</div>

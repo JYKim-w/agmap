@@ -1,0 +1,25 @@
+<!-- screens/survey-step6.html — RN: StepOpinion (종합 판단) -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.form-section{background:var(--white);border-radius:var(--card-r);padding:var(--md);max-width:340px}
+.form-section-title{font-size:17px;font-weight:600;margin-bottom:var(--md);padding-bottom:var(--sm);border-bottom:1px solid var(--gray-100)}
+.form-group{margin-bottom:var(--lg)}.form-label{font-size:14px;font-weight:600;color:var(--gray-800);margin-bottom:var(--sm)}.req{color:var(--error)}
+.select-grid{display:grid;gap:var(--sm)}.cols-3{grid-template-columns:1fr 1fr 1fr}
+.select-btn{height:var(--input-h);border:1.5px solid var(--gray-300);border-radius:var(--btn-r);background:var(--white);font-size:14px;font-weight:600;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.select-btn.selected{border-color:var(--primary-600);background:var(--primary-50);color:var(--primary-600)}
+.opinion-btn{height:56px;font-size:16px;gap:8px;justify-content:flex-start;padding:0 20px}
+.form-textarea{width:100%;height:120px;border:1.5px solid var(--gray-300);border-radius:var(--input-r);padding:12px var(--md);font-size:15px;font-family:inherit;resize:none;outline:none}
+</style>
+<div class="form-section">
+  <div class="form-section-title">6단계: 종합 판단</div>
+  <div class="form-group"><div class="form-label">조사원 의견 <span class="req">*</span></div>
+    <div class="select-grid" style="grid-template-columns:1fr">
+      <button class="select-btn opinion-btn selected"><span style="font-size:20px;color:var(--success)">&#9679;</span> 정상</button>
+      <button class="select-btn opinion-btn"><span style="font-size:20px;color:var(--warning)">&#9679;</span> 경미 위반 (계도)</button>
+      <button class="select-btn opinion-btn"><span style="font-size:20px;color:var(--error)">&#9679;</span> 위반 (처분 필요)</button>
+    </div></div>
+  <div class="form-group"><div class="form-label">소유자 접촉</div>
+    <div class="select-grid cols-3"><button class="select-btn selected">접촉함</button><button class="select-btn">부재</button><button class="select-btn">거부</button></div></div>
+  <div class="form-group"><div class="form-label">특이사항 메모</div>
+    <textarea class="form-textarea" placeholder="현장에서 확인한 특이사항">정상 경작 확인. 소유자 본인이 직접 관리중.</textarea></div>
+</div>

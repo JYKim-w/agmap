@@ -1,0 +1,10 @@
+<!-- components/loading.html — RN: components/LoadingOverlay.tsx -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.loading-overlay{width:340px;height:200px;background:rgba(255,255,255,.8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sm);border-radius:12px}
+.spinner{width:36px;height:36px;border:3px solid var(--gray-200);border-top-color:var(--primary-600);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:15px;color:var(--gray-600)}
+</style>
+<h3>LoadingOverlay</h3>
+<div class="loading-overlay"><div class="spinner"></div><div class="loading-text">제출 중...</div></div>

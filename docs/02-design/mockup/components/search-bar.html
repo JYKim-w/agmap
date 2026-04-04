@@ -1,0 +1,36 @@
+<!-- components/search-bar.html — RN: components/SearchBar.tsx -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.home-search{display:flex;align-items:center;height:40px;background:var(--gray-100);border-radius:20px;padding:0 14px;gap:8px}
+.home-search .icon{font-size:14px;color:var(--gray-500)}
+.home-search input{flex:1;border:none;outline:none;background:transparent;font-size:14px;color:var(--gray-900)}
+.home-search input::placeholder{color:var(--gray-400)}
+.map-search{display:flex;align-items:center;height:44px;background:var(--white);border-radius:22px;box-shadow:var(--shadow-md);padding:0 16px;gap:8px}
+.map-search.active{border:2px solid var(--primary-600)}
+.map-search .icon{font-size:16px;color:var(--gray-500)}
+.map-search input{flex:1;border:none;outline:none;font-size:15px;background:transparent}
+.map-search .clear{width:20px;height:20px;border-radius:50%;background:var(--gray-300);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer}
+.search-results{background:var(--white);border-radius:var(--card-r);box-shadow:var(--shadow-lg);margin-top:8px;overflow:hidden}
+.search-count{padding:10px 16px;font-size:12px;color:var(--gray-500);background:var(--gray-50);border-bottom:1px solid var(--gray-100)}
+.search-item{padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--gray-100);cursor:pointer}
+.search-item:last-child{border-bottom:none}
+.search-item .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.search-item .addr{font-size:15px;font-weight:500}.search-item .addr mark{background:var(--primary-50);color:var(--primary-700);padding:0 2px;border-radius:2px}
+.search-item .sub{font-size:12px;color:var(--gray-500);margin-top:2px}
+</style>
+<h3>SearchBar</h3>
+<div style="max-width:340px;display:flex;flex-direction:column;gap:24px">
+  <!-- 홈용 -->
+  <div><p style="font-size:12px;color:var(--gray-500);margin-bottom:4px">Home (inline)</p>
+    <div class="home-search"><span class="icon">&#128269;</span><input placeholder="주소로 검색"></div></div>
+  <!-- 지도용 비활성 -->
+  <div><p style="font-size:12px;color:var(--gray-500);margin-bottom:4px">Map (inactive)</p>
+    <div class="map-search"><span class="icon">&#128269;</span><input placeholder="할당 필지 검색"></div></div>
+  <!-- 지도용 활성 + 결과 -->
+  <div><p style="font-size:12px;color:var(--gray-500);margin-bottom:4px">Map (active + results)</p>
+    <div class="map-search active"><span class="icon">&#128269;</span><input value="이목"><span class="clear">&times;</span></div>
+    <div class="search-results"><div class="search-count">3건 검색됨</div>
+      <div class="search-item"><div class="dot" style="background:var(--parcel-unsurveyed)"></div><div><div class="addr"><mark>이목</mark>동 100-3</div><div class="sub">미조사 &middot; HIGH</div></div></div>
+      <div class="search-item"><div class="dot" style="background:var(--parcel-completed)"></div><div><div class="addr"><mark>이목</mark>동 300-5</div><div class="sub">완료 &middot; LOW</div></div></div>
+    </div></div>
+</div>

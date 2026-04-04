@@ -1,0 +1,21 @@
+<!-- screens/survey-step3.html — RN: StepFallow (휴경 확인) -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.form-section{background:var(--white);border-radius:var(--card-r);padding:var(--md);max-width:340px}
+.form-section-title{font-size:17px;font-weight:600;margin-bottom:var(--md);padding-bottom:var(--sm);border-bottom:1px solid var(--gray-100)}
+.form-group{margin-bottom:var(--lg)}.form-label{font-size:14px;font-weight:600;color:var(--gray-800);margin-bottom:var(--sm)}.req{color:var(--error)}
+.select-grid{display:grid;gap:var(--sm)}.cols-2{grid-template-columns:1fr 1fr}.cols-3{grid-template-columns:1fr 1fr 1fr}
+.select-btn{height:var(--input-h);border:1.5px solid var(--gray-300);border-radius:var(--btn-r);background:var(--white);font-size:14px;font-weight:600;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.select-btn.selected{border-color:var(--primary-600);background:var(--primary-50);color:var(--primary-600)}
+.yesno-group{display:flex;gap:var(--sm)}.yesno-btn{flex:1;height:var(--btn-h);border-radius:var(--btn-r);border:1.5px solid var(--gray-300);background:var(--white);font-size:15px;font-weight:600;color:var(--gray-700);cursor:pointer}
+.yesno-btn.yes{border-color:var(--primary-600);color:var(--primary-600);background:var(--primary-50)}
+.conditional-divider{display:flex;align-items:center;gap:var(--sm);margin:var(--lg) 0;font-size:13px;color:var(--gray-500)}.conditional-divider::before,.conditional-divider::after{content:'';flex:1;height:1px;background:var(--gray-200)}
+</style>
+<div class="form-section">
+  <div class="form-section-title">3단계: 휴경 확인</div>
+  <div class="form-group"><div class="form-label">휴경 여부 <span class="req">*</span></div><div class="yesno-group"><button class="yesno-btn yes">예</button><button class="yesno-btn">아니오</button></div></div>
+  <div class="conditional-divider">휴경 시 추가 입력</div>
+  <div class="form-group"><div class="form-label">추정 기간</div><div class="select-grid cols-3"><button class="select-btn">1년 미만</button><button class="select-btn selected">1~3년</button><button class="select-btn">3년 이상</button></div></div>
+  <div class="form-group"><div class="form-label">휴경 사유</div><div class="select-grid cols-2"><button class="select-btn selected">고령</button><button class="select-btn">부재</button><button class="select-btn">경제적 사유</button><button class="select-btn">기타</button></div></div>
+  <div class="form-group"><div class="form-label">방치 수준</div><div class="select-grid cols-3"><button class="select-btn">경미</button><button class="select-btn">심각</button><button class="select-btn">완전 방치</button></div></div>
+</div>

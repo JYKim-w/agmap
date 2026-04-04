@@ -1,0 +1,18 @@
+<!-- components/form-yesno.html — RN: components/FormYesNo.tsx -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.form-label{font-size:14px;font-weight:600;color:var(--gray-800);margin-bottom:var(--sm)}.req{color:var(--error)}
+.yesno-group{display:flex;gap:var(--sm)}
+.yesno-btn{flex:1;height:var(--btn-h);border-radius:var(--btn-r);border:1.5px solid var(--gray-300);background:var(--white);font-size:15px;font-weight:600;color:var(--gray-700);cursor:pointer}
+.yesno-btn.yes{border-color:var(--primary-600);color:var(--primary-600);background:var(--primary-50)}
+.yesno-btn.no{border-color:var(--gray-600);color:var(--gray-700);background:var(--gray-100)}
+</style>
+<h3>FormYesNo</h3>
+<div style="max-width:340px;display:flex;flex-direction:column;gap:24px">
+  <div><div class="form-label">경작 여부 <span class="req">*</span></div>
+    <div class="yesno-group"><button class="yesno-btn yes">예</button><button class="yesno-btn">아니오</button></div></div>
+  <div><div class="form-label">임대차 여부</div>
+    <div class="yesno-group"><button class="yesno-btn">예</button><button class="yesno-btn no">아니오</button></div></div>
+  <div><div class="form-label">미선택 상태</div>
+    <div class="yesno-group"><button class="yesno-btn">예</button><button class="yesno-btn">아니오</button></div></div>
+</div>

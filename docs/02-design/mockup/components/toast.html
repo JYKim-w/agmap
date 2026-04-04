@@ -1,0 +1,14 @@
+<!-- components/toast.html — RN: react-native-toast-message 커스텀 -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.toast{background:var(--white);border-radius:var(--input-r);box-shadow:var(--shadow-lg);padding:14px var(--md);display:flex;align-items:center;gap:var(--sm);font-size:14px;font-weight:500;max-width:340px}
+.toast.success{border-left:3px solid var(--success)}.toast.error{border-left:3px solid var(--error)}.toast.warning{border-left:3px solid var(--warning)}
+.toast .t-icon{font-size:18px}
+.toast.success .t-icon{color:var(--success)}.toast.error .t-icon{color:var(--error)}.toast.warning .t-icon{color:var(--warning)}
+</style>
+<h3>Toast</h3>
+<div style="display:flex;flex-direction:column;gap:8px">
+  <div class="toast success"><span class="t-icon">&#10003;</span>조사 결과가 제출되었습니다</div>
+  <div class="toast error"><span class="t-icon">&#10007;</span>필수 항목을 확인해주세요</div>
+  <div class="toast warning"><span class="t-icon">&#9888;</span>네트워크 연결을 확인해주세요</div>
+</div>

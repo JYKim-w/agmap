@@ -1,0 +1,22 @@
+<!-- components/bottom-sheet.html — RN: components/BottomSheet.tsx -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.bs-wrap{position:relative;width:340px;height:300px;background:#dde8d0;border-radius:12px;overflow:hidden}
+.bottom-sheet{position:absolute;bottom:0;left:0;right:0;background:var(--white);border-radius:16px 16px 0 0;box-shadow:var(--shadow-lg)}
+.bs-handle{width:36px;height:4px;background:var(--gray-300);border-radius:2px;margin:var(--sm) auto}
+.bs-content{padding:var(--sm) var(--lg)}
+.bs-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.bs-addr{font-size:17px;font-weight:600}.bs-meta{font-size:13px;color:var(--gray-600);margin-bottom:var(--sm)}
+.bs-action{color:var(--primary-600);font-weight:600;font-size:14px}
+.bs-detail-row{display:flex;padding:10px 0;border-bottom:1px solid var(--gray-100);font-size:15px}
+.bs-detail-label{width:80px;color:var(--gray-600);flex-shrink:0}.bs-detail-value{color:var(--gray-900)}
+.badge{display:inline-flex;padding:var(--xs) var(--sm);border-radius:var(--badge-r);font-size:12px;font-weight:600}
+.badge-unsurveyed{background:#fff5f5;color:#fa5252}
+</style>
+<h3>BottomSheet</h3>
+<div style="display:flex;gap:16px">
+  <!-- peek -->
+  <div><div class="bs-wrap"><div class="bottom-sheet" style="height:120px"><div class="bs-handle"></div><div class="bs-content"><div class="bs-row"><span class="bs-addr">이목동 100-3</span><span class="badge badge-unsurveyed">미조사</span></div><div class="bs-meta">HIGH &middot; 기한 2026-06-15</div><div style="text-align:right"><span class="bs-action">조사 시작 &#8250;</span></div></div></div></div><p style="text-align:center;font-size:12px;color:var(--gray-500);margin-top:4px">peek (160px)</p></div>
+  <!-- half -->
+  <div><div class="bs-wrap" style="height:360px"><div class="bottom-sheet" style="height:260px"><div class="bs-handle"></div><div class="bs-content"><div class="bs-row"><span class="bs-addr">이목동 100-3</span><span class="badge badge-unsurveyed">미조사</span></div><div class="bs-meta">HIGH &middot; 기한 2026-06-15</div><div class="bs-detail-row"><span class="bs-detail-label">소재지</span><span class="bs-detail-value">경기도 수원시 장안구</span></div><div class="bs-detail-row"><span class="bs-detail-label">지목</span><span class="bs-detail-value">전</span></div><div class="bs-detail-row"><span class="bs-detail-label">면적</span><span class="bs-detail-value">1,200 m&sup2;</span></div></div></div></div><p style="text-align:center;font-size:12px;color:var(--gray-500);margin-top:4px">half (40%)</p></div>
+</div>

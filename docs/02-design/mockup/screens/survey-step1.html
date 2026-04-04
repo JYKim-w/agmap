@@ -1,0 +1,24 @@
+<!-- screens/survey-step1.html — RN: StepInfo (필지 정보 읽기전용) -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.form-section{background:var(--white);border-radius:var(--card-r);padding:var(--md);max-width:340px}
+.form-section-title{font-size:17px;font-weight:600;margin-bottom:var(--md);padding-bottom:var(--sm);border-bottom:1px solid var(--gray-100)}
+.info-row{display:flex;padding:12px 0;border-bottom:1px solid var(--gray-100)}
+.info-row:last-child{border-bottom:none}
+.info-label{width:80px;font-size:14px;color:var(--gray-500);flex-shrink:0}
+.info-value{font-size:15px;color:var(--gray-900);font-weight:500}
+.badge{display:inline-flex;padding:var(--xs) var(--sm);border-radius:var(--badge-r);font-size:12px;font-weight:600}
+.badge-high{background:var(--error-light);color:var(--error)}
+.info-banner{background:var(--info-light);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--primary-900);display:flex;gap:8px;margin-top:12px}
+</style>
+<div class="form-section">
+  <div class="form-section-title">1단계: 필지 기본 정보</div>
+  <div style="font-size:13px;color:var(--gray-500);margin-bottom:16px">자동으로 불러온 정보입니다. 확인 후 다음으로 진행하세요.</div>
+  <div class="info-row"><span class="info-label">소재지</span><span class="info-value">경기도 수원시 장안구 이목동 100-3</span></div>
+  <div class="info-row"><span class="info-label">위험도</span><span class="info-value"><span class="badge badge-high">HIGH</span></span></div>
+  <div class="info-row"><span class="info-label">우선순위</span><span class="info-value">1순위</span></div>
+  <div class="info-row"><span class="info-label">조사 기한</span><span class="info-value">2026-06-15</span></div>
+  <div class="info-row"><span class="info-label">구역</span><span class="info-value">수원시 장안구 &middot; 권선구</span></div>
+  <div class="info-row"><span class="info-label">조사원</span><span class="info-value">김현장</span></div>
+  <div class="info-banner"><span style="font-size:16px">&#8505;</span><span>현재 GPS 위치가 필지에서 <strong>120m</strong> 거리입니다.</span></div>
+</div>

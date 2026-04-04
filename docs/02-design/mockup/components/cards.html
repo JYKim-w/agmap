@@ -1,0 +1,37 @@
+<!-- components/cards.html — RN: 홈 탭 카드 컴포넌트들 -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.badge{display:inline-flex;align-items:center;padding:var(--xs) var(--sm);border-radius:var(--badge-r);font-size:12px;font-weight:600}
+.badge-unsurveyed{background:#fff5f5;color:#fa5252}.badge-completed{background:var(--success-light);color:#2b8a3e}
+.badge-rejected{background:var(--warning-light);color:#e8590c}.badge-submitted{background:var(--info-light);color:var(--primary-600)}
+.badge-high{background:var(--error-light);color:var(--error)}.badge-medium{background:var(--warning-light);color:var(--warning)}
+.card{background:var(--white);border-radius:var(--card-r);border:1px solid var(--gray-200);padding:var(--md);box-shadow:var(--shadow-md)}
+.card+.card{margin-top:var(--sm)}
+.assign-card{display:flex;align-items:flex-start;gap:var(--sm)}
+.assign-card .info{flex:1}.assign-card .addr{font-size:16px;font-weight:500;margin-bottom:2px}
+.assign-card .meta{font-size:13px;color:var(--gray-600)}.assign-card .chevron{color:var(--gray-400);font-size:18px;align-self:center}
+.progress-card{background:var(--primary-50);border:none;padding:var(--md);border-radius:var(--card-r)}
+.progress-card .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:var(--sm)}
+.progress-card h3{font-size:17px;font-weight:600}.progress-card .count{font-size:20px;font-weight:700;color:var(--primary-600)}
+.progress-bar{height:8px;background:var(--gray-200);border-radius:4px;overflow:hidden;margin-bottom:var(--sm)}
+.progress-bar-fill{height:100%;background:var(--primary-600);border-radius:4px}
+.progress-label{display:flex;justify-content:space-between;font-size:13px;color:var(--gray-600)}
+.rejected-card{border-left:3px solid var(--warning);background:var(--warning-light)}
+.rejected-card .reason{font-size:13px;color:var(--warning);margin-top:6px;font-weight:500}
+.submit-date{font-size:12px;color:var(--gray-400);margin-top:4px}
+</style>
+<h3>Cards</h3>
+<div style="max-width:340px;display:flex;flex-direction:column;gap:16px">
+  <!-- 진행률 -->
+  <div class="progress-card">
+    <div class="top"><h3>오늘의 조사</h3><span class="count">15/30</span></div>
+    <div class="progress-bar"><div class="progress-bar-fill" style="width:50%"></div></div>
+    <div class="progress-label"><span>완료 15</span><span>남은 15</span></div>
+  </div>
+  <!-- 할당 -->
+  <div class="card"><div class="assign-card"><div class="info"><div style="display:flex;gap:8px;align-items:center;margin-bottom:4px"><span class="badge badge-unsurveyed">미조사</span><span class="addr">이목동 100-3</span></div><div class="meta"><span class="badge badge-high" style="margin-right:4px">HIGH</span> 기한: 2026-06-15</div></div><div class="chevron">&#8250;</div></div></div>
+  <!-- 반려 -->
+  <div class="card rejected-card"><div class="assign-card"><div class="info"><div style="display:flex;gap:8px;align-items:center;margin-bottom:4px"><span class="badge badge-rejected">반려</span><span class="addr">권선동 33-2</span></div><div class="meta">HIGH &middot; 2026-06-15</div><div class="reason">사유: 전경 사진 불량, 재촬영 필요</div></div></div></div>
+  <!-- 제출 -->
+  <div class="card"><div class="assign-card"><div class="info"><div style="display:flex;gap:8px;align-items:center;margin-bottom:4px"><span class="badge badge-submitted">제출완료</span><span class="addr">이목동 300-5</span></div><div class="meta">정상 &middot; 벼 &middot; 양호</div><div class="submit-date">제출: 2026-04-04 10:30</div></div><div class="chevron">&#8250;</div></div></div>
+</div>

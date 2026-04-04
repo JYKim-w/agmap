@@ -1,0 +1,22 @@
+<!-- components/photo-capture.html — RN: components/PhotoCapture.tsx -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.photo-grid{display:flex;gap:var(--sm);flex-wrap:wrap}
+.photo-thumb{width:100px;height:100px;border-radius:var(--input-r);overflow:hidden;position:relative;background:var(--gray-100)}
+.photo-thumb .remove{position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.5);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer}
+.photo-thumb .label{position:absolute;bottom:0;left:0;right:0;padding:2px 0;background:rgba(0,0,0,.5);color:var(--white);font-size:11px;text-align:center}
+.photo-add{width:100px;height:100px;border-radius:var(--input-r);border:2px dashed var(--gray-300);background:var(--gray-50);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--gray-500);font-size:12px}
+.photo-add .plus{font-size:24px}
+.photo-check{display:flex;gap:var(--md);margin-top:var(--sm);font-size:13px}
+.photo-check .ok{color:var(--success);display:flex;align-items:center;gap:4px}
+.photo-check .miss{color:var(--error);display:flex;align-items:center;gap:4px}
+</style>
+<h3>PhotoCapture</h3>
+<div style="max-width:340px">
+  <div class="photo-grid">
+    <div class="photo-thumb"><div style="width:100%;height:100%;background:linear-gradient(135deg,#8fbc8f,#556b2f);display:flex;align-items:center;justify-content:center;color:white;font-size:32px">&#127793;</div><div class="remove">&times;</div><div class="label">전경</div></div>
+    <div class="photo-thumb"><div style="width:100%;height:100%;background:linear-gradient(135deg,#9acd32,#6b8e23);display:flex;align-items:center;justify-content:center;color:white;font-size:32px">&#127807;</div><div class="remove">&times;</div><div class="label">근경</div></div>
+    <div class="photo-add"><span class="plus">+</span><span>추가</span></div>
+  </div>
+  <div class="photo-check"><span class="ok">&#10003; 전경 (필수)</span><span class="ok">&#10003; 근경 (필수)</span></div>
+</div>

@@ -1,0 +1,25 @@
+<!-- screens/survey-step4.html — RN: StepFacility (시설물 확인) -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.form-section{background:var(--white);border-radius:var(--card-r);padding:var(--md);max-width:340px}
+.form-section-title{font-size:17px;font-weight:600;margin-bottom:var(--md);padding-bottom:var(--sm);border-bottom:1px solid var(--gray-100)}
+.form-group{margin-bottom:var(--lg)}.form-label{font-size:14px;font-weight:600;color:var(--gray-800);margin-bottom:var(--sm)}.req{color:var(--error)}
+.select-grid{display:grid;gap:var(--sm)}.cols-2{grid-template-columns:1fr 1fr}.cols-3{grid-template-columns:1fr 1fr 1fr}
+.select-btn{height:var(--input-h);border:1.5px solid var(--gray-300);border-radius:var(--btn-r);background:var(--white);font-size:14px;font-weight:600;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.select-btn.selected{border-color:var(--primary-600);background:var(--primary-50);color:var(--primary-600)}
+.yesno-group{display:flex;gap:var(--sm)}.yesno-btn{flex:1;height:var(--btn-h);border-radius:var(--btn-r);border:1.5px solid var(--gray-300);background:var(--white);font-size:15px;font-weight:600;color:var(--gray-700);cursor:pointer}
+.yesno-btn.yes{border-color:var(--primary-600);color:var(--primary-600);background:var(--primary-50)}
+.conditional-divider{display:flex;align-items:center;gap:var(--sm);margin:var(--lg) 0;font-size:13px;color:var(--gray-500)}.conditional-divider::before,.conditional-divider::after{content:'';flex:1;height:1px;background:var(--gray-200)}
+.form-input{width:100%;height:var(--input-h);border:1.5px solid var(--gray-300);border-radius:var(--input-r);padding:0 var(--md);font-size:15px;outline:none}
+.input-suffix{display:flex}.input-suffix .form-input{border-radius:var(--input-r) 0 0 var(--input-r)}
+.input-suffix .suffix{height:var(--input-h);padding:0 12px;display:flex;align-items:center;background:var(--gray-100);border:1.5px solid var(--gray-300);border-left:none;border-radius:0 var(--input-r) var(--input-r) 0;font-size:13px;color:var(--gray-600)}
+</style>
+<div class="form-section">
+  <div class="form-section-title">4단계: 시설물 확인</div>
+  <div class="form-group"><div class="form-label">시설물 유무 <span class="req">*</span></div><div class="yesno-group"><button class="yesno-btn yes">예</button><button class="yesno-btn">아니오</button></div></div>
+  <div class="conditional-divider">시설물 상세</div>
+  <div class="form-group"><div class="form-label">시설물 유형</div><div class="select-grid cols-3"><button class="select-btn selected">농업시설</button><button class="select-btn">비농업시설</button><button class="select-btn">혼합</button></div></div>
+  <div class="form-group"><div class="form-label">구체 유형</div><div class="select-grid cols-2"><button class="select-btn selected">비닐하우스</button><button class="select-btn">창고</button><button class="select-btn">주택</button><button class="select-btn">공장</button><button class="select-btn">태양광</button><button class="select-btn">기타</button></div></div>
+  <div class="form-group"><div class="form-label">허가 여부</div><div class="select-grid cols-3"><button class="select-btn">허가</button><button class="select-btn selected">무허가</button><button class="select-btn">확인불가</button></div></div>
+  <div class="form-group"><div class="form-label">시설 면적</div><div class="input-suffix"><input class="form-input" type="number" value="150" style="text-align:right"><div class="suffix">m&sup2;</div></div></div>
+</div>

@@ -1,0 +1,35 @@
+<!-- screens/home.html — RN: app/(tabs)/index.tsx [할당 목록 탭] -->
+<link rel="stylesheet" href="../base.css">
+<link rel="stylesheet" href="../components/cards.html"> <!-- 참조만: 실제 스타일은 아래 -->
+<style>
+.badge{display:inline-flex;padding:var(--xs) var(--sm);border-radius:var(--badge-r);font-size:12px;font-weight:600}
+.badge-unsurveyed{background:#fff5f5;color:#fa5252}.badge-in-progress{background:#fff9db;color:#f08c00}
+.badge-high{background:var(--error-light);color:var(--error)}.badge-medium{background:var(--warning-light);color:var(--warning)}
+.card{background:var(--white);border-radius:var(--card-r);border:1px solid var(--gray-200);padding:var(--md);box-shadow:var(--shadow-md)}
+.card+.card{margin-top:var(--sm)}
+.progress-card{background:var(--primary-50);border:none;padding:var(--md);border-radius:var(--card-r);margin-bottom:var(--md)}
+.progress-card .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:var(--sm)}
+.progress-card h3{font-size:17px;font-weight:600}.progress-card .count{font-size:20px;font-weight:700;color:var(--primary-600)}
+.progress-bar{height:8px;background:var(--gray-200);border-radius:4px;overflow:hidden;margin-bottom:var(--sm)}
+.progress-bar-fill{height:100%;background:var(--primary-600);border-radius:4px}
+.progress-label{display:flex;justify-content:space-between;font-size:13px;color:var(--gray-600)}
+.home-tabs{display:flex;background:var(--gray-100);border-radius:var(--input-r);padding:3px;margin-bottom:var(--md)}
+.home-tab{flex:1;height:36px;border:none;background:transparent;font-size:14px;font-weight:600;color:var(--gray-500);cursor:pointer;border-radius:6px}
+.home-tab.active{background:var(--white);color:var(--gray-900);box-shadow:var(--shadow-sm)}
+.home-search{display:flex;align-items:center;height:40px;background:var(--gray-100);border-radius:20px;padding:0 14px;gap:8px;margin-bottom:var(--md)}
+.home-search input{flex:1;border:none;outline:none;background:transparent;font-size:14px}
+.home-search input::placeholder{color:var(--gray-400)}
+.rejected-banner{background:var(--warning-light);border-left:3px solid var(--warning);border-radius:var(--badge-r);padding:12px var(--md);display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--md);font-size:14px;font-weight:600;color:var(--gray-800)}
+</style>
+<div style="max-width:340px">
+  <div class="progress-card">
+    <div class="top"><h3>오늘의 조사</h3><span class="count">15/30</span></div>
+    <div class="progress-bar"><div class="progress-bar-fill" style="width:50%"></div></div>
+    <div class="progress-label"><span>완료 15</span><span>남은 15</span></div>
+  </div>
+  <div class="rejected-banner"><span>&#9888; 반려 2건 - 재조사 필요</span><span style="color:var(--warning)">&#8250;</span></div>
+  <div class="home-tabs"><button class="home-tab active">할당 목록</button><button class="home-tab">제출 현황</button></div>
+  <div class="home-search"><span style="font-size:14px;color:var(--gray-500)">&#128269;</span><input placeholder="주소로 검색"></div>
+  <div class="card"><div style="display:flex;gap:8px;align-items:center;margin-bottom:4px"><span class="badge badge-unsurveyed">미조사</span><span style="font-size:16px;font-weight:500">이목동 100-3</span></div><div style="font-size:13px;color:var(--gray-600)"><span class="badge badge-high" style="margin-right:4px">HIGH</span> 기한: 2026-06-15</div></div>
+  <div class="card"><div style="display:flex;gap:8px;align-items:center;margin-bottom:4px"><span class="badge badge-in-progress">진행중</span><span style="font-size:16px;font-weight:500">권선동 55-2</span></div><div style="font-size:13px;color:var(--gray-600)"><span class="badge badge-medium" style="margin-right:4px">MEDIUM</span> 기한: 2026-06-10</div></div>
+</div>

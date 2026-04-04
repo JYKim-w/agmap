@@ -1,0 +1,34 @@
+<!-- screens/home-submitted.html — RN: app/(tabs)/index.tsx [제출 현황 탭] -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.badge{display:inline-flex;padding:var(--xs) var(--sm);border-radius:var(--badge-r);font-size:12px;font-weight:600}
+.badge-submitted{background:var(--info-light);color:var(--primary-600)}.badge-reviewing{background:var(--reviewing-light);color:var(--reviewing)}
+.badge-approved{background:var(--success-light);color:#2b8a3e}.badge-rejected{background:var(--warning-light);color:#e8590c}
+.card{background:var(--white);border-radius:var(--card-r);border:1px solid var(--gray-200);padding:var(--md);box-shadow:var(--shadow-md)}
+.card+.card{margin-top:var(--sm)}
+.home-tabs{display:flex;background:var(--gray-100);border-radius:var(--input-r);padding:3px;margin-bottom:var(--md)}
+.home-tab{flex:1;height:36px;border:none;background:transparent;font-size:14px;font-weight:600;color:var(--gray-500);cursor:pointer;border-radius:6px}
+.home-tab.active{background:var(--white);color:var(--gray-900);box-shadow:var(--shadow-sm)}
+.home-search{display:flex;align-items:center;height:40px;background:var(--gray-100);border-radius:20px;padding:0 14px;gap:8px;margin-bottom:var(--md)}
+.home-search input{flex:1;border:none;outline:none;background:transparent;font-size:14px}
+.home-search input::placeholder{color:var(--gray-400)}
+.submit-date{font-size:12px;color:var(--gray-400);margin-top:4px}
+.rejected-card{border-left:3px solid var(--warning);background:var(--warning-light)}
+.rejected-card .reason{font-size:13px;color:var(--warning);margin-top:6px;font-weight:500}
+.status-counts{display:flex;gap:8px;margin-bottom:16px}
+.status-count{flex:1;border-radius:10px;padding:12px;text-align:center}
+.status-count .num{font-size:20px;font-weight:700}.status-count .label{font-size:12px;color:var(--gray-600);margin-top:2px}
+</style>
+<div style="max-width:340px">
+  <div class="home-tabs"><button class="home-tab">할당 목록</button><button class="home-tab active">제출 현황</button></div>
+  <div class="home-search"><span style="font-size:14px;color:var(--gray-500)">&#128269;</span><input placeholder="주소로 검색"></div>
+  <div class="status-counts">
+    <div class="status-count" style="background:var(--info-light)"><div class="num" style="color:var(--primary-600)">8</div><div class="label">제출완료</div></div>
+    <div class="status-count" style="background:var(--reviewing-light)"><div class="num" style="color:var(--reviewing)">5</div><div class="label">검수중</div></div>
+    <div class="status-count" style="background:var(--success-light)"><div class="num" style="color:#2b8a3e">2</div><div class="label">승인</div></div>
+    <div class="status-count" style="background:var(--warning-light)"><div class="num" style="color:#e8590c">1</div><div class="label">반려</div></div>
+  </div>
+  <div class="card"><div style="display:flex;gap:8px;align-items:center;margin-bottom:4px"><span class="badge badge-submitted">제출완료</span><span style="font-size:16px;font-weight:500">이목동 300-5</span></div><div style="font-size:13px;color:var(--gray-600)">정상 &middot; 벼 &middot; 양호</div><div class="submit-date">제출: 2026-04-04 10:30</div></div>
+  <div class="card"><div style="display:flex;gap:8px;align-items:center;margin-bottom:4px"><span class="badge badge-approved">승인</span><span style="font-size:16px;font-weight:500">이목동 55-1</span></div><div style="font-size:13px;color:var(--gray-600)">정상 &middot; 밭작물</div><div class="submit-date">제출: 04-03 14:20 &middot; 승인: 04-04</div></div>
+  <div class="card rejected-card"><div style="display:flex;gap:8px;align-items:center;margin-bottom:4px"><span class="badge badge-rejected">반려</span><span style="font-size:16px;font-weight:500">권선동 33-2</span></div><div class="reason">사유: 전경 사진 불량</div><div class="submit-date">반려: 04-03 10:00</div></div>
+</div>

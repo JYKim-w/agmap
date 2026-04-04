@@ -1,0 +1,50 @@
+<!-- components/layer-sheet.html — RN: 지도 레이어 선택 바텀시트 -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.layer-sheet{background:var(--white);border-radius:16px 16px 0 0;box-shadow:var(--shadow-lg);max-width:340px}
+.bs-handle{width:36px;height:4px;background:var(--gray-300);border-radius:2px;margin:var(--sm) auto}
+.layer-section{padding:var(--md) var(--lg)}
+.layer-section-title{font-size:15px;font-weight:700;color:var(--gray-900);margin-bottom:12px}
+.layer-bg-group{display:flex;gap:12px}
+.layer-bg-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+.layer-bg-thumb{width:100%;aspect-ratio:1;border-radius:12px;border:2.5px solid transparent;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--gray-600)}
+.layer-bg-thumb.active{border-color:var(--primary-600)}
+.layer-bg-thumb.base{background:linear-gradient(135deg,#f0e6d3,#e8dcc8)}
+.layer-bg-thumb.satellite{background:linear-gradient(135deg,#3a5a3a,#2d4a2d);color:white}
+.layer-bg-thumb.hybrid{background:linear-gradient(135deg,#3a5a3a,#2d4a2d);color:white}
+.layer-bg-label{font-size:12px;color:var(--gray-600)}.layer-bg-label.active{color:var(--primary-600);font-weight:600}
+.layer-toggle-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.layer-toggle-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+.layer-toggle-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--gray-100);color:var(--gray-600)}
+.layer-toggle-icon.active{background:var(--primary-600);color:var(--white)}
+.layer-toggle-label{font-size:11px;color:var(--gray-600);text-align:center;line-height:1.2}.layer-toggle-label.active{color:var(--primary-600);font-weight:600}
+</style>
+<h3>Layer Sheet</h3>
+<div class="layer-sheet">
+  <div class="bs-handle"></div>
+  <div class="layer-section" style="border-bottom:1px solid var(--gray-200)">
+    <div class="layer-section-title">배경지도</div>
+    <div class="layer-bg-group">
+      <div class="layer-bg-item"><div class="layer-bg-thumb base active">일반</div><span class="layer-bg-label active">일반</span></div>
+      <div class="layer-bg-item"><div class="layer-bg-thumb satellite">위성</div><span class="layer-bg-label">위성</span></div>
+      <div class="layer-bg-item"><div class="layer-bg-thumb hybrid">혼합</div><span class="layer-bg-label">하이브리드</span></div>
+    </div>
+  </div>
+  <div class="layer-section" style="border-bottom:1px solid var(--gray-200)">
+    <div class="layer-section-title">레이어</div>
+    <div class="layer-toggle-grid">
+      <div class="layer-toggle-item"><div class="layer-toggle-icon active">&#9638;</div><span class="layer-toggle-label active">연속지적도</span></div>
+      <div class="layer-toggle-item"><div class="layer-toggle-icon">&#9552;</div><span class="layer-toggle-label">도로경계</span></div>
+      <div class="layer-toggle-item"><div class="layer-toggle-icon active">&#9645;</div><span class="layer-toggle-label active">시군구경계</span></div>
+      <div class="layer-toggle-item"><div class="layer-toggle-icon">&#9645;</div><span class="layer-toggle-label">읍면동경계</span></div>
+      <div class="layer-toggle-item"><div class="layer-toggle-icon">&#9711;</div><span class="layer-toggle-label">리경계</span></div>
+      <div class="layer-toggle-item"><div class="layer-toggle-icon">&#9741;</div><span class="layer-toggle-label">팜맵</span></div>
+      <div class="layer-toggle-item"><div class="layer-toggle-icon">LX</div><span class="layer-toggle-label">LX맵</span></div>
+      <div class="layer-toggle-item"><div class="layer-toggle-icon">&#9783;</div><span class="layer-toggle-label">농지도</span></div>
+    </div>
+  </div>
+  <div class="layer-section">
+    <div class="layer-section-title">정사영상</div>
+    <div class="layer-toggle-grid"><div class="layer-toggle-item"><div class="layer-toggle-icon">&#128681;</div><span class="layer-toggle-label">드론영상</span></div></div>
+  </div>
+</div>

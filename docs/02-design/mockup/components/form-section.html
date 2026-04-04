@@ -1,0 +1,17 @@
+<!-- components/form-section.html — RN: components/FormSection.tsx -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.form-section{background:var(--white);border-radius:var(--card-r);padding:var(--md);margin:var(--md) 0}
+.form-section-title{font-size:17px;font-weight:600;color:var(--gray-900);margin-bottom:var(--md);padding-bottom:var(--sm);border-bottom:1px solid var(--gray-100)}
+.conditional-divider{display:flex;align-items:center;gap:var(--sm);margin:var(--lg) 0;font-size:13px;color:var(--gray-500)}
+.conditional-divider::before,.conditional-divider::after{content:'';flex:1;height:1px;background:var(--gray-200)}
+</style>
+<h3>FormSection</h3>
+<div style="max-width:340px">
+  <div class="form-section">
+    <div class="form-section-title">2단계: 실경작 확인</div>
+    <p style="color:var(--gray-600);font-size:14px">[폼 항목 영역]</p>
+    <div class="conditional-divider">경작 시 추가 입력</div>
+    <p style="color:var(--gray-600);font-size:14px">[조건부 항목 영역]</p>
+  </div>
+</div>

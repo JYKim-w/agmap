@@ -1,0 +1,33 @@
+<!-- screens/survey-confirm.html — RN: StepConfirm (입력 확인 + 제출) -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.card{background:var(--white);border-radius:var(--card-r);border:1px solid var(--gray-200);padding:var(--md);box-shadow:var(--shadow-md);max-width:340px}
+.summary-title{font-size:14px;font-weight:600;color:var(--gray-600);margin-bottom:var(--sm);text-transform:uppercase;letter-spacing:.5px}
+.summary-row{display:flex;padding:8px 0;border-bottom:1px solid var(--gray-100);font-size:15px}
+.summary-label{width:100px;color:var(--gray-600);flex-shrink:0}.summary-value{color:var(--gray-900);font-weight:500}
+.summary-section{margin-bottom:var(--md)}
+.badge{display:inline-flex;padding:var(--xs) var(--sm);border-radius:var(--badge-r);font-size:12px;font-weight:600}
+.badge-high{background:var(--error-light);color:var(--error)}
+.photo-grid{display:flex;gap:var(--sm)}
+.photo-thumb{width:80px;height:80px;border-radius:var(--input-r);overflow:hidden;position:relative;background:var(--gray-100)}
+.photo-thumb .label{position:absolute;bottom:0;left:0;right:0;padding:2px 0;background:rgba(0,0,0,.5);color:var(--white);font-size:11px;text-align:center}
+.warning-banner{background:var(--warning-light);border-left:3px solid var(--warning);border-radius:var(--badge-r);padding:12px var(--md);font-size:14px;color:var(--gray-800);margin-top:var(--md);display:flex;gap:var(--sm)}
+</style>
+<div class="card">
+  <div class="summary-section"><div class="summary-title">필지 정보</div>
+    <div class="summary-row"><span class="summary-label">주소</span><span class="summary-value">이목동 100-3</span></div>
+    <div class="summary-row"><span class="summary-label">위험도</span><span class="summary-value"><span class="badge badge-high">HIGH</span></span></div></div>
+  <div class="summary-section"><div class="summary-title">조사 내용</div>
+    <div class="summary-row"><span class="summary-label">실경작</span><span class="summary-value">예 (벼 / 양호 / 소유자)</span></div>
+    <div class="summary-row"><span class="summary-label">휴경</span><span class="summary-value">아니오</span></div>
+    <div class="summary-row"><span class="summary-label">시설물</span><span class="summary-value">아니오</span></div>
+    <div class="summary-row"><span class="summary-label">불법전용</span><span class="summary-value">아니오</span></div>
+    <div class="summary-row"><span class="summary-label">종합의견</span><span class="summary-value" style="color:var(--success);font-weight:600">정상</span></div>
+    <div class="summary-row"><span class="summary-label">메모</span><span class="summary-value">정상 경작 확인</span></div></div>
+  <div class="summary-section" style="margin-bottom:0"><div class="summary-title">증빙 사진 (2장)</div>
+    <div class="photo-grid">
+      <div class="photo-thumb"><div style="width:100%;height:100%;background:linear-gradient(135deg,#8fbc8f,#556b2f)"></div><div class="label">전경</div></div>
+      <div class="photo-thumb"><div style="width:100%;height:100%;background:linear-gradient(135deg,#9acd32,#6b8e23)"></div><div class="label">근경</div></div>
+    </div></div>
+  <div class="warning-banner"><span>&#9888;</span> GPS 거리: 현재 위치에서 350m</div>
+</div>

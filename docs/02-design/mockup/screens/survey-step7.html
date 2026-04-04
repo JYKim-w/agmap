@@ -1,0 +1,26 @@
+<!-- screens/survey-step7.html — RN: StepPhotos (증빙 사진) -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.form-section{background:var(--white);border-radius:var(--card-r);padding:var(--md);max-width:340px}
+.form-section-title{font-size:17px;font-weight:600;margin-bottom:var(--md);padding-bottom:var(--sm);border-bottom:1px solid var(--gray-100)}
+.form-label{font-size:14px;font-weight:600;color:var(--gray-800);margin-bottom:var(--sm)}.req{color:var(--error)}
+.photo-grid{display:flex;gap:var(--sm);flex-wrap:wrap}
+.photo-thumb{width:100px;height:100px;border-radius:var(--input-r);overflow:hidden;position:relative;background:var(--gray-100)}
+.photo-thumb .remove{position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.5);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:12px}
+.photo-thumb .label{position:absolute;bottom:0;left:0;right:0;padding:2px 0;background:rgba(0,0,0,.5);color:var(--white);font-size:11px;text-align:center}
+.photo-add{width:100px;height:100px;border-radius:var(--input-r);border:2px dashed var(--gray-300);background:var(--gray-50);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--gray-500);font-size:12px}
+.photo-add .plus{font-size:24px}
+.photo-check{display:flex;gap:var(--md);margin-top:var(--sm);font-size:13px}.photo-check .ok{color:var(--success)}
+.guide{font-size:13px;color:var(--gray-600);line-height:22px;margin-top:var(--md)}
+</style>
+<div class="form-section">
+  <div class="form-section-title">7단계: 증빙 사진</div>
+  <div class="form-label">사진 촬영 <span class="req">*</span></div>
+  <div class="photo-grid">
+    <div class="photo-thumb"><div style="width:100%;height:100%;background:linear-gradient(135deg,#8fbc8f,#556b2f);display:flex;align-items:center;justify-content:center;color:white;font-size:32px">&#127793;</div><div class="remove">&times;</div><div class="label">전경</div></div>
+    <div class="photo-thumb"><div style="width:100%;height:100%;background:linear-gradient(135deg,#9acd32,#6b8e23);display:flex;align-items:center;justify-content:center;color:white;font-size:32px">&#127807;</div><div class="remove">&times;</div><div class="label">근경</div></div>
+    <div class="photo-add"><span class="plus">+</span><span>추가</span></div>
+  </div>
+  <div class="photo-check"><span class="ok">&#10003; 전경 (필수)</span><span class="ok">&#10003; 근경 (필수)</span></div>
+  <div class="guide"><strong>전경</strong> - 필지 전체<br><strong>근경</strong> - 작물/시설 클로즈업<br><strong>시설물</strong> - 시설물 있을 때<br><strong>위반</strong> - 위반 판단 시 증거</div>
+</div>

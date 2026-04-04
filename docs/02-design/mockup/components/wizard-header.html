@@ -1,0 +1,28 @@
+<!-- components/wizard-header.html — RN: survey 위저드 상단 스텝 인디케이터 -->
+<link rel="stylesheet" href="../base.css">
+<style>
+.wizard-header{padding:var(--md) var(--lg);background:var(--white);border-bottom:1px solid var(--gray-200)}
+.wizard-steps{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sm)}
+.wizard-step{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.wizard-step.done{background:var(--primary-600);color:var(--white)}
+.wizard-step.current{width:32px;height:32px;background:var(--primary-600);color:var(--white);box-shadow:0 0 0 4px var(--primary-100)}
+.wizard-step.pending{background:var(--gray-200);color:var(--gray-500)}
+.wizard-line{flex:1;height:2px;margin:0 4px}
+.wizard-line.done{background:var(--primary-600)}.wizard-line.pending{background:var(--gray-200)}
+.wizard-label{font-size:13px;color:var(--gray-600);text-align:right}
+</style>
+<h3>WizardHeader</h3>
+<div style="max-width:340px">
+  <div class="wizard-header">
+    <div class="wizard-steps">
+      <div class="wizard-step done">&#10003;</div><div class="wizard-line done"></div>
+      <div class="wizard-step done">&#10003;</div><div class="wizard-line done"></div>
+      <div class="wizard-step current">3</div><div class="wizard-line pending"></div>
+      <div class="wizard-step pending">4</div><div class="wizard-line pending"></div>
+      <div class="wizard-step pending">5</div><div class="wizard-line pending"></div>
+      <div class="wizard-step pending">6</div><div class="wizard-line pending"></div>
+      <div class="wizard-step pending">7</div>
+    </div>
+    <div class="wizard-label">3/7 단계</div>
+  </div>
+</div>
