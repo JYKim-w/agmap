@@ -122,6 +122,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="login/index" />
           <Stack.Screen name="map/index" />
+          <Stack.Screen name="survey/[id]" options={{ animation: 'slide_from_bottom' }} />
         </Stack>
         <Toast />
       </GestureHandlerRootView>

@@ -197,7 +197,7 @@ export default function HomeScreen() {
         data={listData}
         keyExtractor={(item) => `${item.assignmentId}-${item.resultId}`}
         renderItem={({ item }) => tab === 0
-          ? <AssignmentCard item={item} onPress={() => router.push(`/(tabs)/survey/${item.assignmentId}`)} />
+          ? <AssignmentCard item={item} onPress={() => router.push(`/survey/${item.assignmentId}`)} />
           : <ResultCard item={item} />
         }
         contentContainerStyle={s.listContent}

@@ -1,9 +1,9 @@
-// 조사 탭 진입점 — 할당 목록에서 선택해야 조사 시작 가능
+// 조사 탭 — 할당 목록에서 선택해야 조사 시작 가능
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function SurveyIndex() {
+export default function SurveyTab() {
   return (
     <SafeAreaView style={s.safe}>
       <View style={s.container}>
