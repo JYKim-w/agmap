@@ -5,7 +5,7 @@ import FormYesNo from '@/components/FormYesNo';
 import useSurveyFormStore from '@/lib/store/surveyForm';
 import { FALLOW_PERIOD, FALLOW_REASON, NEGLECT_LEVEL } from '@/lib/survey/codes';
 
-export default function StepFallow() {
+export default function StepFallow({ error }: { error?: boolean }) {
   const fallowYn = useSurveyFormStore((s) => s.fallowYn);
   const fallowPeriod = useSurveyFormStore((s) => s.fallowPeriod);
   const fallowReason = useSurveyFormStore((s) => s.fallowReason);
@@ -14,7 +14,7 @@ export default function StepFallow() {
 
   return (
     <FormSection title="3단계: 휴경 확인">
-      <FormYesNo label="휴경 여부" value={fallowYn} onChange={(v) => setField('fallowYn', v)} required />
+      <FormYesNo label="휴경 여부" value={fallowYn} onChange={(v) => setField('fallowYn', v)} required error={error} />
 
       {fallowYn === true && (
         <>

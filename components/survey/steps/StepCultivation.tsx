@@ -6,7 +6,7 @@ import FormTextInput from '@/components/FormTextInput';
 import useSurveyFormStore from '@/lib/store/surveyForm';
 import { CROP_CONDITION, CROP_TYPE, CULTIVATOR_TYPE } from '@/lib/survey/codes';
 
-export default function StepCultivation() {
+export default function StepCultivation({ error }: { error?: boolean }) {
   const cultivationYn = useSurveyFormStore((s) => s.cultivationYn);
   const cropType = useSurveyFormStore((s) => s.cropType);
   const cropCondition = useSurveyFormStore((s) => s.cropCondition);
@@ -17,7 +17,7 @@ export default function StepCultivation() {
 
   return (
     <FormSection title="2단계: 실경작 확인">
-      <FormYesNo label="경작 여부" value={cultivationYn} onChange={(v) => setField('cultivationYn', v)} required />
+      <FormYesNo label="경작 여부" value={cultivationYn} onChange={(v) => setField('cultivationYn', v)} required error={error} />
 
       {cultivationYn === true && (
         <>

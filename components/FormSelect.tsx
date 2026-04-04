@@ -8,9 +8,10 @@ interface Props {
   onChange: (v: string) => void;
   required?: boolean;
   columns?: 2 | 3;
+  error?: boolean;
 }
 
-export default function FormSelect({ label, items, value, onChange, required, columns }: Props) {
+export default function FormSelect({ label, items, value, onChange, required, columns, error }: Props) {
   const cols = columns ?? (items.length <= 3 ? 3 : 2);
   return (
     <View style={s.group}>
@@ -26,6 +27,7 @@ export default function FormSelect({ label, items, value, onChange, required, co
           </Pressable>
         ))}
       </View>
+      {error && !value && <Text style={s.errorText}>필수 항목입니다</Text>}
     </View>
   );
 }
@@ -42,5 +44,6 @@ const s = StyleSheet.create({
   btnSelected: { borderColor: '#228be6', backgroundColor: '#e7f5ff' },
   btnText: { fontSize: 14, fontWeight: '600', color: '#495057' },
   btnTextSelected: { color: '#228be6' },
+  errorText: { fontSize: 13, color: '#fa5252', marginTop: 6 },
 });
 

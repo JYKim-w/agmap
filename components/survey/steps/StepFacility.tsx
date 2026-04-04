@@ -6,7 +6,7 @@ import { FormNumberInput } from '@/components/FormTextInput';
 import useSurveyFormStore from '@/lib/store/surveyForm';
 import { FACILITY_DETAIL, FACILITY_TYPE, PERMIT_STATUS } from '@/lib/survey/codes';
 
-export default function StepFacility() {
+export default function StepFacility({ error }: { error?: boolean }) {
   const facilityYn = useSurveyFormStore((s) => s.facilityYn);
   const facilityType = useSurveyFormStore((s) => s.facilityType);
   const facilityDetail = useSurveyFormStore((s) => s.facilityDetail);
@@ -17,7 +17,7 @@ export default function StepFacility() {
 
   return (
     <FormSection title="4단계: 시설물 확인">
-      <FormYesNo label="시설물 유무" value={facilityYn} onChange={(v) => setField('facilityYn', v)} required />
+      <FormYesNo label="시설물 유무" value={facilityYn} onChange={(v) => setField('facilityYn', v)} required error={error} />
 
       {facilityYn === true && (
         <>

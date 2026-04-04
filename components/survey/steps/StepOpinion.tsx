@@ -13,7 +13,7 @@ const OPINION_OPTIONS = [
   { value: 'VIOLATION', label: '위반 (처분 필요)', color: '#fa5252' },
 ];
 
-export default function StepOpinion() {
+export default function StepOpinion({ error }: { error?: boolean }) {
   const surveyorOpinion = useSurveyFormStore((s) => s.surveyorOpinion);
   const ownerContact = useSurveyFormStore((s) => s.ownerContact);
   const memo = useSurveyFormStore((s) => s.memo);
@@ -28,7 +28,7 @@ export default function StepOpinion() {
           {OPINION_OPTIONS.map((opt) => (
             <Pressable
               key={opt.value}
-              style={[s.opinionBtn, surveyorOpinion === opt.value && s.opinionBtnSelected]}
+              style={[s.opinionBtn, surveyorOpinion === opt.value && s.opinionBtnSelected, error && !surveyorOpinion && s.opinionBtnError]}
               onPress={() => setField('surveyorOpinion', opt.value)}
             >
               <View style={[s.dot, { backgroundColor: opt.color }]} />
@@ -38,6 +38,7 @@ export default function StepOpinion() {
             </Pressable>
           ))}
         </View>
+        {error && !surveyorOpinion && <Text style={s.errorText}>필수 항목입니다</Text>}
       </View>
 
       <FormSelect label="소유자 접촉" items={OWNER_CONTACT} value={ownerContact} onChange={(v) => setField('ownerContact', v)} columns={3} />
@@ -60,4 +61,6 @@ const s = StyleSheet.create({
   dot: { width: 12, height: 12, borderRadius: 6 },
   opinionText: { fontSize: 16, fontWeight: '600', color: '#495057' },
   opinionTextSelected: { color: '#228be6' },
+  opinionBtnError: { borderColor: '#fa5252', backgroundColor: '#fff5f5' },
+  errorText: { fontSize: 13, color: '#fa5252', marginTop: 6 },
 });

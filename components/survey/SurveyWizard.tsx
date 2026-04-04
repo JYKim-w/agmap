@@ -36,6 +36,7 @@ export default function SurveyWizard() {
   const [showValidation, setShowValidation] = useState(false);
   const [warnings, setWarnings] = useState<ValidationWarning[]>([]);
   const [formStartTime] = useState(Date.now());
+  const [stepError, setStepError] = useState(false);
 
   const handleTrySubmit = () => {
     const w = validateSurveyForm(formState, { startTime: formStartTime });
@@ -126,11 +127,11 @@ export default function SurveyWizard() {
   const renderStep = () => {
     switch (currentStep) {
       case 1: return <StepInfo />;
-      case 2: return <StepCultivation />;
-      case 3: return <StepFallow />;
-      case 4: return <StepFacility />;
+      case 2: return <StepCultivation error={stepError} />;
+      case 3: return <StepFallow error={stepError} />;
+      case 4: return <StepFacility error={stepError} />;
       case 5: return <StepConversion />;
-      case 6: return <StepOpinion />;
+      case 6: return <StepOpinion error={stepError} />;
       case 7: return <StepPhotos />;
       default: return null;
     }
@@ -140,6 +141,7 @@ export default function SurveyWizard() {
   const validateCurrentStep = (): boolean => {
     const warn = (msg: string) => {
       Toast.show({ type: 'error', text1: msg });
+      setStepError(true);
       return false;
     };
     switch (currentStep) {
@@ -164,6 +166,7 @@ export default function SurveyWizard() {
 
   const handleNext = () => {
     if (validateCurrentStep()) {
+      setStepError(false);
       nextStep();
     }
   };

@@ -6,26 +6,28 @@ interface Props {
   value: boolean | null;
   onChange: (v: boolean) => void;
   required?: boolean;
+  error?: boolean;
 }
 
-export default function FormYesNo({ label, value, onChange, required }: Props) {
+export default function FormYesNo({ label, value, onChange, required, error }: Props) {
   return (
     <View style={s.group}>
       <Text style={s.label}>{label}{required && <Text style={s.req}> *</Text>}</Text>
       <View style={s.row}>
         <Pressable
-          style={[s.btn, value === true && s.btnYes]}
+          style={[s.btn, value === true && s.btnYes, error && value === null && s.btnError]}
           onPress={() => onChange(true)}
         >
           <Text style={[s.btnText, value === true && s.btnYesText]}>예</Text>
         </Pressable>
         <Pressable
-          style={[s.btn, value === false && s.btnNo]}
+          style={[s.btn, value === false && s.btnNo, error && value === null && s.btnError]}
           onPress={() => onChange(false)}
         >
           <Text style={[s.btnText, value === false && s.btnNoText]}>아니오</Text>
         </Pressable>
       </View>
+      {error && value === null && <Text style={s.errorText}>필수 항목입니다</Text>}
     </View>
   );
 }
@@ -41,4 +43,6 @@ const s = StyleSheet.create({
   btnYesText: { color: '#228be6' },
   btnNo: { borderColor: '#495057', backgroundColor: '#f1f3f5' },
   btnNoText: { color: '#495057' },
+  btnError: { borderColor: '#fa5252', backgroundColor: '#fff5f5' },
+  errorText: { fontSize: 13, color: '#fa5252', marginTop: 6 },
 });
