@@ -24,9 +24,10 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
     set({ isLoading: true });
     try {
       const res = await getMyAssignments(date);
+      console.log('[Assignments] API response:', JSON.stringify(res).slice(0, 500));
       if (res.success) set({ assignments: res.data ?? [] });
     } catch (e) {
-      console.warn('fetchMyAssignments error:', e);
+      console.warn('[Assignments] fetchMyAssignments error:', e);
     } finally {
       set({ isLoading: false });
     }

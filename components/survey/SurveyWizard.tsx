@@ -9,6 +9,8 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
+import ValidationModal from '@/components/ValidationModal';
+import { validateSurveyForm, hasBlockingWarnings, type ValidationWarning } from '@/lib/survey/validation';
 import StepInfo from './steps/StepInfo';
 import StepCultivation from './steps/StepCultivation';
 import StepFallow from './steps/StepFallow';
@@ -31,8 +33,26 @@ export default function SurveyWizard() {
   const assignments = useAssignmentStore((s) => s.assignments);
   const fetchMyAssignments = useAssignmentStore((s) => s.fetchMyAssignments);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showValidation, setShowValidation] = useState(false);
+  const [warnings, setWarnings] = useState<ValidationWarning[]>([]);
+  const [formStartTime] = useState(Date.now());
+
+  const handleTrySubmit = () => {
+    const w = validateSurveyForm(formState, { startTime: formStartTime });
+    if (w.length === 0) {
+      handleSubmit('SUBMITTED');
+      return;
+    }
+    setWarnings(w);
+    if (hasBlockingWarnings(w)) {
+      Alert.alert('필수 항목 누락', w.filter((x) => x.blocking).map((x) => x.message).join('\n'));
+      return;
+    }
+    setShowValidation(true);
+  };
 
   const handleSubmit = async (status: 'DRAFT' | 'SUBMITTED') => {
+    setShowValidation(false);
     setIsSubmitting(true);
     try {
       const body = {
@@ -152,7 +172,7 @@ export default function SurveyWizard() {
           </Pressable>
         ) : (
           <View style={{ flex: 2, gap: 8 }}>
-            <Pressable style={s.nextBtn} onPress={() => handleSubmit('SUBMITTED')} disabled={isSubmitting}>
+            <Pressable style={s.nextBtn} onPress={handleTrySubmit} disabled={isSubmitting}>
               {isSubmitting ? <ActivityIndicator color="#fff" /> : <Text style={s.nextBtnText}>제출</Text>}
             </Pressable>
             <Pressable style={s.draftBtn} onPress={() => handleSubmit('DRAFT')} disabled={isSubmitting}>
@@ -161,6 +181,12 @@ export default function SurveyWizard() {
           </View>
         )}
       </View>
+      <ValidationModal
+        visible={showValidation}
+        warnings={warnings}
+        onCancel={() => setShowValidation(false)}
+        onSubmit={() => handleSubmit('SUBMITTED')}
+      />
     </SafeAreaView>
   );
 }
