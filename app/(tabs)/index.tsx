@@ -16,6 +16,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import type { Assignment } from '@/lib/api/types';
 
 // ─── Progress Card ─────────────────────────────────────────────
@@ -85,11 +86,11 @@ function SearchBar() {
 }
 
 // ─── Assignment Card (할당 목록) ───────────────────────────────
-function AssignmentCard({ item }: { item: Assignment }) {
+function AssignmentCard({ item, onPress }: { item: Assignment; onPress?: () => void }) {
   const badgeType = getStatusBadgeType(item.resultId, item.resultStatus);
   const shortAddr = item.address?.split(' ').slice(-1)[0] ?? item.address;
   return (
-    <View style={s.card}>
+    <Pressable style={s.card} onPress={onPress}>
       <View style={s.cardRow}>
         <StatusBadge type={badgeType} />
         <Text style={s.cardAddr}>{shortAddr}</Text>
@@ -97,7 +98,7 @@ function AssignmentCard({ item }: { item: Assignment }) {
       <View style={s.cardMeta}>
         {item.riskGrade && <StatusBadge type={item.riskGrade as any} />}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -165,6 +166,7 @@ export default function HomeScreen() {
   const searchQuery = useAssignmentStore((s) => s.searchQuery);
   const rejected = useAssignmentStore((s) => s.rejected);
   const user = useAuthStore((s) => s.user);
+  const router = useRouter();
 
   const refresh = useCallback(() => {
     fetchMyAssignments();
@@ -194,7 +196,10 @@ export default function HomeScreen() {
       <FlatList
         data={listData}
         keyExtractor={(item) => `${item.assignmentId}-${item.resultId}`}
-        renderItem={({ item }) => tab === 0 ? <AssignmentCard item={item} /> : <ResultCard item={item} />}
+        renderItem={({ item }) => tab === 0
+          ? <AssignmentCard item={item} onPress={() => router.push(`/(tabs)/survey/${item.assignmentId}`)} />
+          : <ResultCard item={item} />
+        }
         contentContainerStyle={s.listContent}
         refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} tintColor="#228be6" />}
         ListHeaderComponent={
