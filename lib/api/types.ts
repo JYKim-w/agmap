@@ -30,3 +30,17 @@ export interface AuthUser {
   role: 'SURVEYOR' | 'MANAGER' | 'ADMIN';
   companyName: string;
 }
+
+// 할당 + 조사결과 (my-assignments, rejected 공통)
+export interface Assignment {
+  resultId: number | null;
+  assignmentId: number;
+  address: string;
+  riskGrade: 'HIGH' | 'MEDIUM' | 'LOW';
+  resultStatus: string | null;
+  surveyedAt: string | null;
+  surveyorOpinion: string | null;
+  cropType: string | null;
+  cropCondition: string | null;
+  reviewComment?: string;
+}

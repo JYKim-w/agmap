@@ -37,7 +37,7 @@ export default function LoginScreen() {
 
     if (result.success) {
       Toast.show({ type: 'success', text1: '로그인 완료' });
-      navigation.navigate('map/index' as never);
+      navigation.navigate('(tabs)' as never);
     } else {
       Toast.show({ type: 'error', text1: '로그인 실패', text2: result.message });
     }

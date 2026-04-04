@@ -117,10 +117,11 @@ export default function RootLayout() {
             navigationBarColor: 'transparent',
             navigationBarHidden: true,
           }}
-          initialRouteName={isAuthenticated ? 'map/index' : 'login/index'}
+          initialRouteName={isAuthenticated ? '(tabs)' : 'login/index'}
         >
-          <Stack.Screen name="map/index" />
+          <Stack.Screen name="(tabs)" />
           <Stack.Screen name="login/index" />
+          <Stack.Screen name="map/index" />
         </Stack>
         <Toast />
       </GestureHandlerRootView>
