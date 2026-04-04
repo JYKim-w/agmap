@@ -171,14 +171,14 @@ export default function SurveyWizard() {
             <Text style={s.nextBtnText}>다음</Text>
           </Pressable>
         ) : (
-          <View style={{ flex: 2, gap: 8 }}>
-            <Pressable style={s.nextBtn} onPress={handleTrySubmit} disabled={isSubmitting}>
-              {isSubmitting ? <ActivityIndicator color="#fff" /> : <Text style={s.nextBtnText}>제출</Text>}
-            </Pressable>
+          <>
             <Pressable style={s.draftBtn} onPress={() => handleSubmit('DRAFT')} disabled={isSubmitting}>
               <Text style={s.draftBtnText}>임시저장</Text>
             </Pressable>
-          </View>
+            <Pressable style={s.nextBtn} onPress={handleTrySubmit} disabled={isSubmitting}>
+              {isSubmitting ? <ActivityIndicator color="#fff" /> : <Text style={s.nextBtnText}>제출</Text>}
+            </Pressable>
+          </>
         )}
       </View>
       <ValidationModal
@@ -204,6 +204,6 @@ const s = StyleSheet.create({
   prevBtnText: { fontSize: 16, fontWeight: '600', color: '#495057' },
   nextBtn: { flex: 2, height: 52, borderRadius: 10, backgroundColor: '#228be6', alignItems: 'center', justifyContent: 'center' },
   nextBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
-  draftBtn: { height: 44, borderRadius: 10, borderWidth: 1.5, borderColor: '#dee2e6', alignItems: 'center', justifyContent: 'center' },
-  draftBtnText: { fontSize: 14, fontWeight: '600', color: '#868e96' },
+  draftBtn: { flex: 1, height: 52, borderRadius: 10, borderWidth: 1.5, borderColor: '#dee2e6', alignItems: 'center', justifyContent: 'center' },
+  draftBtnText: { fontSize: 16, fontWeight: '600', color: '#495057' },
 });
