@@ -195,7 +195,7 @@ export default function HomeScreen() {
 
       <FlatList
         data={listData}
-        keyExtractor={(item) => `${item.assignmentId}-${item.resultId}`}
+        keyExtractor={(item, index) => `${tab}-${item.assignmentId}-${item.resultId}-${index}`}
         renderItem={({ item }) => tab === 0
           ? <AssignmentCard item={item} onPress={() => router.push(`/survey/${item.assignmentId}`)} />
           : <ResultCard item={item} />
