@@ -1,13 +1,7 @@
 // Design Ref: mockup/screens/home.html + home-submitted.html
 // 홈 탭 — 오늘의 조사 진행률 + 할당 목록 / 제출 현황
 import StatusBadge, { getStatusBadgeType } from '@/components/StatusBadge';
-import useAssignmentStore, {
-  selectFiltered,
-  selectProgress,
-  selectStatusCounts,
-  selectSubmitted,
-  selectUnsubmitted,
-} from '@/lib/store/assignments';
+import useAssignmentStore from '@/lib/store/assignments';
 import useAuthStore from '@/lib/store/auth';
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
@@ -26,7 +20,11 @@ import type { Assignment } from '@/lib/api/types';
 
 // ─── Progress Card ─────────────────────────────────────────────
 function ProgressCard() {
-  const { total, completed, remaining, rate } = useAssignmentStore(selectProgress);
+  const assignments = useAssignmentStore((s) => s.assignments);
+  const total = assignments.length;
+  const completed = assignments.filter((a) => a.resultId !== null).length;
+  const remaining = total - completed;
+  const rate = total > 0 ? completed / total : 0;
   return (
     <View style={s.progressCard}>
       <View style={s.progressTop}>
@@ -130,7 +128,15 @@ function ResultCard({ item }: { item: Assignment }) {
 
 // ─── Status Counts (제출 현황 탭 상단) ─────────────────────────
 function StatusCounts() {
-  const counts = useAssignmentStore(selectStatusCounts);
+  const assignments = useAssignmentStore((s) => s.assignments);
+  const rejected = useAssignmentStore((s) => s.rejected);
+  const submitted = assignments.filter((a) => a.resultId && a.resultStatus && a.resultStatus !== 'DRAFT');
+  const counts = {
+    submitted: submitted.filter((a) => a.resultStatus === 'SUBMITTED').length,
+    reviewing: submitted.filter((a) => a.resultStatus === 'REVIEWING').length,
+    approved: submitted.filter((a) => a.resultStatus === 'APPROVED').length,
+    rejected: rejected.length,
+  };
   const items = [
     { label: '제출완료', count: counts.submitted, bg: '#e7f5ff', color: '#228be6' },
     { label: '검수중', count: counts.reviewing, bg: '#f3f0ff', color: '#7048e8' },
@@ -155,9 +161,8 @@ export default function HomeScreen() {
   const isLoading = useAssignmentStore((s) => s.isLoading);
   const fetchMyAssignments = useAssignmentStore((s) => s.fetchMyAssignments);
   const fetchRejected = useAssignmentStore((s) => s.fetchRejected);
-  const unsubmitted = useAssignmentStore(selectUnsubmitted);
-  const submitted = useAssignmentStore(selectSubmitted);
-  const filtered = useAssignmentStore(selectFiltered);
+  const assignments = useAssignmentStore((s) => s.assignments);
+  const searchQuery = useAssignmentStore((s) => s.searchQuery);
   const rejected = useAssignmentStore((s) => s.rejected);
   const user = useAuthStore((s) => s.user);
 
@@ -168,9 +173,17 @@ export default function HomeScreen() {
 
   useEffect(() => { refresh(); }, [refresh]);
 
+  const q = searchQuery.trim().toLowerCase();
+  const filteredList = q
+    ? assignments.filter((a) => a.address?.toLowerCase().includes(q))
+    : assignments;
+
   const listData = tab === 0
-    ? filtered.filter((a) => !a.resultId || a.resultStatus === 'DRAFT')
-    : [...submitted, ...rejected];
+    ? filteredList.filter((a) => !a.resultId || a.resultStatus === 'DRAFT')
+    : [
+        ...assignments.filter((a) => a.resultId && a.resultStatus && a.resultStatus !== 'DRAFT'),
+        ...rejected,
+      ];
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>

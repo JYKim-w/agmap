@@ -1,8 +1,11 @@
 // Design Ref: §5 탭 네비게이션 (홈/지도/조사/내정보)
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
@@ -13,8 +16,8 @@ export default function TabLayout() {
           borderTopWidth: 1,
           borderTopColor: 'rgba(0,0,0,0.08)',
           backgroundColor: '#ffffff',
-          height: 60,
-          paddingBottom: 8,
+          height: 56 + insets.bottom,
+          paddingBottom: insets.bottom,
           paddingTop: 4,
         },
         tabBarLabelStyle: {
