@@ -19,9 +19,9 @@ export default function StepFallow() {
       {fallowYn === true && (
         <>
           <ConditionalDivider label="휴경 시 추가 입력" />
-          <FormSelect label="휴경 기간" items={FALLOW_PERIOD} value={fallowPeriod} onChange={(v) => setField('fallowPeriod', v)} />
+          <FormSelect label="추정 기간" items={FALLOW_PERIOD} value={fallowPeriod} onChange={(v) => setField('fallowPeriod', v)} columns={3} />
           <FormSelect label="휴경 사유" items={FALLOW_REASON} value={fallowReason} onChange={(v) => setField('fallowReason', v)} />
-          <FormSelect label="방치 수준" items={NEGLECT_LEVEL} value={neglectLevel} onChange={(v) => setField('neglectLevel', v)} />
+          <FormSelect label="방치 수준" items={NEGLECT_LEVEL} value={neglectLevel} onChange={(v) => setField('neglectLevel', v)} columns={3} />
         </>
       )}
     </FormSection>
