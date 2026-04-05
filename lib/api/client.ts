@@ -63,12 +63,18 @@ async function request<T>(
   });
 
   if (res.status === 401) {
+    if (__DEV__) console.warn(`[API] 401 ${method} ${path}`);
     onUnauthorized?.();
     throw new Error('Unauthorized');
   }
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
+    if (__DEV__) {
+      console.warn(`[API] ${res.status} ${method} ${path}`);
+      console.warn(`[API] req:`, body ?? '(no body)');
+      console.warn(`[API] res:`, text.slice(0, 500));
+    }
     throw new Error(extractErrorMessage(res.status, text));
   }
 
@@ -95,12 +101,17 @@ async function uploadFile<T>(
   });
 
   if (res.status === 401) {
+    if (__DEV__) console.warn(`[API] 401 POST ${path} (upload)`);
     onUnauthorized?.();
     throw new Error('Unauthorized');
   }
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
+    if (__DEV__) {
+      console.warn(`[API] ${res.status} POST ${path} (upload)`);
+      console.warn(`[API] res:`, text.slice(0, 500));
+    }
     throw new Error(extractErrorMessage(res.status, text));
   }
 
