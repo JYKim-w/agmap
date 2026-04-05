@@ -135,7 +135,7 @@ export default function SurveyWizard() {
         router.back();
       }
     } catch (e: any) {
-      Toast.show({ type: 'error', text1: '서버 연결 실패', text2: e?.message });
+      Toast.show({ type: 'error', text1: e?.message || '서버에 연결할 수 없습니다' });
     } finally {
       setIsSubmitting(false);
     }

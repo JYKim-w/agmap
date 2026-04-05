@@ -7,6 +7,28 @@ import type { ApiResponse } from './types';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
+const STATUS_MESSAGES: Record<number, string> = {
+  400: '요청 형식이 올바르지 않습니다.',
+  403: '접근 권한이 없습니다.',
+  404: '요청한 정보를 찾을 수 없습니다.',
+  500: '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+  502: '서버에 연결할 수 없습니다.',
+  503: '서버 점검 중입니다. 잠시 후 다시 시도해주세요.',
+};
+
+/** 서버 응답에서 사용자에게 보여줄 메시지 추출 */
+function extractErrorMessage(status: number, text: string): string {
+  // ApiResponse JSON이면 message 추출
+  try {
+    const json = JSON.parse(text);
+    if (json.message && typeof json.message === 'string') {
+      return json.message;
+    }
+  } catch {}
+  // HTTP 상태 코드 기반 메시지
+  return STATUS_MESSAGES[status] ?? '요청 처리 중 오류가 발생했습니다.';
+}
+
 let getToken: (() => string | null) | null = null;
 let onUnauthorized: (() => void) | null = null;
 
@@ -47,7 +69,7 @@ async function request<T>(
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new Error(`HTTP ${res.status}: ${text}`);
+    throw new Error(extractErrorMessage(res.status, text));
   }
 
   return res.json();
@@ -79,7 +101,7 @@ async function uploadFile<T>(
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new Error(`HTTP ${res.status}: ${text}`);
+    throw new Error(extractErrorMessage(res.status, text));
   }
 
   return res.json();
