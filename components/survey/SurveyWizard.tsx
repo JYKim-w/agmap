@@ -18,9 +18,11 @@ import StepFacility from './steps/StepFacility';
 import StepConversion from './steps/StepConversion';
 import StepOpinion from './steps/StepOpinion';
 import StepPhotos from './steps/StepPhotos';
+import StepConfirm from './steps/StepConfirm';
+import * as Location from 'expo-location';
 
-const STEP_TITLES = ['필지 정보', '실경작 확인', '휴경 확인', '시설물 확인', '불법 전용', '종합 판단', '증빙 사진'];
-const TOTAL_STEPS = 7;
+const STEP_TITLES = ['필지 정보', '실경작 확인', '휴경 확인', '시설물 확인', '불법 전용', '종합 판단', '증빙 사진', '입력 확인'];
+const TOTAL_STEPS = 8;
 
 export default function SurveyWizard() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -81,6 +83,8 @@ export default function SurveyWizard() {
         surveyorOpinion: formState.surveyorOpinion,
         ownerContact: formState.ownerContact,
         memo: formState.memo || null,
+        surveyLat: formState.surveyLat,
+        surveyLng: formState.surveyLng,
         resultStatus: status,
       };
 
@@ -121,6 +125,14 @@ export default function SurveyWizard() {
     const assignment = assignments.find((a) => a.assignmentId === assignmentId);
     if (assignment) {
       initForm(assignmentId, assignment.address, assignment.riskGrade);
+      // GPS 자동 기록
+      (async () => {
+        try {
+          const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+          useSurveyFormStore.getState().setField('surveyLat', loc.coords.latitude);
+          useSurveyFormStore.getState().setField('surveyLng', loc.coords.longitude);
+        } catch {}
+      })();
     }
   }, [id]);
 
@@ -133,6 +145,7 @@ export default function SurveyWizard() {
       case 5: return <StepConversion />;
       case 6: return <StepOpinion error={stepError} />;
       case 7: return <StepPhotos />;
+      case 8: return <StepConfirm />;
       default: return null;
     }
   };

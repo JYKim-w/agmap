@@ -42,6 +42,11 @@ export interface SurveyFormData {
 
   // Step 7: 사진
   photos: PhotoEntry[];
+
+  // 메타 (자동 기록)
+  surveyLat: number | null;
+  surveyLng: number | null;
+  startedAt: number | null; // Date.now() 타임스탬프
 }
 
 export interface PhotoEntry {
@@ -91,9 +96,12 @@ const INITIAL: SurveyFormData = {
   ownerContact: null,
   memo: '',
   photos: [],
+  surveyLat: null,
+  surveyLng: null,
+  startedAt: null,
 };
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 8; // 7단계 폼 + 확인 화면
 
 export const useSurveyFormStore = create<SurveyFormState>((set) => ({
   ...INITIAL,
@@ -106,7 +114,7 @@ export const useSurveyFormStore = create<SurveyFormState>((set) => ({
   prevStep: () => set((s) => ({ currentStep: Math.max(1, s.currentStep - 1) })),
 
   initForm: (assignmentId, address, riskGrade) =>
-    set({ ...INITIAL, currentStep: 1, resultStatus: 'DRAFT', assignmentId, address, riskGrade }),
+    set({ ...INITIAL, currentStep: 1, resultStatus: 'DRAFT', assignmentId, address, riskGrade, startedAt: Date.now() }),
 
   reset: () => set({ ...INITIAL, currentStep: 1, resultStatus: 'DRAFT' }),
 
