@@ -1,7 +1,7 @@
 // API 클라이언트 — fetch wrapper
 // - Authorization 헤더 자동 주입
-// - 401 → 로그아웃 + 로그인 화면 이동
-// - ApiResponse<T> 파싱
+// - 401 → refreshToken으로 자동 갱신 → 원래 요청 재시도
+// - refresh도 실패 → 로그아웃 + 로그인 화면 이동
 import { BASE_URL } from '@/lib/config';
 import type { ApiResponse } from './types';
 
@@ -16,35 +16,87 @@ const STATUS_MESSAGES: Record<number, string> = {
   503: '서버 점검 중입니다. 잠시 후 다시 시도해주세요.',
 };
 
-/** 서버 응답에서 사용자에게 보여줄 메시지 추출 */
 function extractErrorMessage(status: number, text: string): string {
-  // ApiResponse JSON이면 message 추출
   try {
     const json = JSON.parse(text);
-    if (json.message && typeof json.message === 'string') {
-      return json.message;
-    }
+    if (json.message && typeof json.message === 'string') return json.message;
   } catch {}
-  // HTTP 상태 코드 기반 메시지
   return STATUS_MESSAGES[status] ?? '요청 처리 중 오류가 발생했습니다.';
 }
 
+// ---------------------------------------------------------------------------
+// Client config — auth store에서 주입
+// ---------------------------------------------------------------------------
+
 let getToken: (() => string | null) | null = null;
+let getRefreshToken: (() => string | null) | null = null;
+let onTokenRefreshed: ((accessToken: string, refreshToken: string) => void) | null = null;
 let onUnauthorized: (() => void) | null = null;
 
-/** auth store에서 토큰 getter와 401 핸들러를 주입 */
+/** 토큰 갱신 중 중복 호출 방지 */
+let refreshPromise: Promise<boolean> | null = null;
+
 export function configureClient(opts: {
   getToken: () => string | null;
+  getRefreshToken: () => string | null;
+  onTokenRefreshed: (accessToken: string, refreshToken: string) => void;
   onUnauthorized: () => void;
 }) {
   getToken = opts.getToken;
+  getRefreshToken = opts.getRefreshToken;
+  onTokenRefreshed = opts.onTokenRefreshed;
   onUnauthorized = opts.onUnauthorized;
 }
+
+// ---------------------------------------------------------------------------
+// Token refresh
+// ---------------------------------------------------------------------------
+
+async function tryRefreshToken(): Promise<boolean> {
+  const rt = getRefreshToken?.();
+  if (!rt) return false;
+
+  try {
+    const res = await fetch(`${BASE_URL}/auth/api/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: rt }),
+    });
+
+    if (!res.ok) {
+      if (__DEV__) console.warn('[API] refresh failed:', res.status);
+      return false;
+    }
+
+    const json: ApiResponse<any> = await res.json();
+    if (json.success && json.data?.accessToken) {
+      onTokenRefreshed?.(json.data.accessToken, json.data.refreshToken);
+      if (__DEV__) console.log('[API] token refreshed');
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/** 중복 방지 — 동시에 여러 401이 와도 refresh 한 번만 */
+function refreshOnce(): Promise<boolean> {
+  if (!refreshPromise) {
+    refreshPromise = tryRefreshToken().finally(() => { refreshPromise = null; });
+  }
+  return refreshPromise;
+}
+
+// ---------------------------------------------------------------------------
+// Request
+// ---------------------------------------------------------------------------
 
 async function request<T>(
   method: HttpMethod,
   path: string,
   body?: any,
+  _isRetry = false,
 ): Promise<ApiResponse<T>> {
   const url = `${BASE_URL}${path}`;
   const headers: Record<string, string> = {
@@ -62,8 +114,17 @@ async function request<T>(
     body: body ? JSON.stringify(body) : undefined,
   });
 
+  // 401 → 토큰 갱신 시도 → 재시도
+  if (res.status === 401 && !_isRetry) {
+    const refreshed = await refreshOnce();
+    if (refreshed) {
+      return request<T>(method, path, body, true);
+    }
+    onUnauthorized?.();
+    throw new Error('Unauthorized');
+  }
+
   if (res.status === 401) {
-    if (__DEV__) console.warn(`[API] 401 ${method} ${path}`);
     onUnauthorized?.();
     throw new Error('Unauthorized');
   }
@@ -81,10 +142,10 @@ async function request<T>(
   return res.json();
 }
 
-/** multipart/form-data 업로드 */
 async function uploadFile<T>(
   path: string,
   formData: FormData,
+  _isRetry = false,
 ): Promise<ApiResponse<T>> {
   const url = `${BASE_URL}${path}`;
   const headers: Record<string, string> = {};
@@ -100,8 +161,16 @@ async function uploadFile<T>(
     body: formData,
   });
 
+  if (res.status === 401 && !_isRetry) {
+    const refreshed = await refreshOnce();
+    if (refreshed) {
+      return uploadFile<T>(path, formData, true);
+    }
+    onUnauthorized?.();
+    throw new Error('Unauthorized');
+  }
+
   if (res.status === 401) {
-    if (__DEV__) console.warn(`[API] 401 POST ${path} (upload)`);
     onUnauthorized?.();
     throw new Error('Unauthorized');
   }

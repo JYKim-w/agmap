@@ -6,6 +6,7 @@ export const BASE_URL = 'http://211.214.194.88:5632';
 export const API = {
   // 인증
   LOGIN: '/auth/api/login',
+  REFRESH: '/auth/api/refresh',
 
   // 조사 (Phase 2+)
   MY_ASSIGNMENTS: '/mobile/api/survey/my-assignments',
