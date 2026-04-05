@@ -186,20 +186,47 @@ export default function SurveyWizard() {
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
-      {/* 헤더 */}
-      <View style={s.header}>
+      {/* 네비게이션 헤더 */}
+      <View style={s.navHeader}>
         <Pressable onPress={() => currentStep === 1 ? router.back() : prevStep()} hitSlop={8}>
           <Ionicons name="chevron-back" size={24} color="#212529" />
         </Pressable>
-        <Text style={s.headerTitle}>{currentStep}/{TOTAL_STEPS} {STEP_TITLES[currentStep - 1]}</Text>
+        <Text style={s.navTitle}>{STEP_TITLES[currentStep - 1]}</Text>
         <Pressable onPress={() => router.back()} hitSlop={8}>
           <Ionicons name="close" size={24} color="#868e96" />
         </Pressable>
       </View>
 
-      {/* 진행률 바 */}
-      <View style={s.progressBar}>
-        <View style={[s.progressFill, { width: `${(currentStep / TOTAL_STEPS) * 100}%` }]} />
+      {/* 스텝 인디케이터 — mockup/components/wizard-header.html */}
+      <View style={s.wizardHeader}>
+        <View style={s.wizardSteps}>
+          {Array.from({ length: TOTAL_STEPS }, (_, i) => {
+            const step = i + 1;
+            const isDone = step < currentStep;
+            const isCurrent = step === currentStep;
+            return (
+              <View key={step} style={{ flexDirection: 'row', alignItems: 'center', flex: step < TOTAL_STEPS ? 1 : 0 }}>
+                <View style={[
+                  s.stepCircle,
+                  isDone && s.stepDone,
+                  isCurrent && s.stepCurrent,
+                  !isDone && !isCurrent && s.stepPending,
+                ]}>
+                  <Text style={[
+                    s.stepNum,
+                    (isDone || isCurrent) && s.stepNumActive,
+                  ]}>
+                    {isDone ? '✓' : step}
+                  </Text>
+                </View>
+                {step < TOTAL_STEPS && (
+                  <View style={[s.stepLine, isDone ? s.stepLineDone : s.stepLinePending]} />
+                )}
+              </View>
+            );
+          })}
+        </View>
+        <Text style={s.wizardLabel}>{currentStep}/{TOTAL_STEPS} 단계</Text>
       </View>
 
       {/* 폼 콘텐츠 */}
@@ -241,10 +268,21 @@ export default function SurveyWizard() {
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#f8f9fa' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
-  headerTitle: { fontSize: 16, fontWeight: '600', color: '#212529' },
-  progressBar: { height: 4, backgroundColor: '#e9ecef', marginHorizontal: 16, borderRadius: 2 },
-  progressFill: { height: '100%', backgroundColor: '#228be6', borderRadius: 2 },
+  navHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
+  navTitle: { fontSize: 16, fontWeight: '600', color: '#212529' },
+  // 스텝 인디케이터
+  wizardHeader: { paddingHorizontal: 24, paddingVertical: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e9ecef' },
+  wizardSteps: { flexDirection: 'row', alignItems: 'center' },
+  stepCircle: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  stepCurrent: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#228be6', shadowColor: '#228be6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 3 },
+  stepDone: { backgroundColor: '#228be6' },
+  stepPending: { backgroundColor: '#e9ecef' },
+  stepNum: { fontSize: 12, fontWeight: '600', color: '#adb5bd' },
+  stepNumActive: { color: '#fff' },
+  stepLine: { flex: 1, height: 2, marginHorizontal: 4 },
+  stepLineDone: { backgroundColor: '#228be6' },
+  stepLinePending: { backgroundColor: '#e9ecef' },
+  wizardLabel: { fontSize: 13, color: '#868e96', textAlign: 'right', marginTop: 8 },
   content: { flex: 1 },
   contentInner: { padding: 16, paddingBottom: 32 },
   footer: { flexDirection: 'row', gap: 8, padding: 16, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#e9ecef' },
