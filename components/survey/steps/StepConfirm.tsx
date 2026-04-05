@@ -83,7 +83,7 @@ export default function StepConfirm() {
         {/* 메타 정보 */}
         <Text style={s.sectionTitle}>조사 정보</Text>
         <Row label="소요시간" value={elapsedText} />
-        <Row label="GPS" value={form.surveyLat ? `${form.surveyLat.toFixed(5)}, ${form.surveyLng?.toFixed(5)}` : '미기록'} />
+        <Row label="GPS" value={form.surveyLng ? `${form.surveyLng.toFixed(5)}, ${form.surveyLat?.toFixed(5)}` : '미기록'} />
       </FormSection>
     </>
   );
