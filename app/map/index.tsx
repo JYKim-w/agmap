@@ -4,7 +4,7 @@ import MapLibreGL from '@maplibre/maplibre-react-native';
 import { area, length, polygon as turfPolygon, lineString as turfLineString } from '@turf/turf';
 import { Stack, useRouter } from 'expo-router';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, Keyboard, StyleSheet, Text, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 import { SurveyStatusLayer } from '@/lib/map/components/SurveyStatusLayer';
@@ -18,7 +18,9 @@ import { MeasureLayer } from '@/lib/map/components/MeasureLayer';
 import { MeasureCrosshair } from '@/lib/map/components/MeasureCrosshair';
 import { MeasureInfoCard } from '@/lib/map/components/MeasureInfoCard';
 import { MeasureControlBar } from '@/lib/map/components/MeasureControlBar';
+import { SearchBar } from '@/lib/map/components/SearchBar';
 import { useSurveyStatusMap } from '@/lib/map/hooks/useSurveyStatusMap';
+import { useParcelCentroid } from '@/lib/map/hooks/useParcelCentroid';
 import { useUserTracking } from '@/lib/map/hooks/useUserTracking';
 import { DEFAULT_CENTER, DEFAULT_ZOOM, KOREA_BOUNDS, VWORLD_KEY } from '@/lib/map/constants';
 import type { SurveyStatus } from '@/lib/map/types';
@@ -117,10 +119,27 @@ export default function MapScreen() {
   const { toggleTrackingMode, onUserTrackingModeChange, onLocationUpdate } =
     useUserTracking(cameraRef, setCameraState);
 
+  // Search — PNU centroid lookup
+  const { getCentroid } = useParcelCentroid();
+
   // --- Handlers ---
   const handleParcelPress = useCallback((pnu: string) => {
     if (statusMap.has(pnu)) setSelectedPnu(pnu);
   }, [statusMap]);
+
+  const handleSearchSelect = useCallback(async (pnu: string) => {
+    setTrackingMode('off');
+    const coord = await getCentroid(pnu);
+    if (coord) {
+      setCameraState({
+        centerCoordinate: coord,
+        zoomLevel: 16,
+        animationDuration: 800,
+      });
+      // 이동 후 팝업 표시
+      setTimeout(() => { if (statusMap.has(pnu)) setSelectedPnu(pnu); }, 900);
+    }
+  }, [getCentroid, statusMap, setTrackingMode]);
 
   const handleStartSurvey = useCallback((assignmentId: number) => {
     setSelectedPnu(null);
@@ -168,8 +187,9 @@ export default function MapScreen() {
   }, [measurePoints, setOwnAr, setIsMeasuring, resetMeasure]);
 
   const onMapPress = useCallback((event: any) => {
-    if (isMeasuring) return; // 측정 모드에서는 탭 무시
-    setSelectedPnu(null); // 빈 곳 탭 시 팝업 닫기
+    if (isMeasuring) return;
+    setSelectedPnu(null);
+    Keyboard.dismiss(); // 검색바 자동완성 닫기
   }, [isMeasuring]);
 
   return (
@@ -241,6 +261,10 @@ export default function MapScreen() {
           onStartSurvey={handleStartSurvey}
           onClose={() => setSelectedPnu(null)}
         />
+      )}
+
+      {!isMeasuring && (
+        <SearchBar statusMap={statusMap} onSelect={handleSearchSelect} />
       )}
 
       {!isMeasuring && (
