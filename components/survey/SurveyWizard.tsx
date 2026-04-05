@@ -1,7 +1,7 @@
 // Design Ref: mockup/screens/survey-step*.html
 // 조사 위저드 — 7단계 폼
 import useSurveyFormStore from '@/lib/store/surveyForm';
-import { submitResult, uploadPhoto } from '@/lib/api/survey';
+import { submitResult, updateResult, uploadPhoto, getAssignmentDetail } from '@/lib/api/survey';
 import useAssignmentStore from '@/lib/store/assignments';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -89,13 +89,23 @@ export default function SurveyWizard() {
         resultStatus: status,
       };
 
-      const res = await submitResult(body);
-      if (!res.success) {
-        Toast.show({ type: 'error', text1: '제출 실패', text2: res.message });
-        return;
-      }
+      // 기존 DRAFT가 있으면 update, 없으면 insert
+      const assignment = assignments.find((a) => a.assignmentId === formState.assignmentId);
+      const existingResultId = assignment?.resultId;
+      const isDraftUpdate = existingResultId && assignment?.resultStatus === 'DRAFT';
 
-      const resultId = res.data;
+      let resultId: number;
+      if (isDraftUpdate) {
+        const res = await updateResult(existingResultId, body);
+        resultId = existingResultId;
+      } else {
+        const res = await submitResult(body);
+        if (!res.success) {
+          Toast.show({ type: 'error', text1: '제출 실패', text2: res.message });
+          return;
+        }
+        resultId = res.data;
+      }
 
       // 사진 업로드
       for (const photo of formState.photos) {
@@ -148,11 +158,53 @@ export default function SurveyWizard() {
     if (!assignment) return;
 
     (async () => {
-      // 로컬 draft 복원 시도
-      const loaded = await useSurveyFormStore.getState().loadDraft(assignmentId);
-      if (!loaded) {
-        initForm(assignmentId, assignment.address, assignment.riskGrade);
+      // 1. 로컬 draft 복원 시도
+      const localLoaded = await useSurveyFormStore.getState().loadDraft(assignmentId);
+
+      if (!localLoaded) {
+        // 2. 서버 DRAFT 복원 시도
+        let serverLoaded = false;
+        if (assignment.resultId && assignment.resultStatus === 'DRAFT') {
+          try {
+            const res = await getAssignmentDetail(assignmentId);
+            if (res.success && res.data) {
+              const d = res.data;
+              initForm(assignmentId, assignment.address, assignment.riskGrade);
+              const store = useSurveyFormStore.getState();
+              if (d.cultivationYn != null) store.setField('cultivationYn', d.cultivationYn);
+              if (d.cropType) store.setField('cropType', d.cropType);
+              if (d.cropCondition) store.setField('cropCondition', d.cropCondition);
+              if (d.cultivatorType) store.setField('cultivatorType', d.cultivatorType);
+              if (d.leaseYn != null) store.setField('leaseYn', d.leaseYn);
+              if (d.lesseeInfo) store.setField('lesseeInfo', d.lesseeInfo);
+              if (d.fallowYn != null) store.setField('fallowYn', d.fallowYn);
+              if (d.fallowPeriod) store.setField('fallowPeriod', d.fallowPeriod);
+              if (d.fallowReason) store.setField('fallowReason', d.fallowReason);
+              if (d.neglectLevel) store.setField('neglectLevel', d.neglectLevel);
+              if (d.facilityYn != null) store.setField('facilityYn', d.facilityYn);
+              if (d.facilityType) store.setField('facilityType', d.facilityType);
+              if (d.facilityDetail) store.setField('facilityDetail', d.facilityDetail);
+              if (d.facilityPermitted) store.setField('facilityPermitted', d.facilityPermitted);
+              if (d.facilityArea) store.setField('facilityArea', String(d.facilityArea));
+              if (d.facilityRatio) store.setField('facilityRatio', String(d.facilityRatio));
+              if (d.conversionYn != null) store.setField('conversionYn', d.conversionYn);
+              if (d.conversionUse) store.setField('conversionUse', d.conversionUse);
+              if (d.conversionScale) store.setField('conversionScale', d.conversionScale);
+              if (d.conversionPermitted) store.setField('conversionPermitted', d.conversionPermitted);
+              if (d.surveyorOpinion) store.setField('surveyorOpinion', d.surveyorOpinion);
+              if (d.ownerContact) store.setField('ownerContact', d.ownerContact);
+              if (d.memo) store.setField('memo', d.memo);
+              serverLoaded = true;
+            }
+          } catch {}
+        }
+
+        // 3. 신규
+        if (!serverLoaded) {
+          initForm(assignmentId, assignment.address, assignment.riskGrade);
+        }
       }
+
       // GPS 자동 기록
       try {
         const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });

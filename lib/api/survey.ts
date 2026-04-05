@@ -16,6 +16,11 @@ export async function getRejected() {
   return api.get<Assignment[]>(API.REJECTED);
 }
 
+/** 할당 상세 조회 (기존 DRAFT 결과 포함) */
+export async function getAssignmentDetail(assignId: number) {
+  return api.get<any>(`${API.ASSIGNMENT}/${assignId}`);
+}
+
 /** 조사 결과 제출 (신규 또는 수정) */
 export async function submitResult(data: Record<string, any>) {
   return api.post<number>(API.RESULT, data);
