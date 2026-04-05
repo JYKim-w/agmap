@@ -3,8 +3,20 @@
 import FormSection from '@/components/FormSection';
 import StatusBadge from '@/components/StatusBadge';
 import useSurveyFormStore from '@/lib/store/surveyForm';
-import { SURVEYOR_OPINION } from '@/lib/survey/codes';
+import {
+  CROP_TYPE, CROP_CONDITION, CULTIVATOR_TYPE,
+  FALLOW_PERIOD, FALLOW_REASON, NEGLECT_LEVEL,
+  FACILITY_TYPE, FACILITY_DETAIL, PERMIT_STATUS,
+  CONVERSION_USE, CONVERSION_SCALE,
+  SURVEYOR_OPINION, OWNER_CONTACT,
+} from '@/lib/survey/codes';
 import { Image, StyleSheet, Text, View } from 'react-native';
+
+/** 코드값 → 라벨 변환 */
+function codeLabel(codes: { value: string; label: string }[], value: string | null): string {
+  if (!value) return '';
+  return codes.find((c) => c.value === value)?.label ?? value;
+}
 
 function Row({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
@@ -42,12 +54,12 @@ export default function StepConfirm() {
         <Row
           label="실경작"
           value={form.cultivationYn === true
-            ? `예 (${[form.cropType, form.cropCondition, form.cultivatorType].filter(Boolean).join(' / ')})`
+            ? `예 (${[codeLabel(CROP_TYPE, form.cropType), codeLabel(CROP_CONDITION, form.cropCondition), codeLabel(CULTIVATOR_TYPE, form.cultivatorType)].filter(Boolean).join(' / ')})`
             : form.cultivationYn === false ? '아니오' : '-'}
         />
-        <Row label="휴경" value={form.fallowYn === true ? `예 (${form.fallowPeriod ?? ''})` : form.fallowYn === false ? '아니오' : '-'} />
-        <Row label="시설물" value={form.facilityYn === true ? `예 (${form.facilityType ?? ''})` : form.facilityYn === false ? '아니오' : '-'} />
-        <Row label="불법전용" value={form.conversionYn === true ? `예 (${form.conversionUse ?? ''})` : form.conversionYn === false ? '아니오' : '-'} />
+        <Row label="휴경" value={form.fallowYn === true ? `예 (${codeLabel(FALLOW_PERIOD, form.fallowPeriod)})` : form.fallowYn === false ? '아니오' : '-'} />
+        <Row label="시설물" value={form.facilityYn === true ? `예 (${codeLabel(FACILITY_TYPE, form.facilityType)})` : form.facilityYn === false ? '아니오' : '-'} />
+        <Row label="불법전용" value={form.conversionYn === true ? `예 (${codeLabel(CONVERSION_USE, form.conversionUse)})` : form.conversionYn === false ? '아니오' : '-'} />
         <Row label="종합의견" value={opinionLabel} color={opinionColor} />
         {form.memo ? <Row label="메모" value={form.memo} /> : null}
 
