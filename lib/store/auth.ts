@@ -64,7 +64,20 @@ export const useAuthStore = create<AuthState>((set, get) => {
         return { success: true, message: '로그인 성공' };
       } catch (e: any) {
         set({ isLoading: false });
-        return { success: false, message: e?.message || '서버 연결 실패' };
+        const raw = e?.message ?? '';
+        let message = '서버에 연결할 수 없습니다. 네트워크를 확인해주세요.';
+        if (raw.includes('401') || raw.includes('Unauthorized')) {
+          message = '아이디 또는 비밀번호가 올바르지 않습니다.';
+        } else if (raw.includes('403')) {
+          message = '접근 권한이 없습니다. 관리자에게 문의하세요.';
+        } else if (raw.includes('404')) {
+          message = '서버를 찾을 수 없습니다. 잠시 후 다시 시도해주세요.';
+        } else if (raw.includes('500')) {
+          message = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+        } else if (raw.includes('Network') || raw.includes('fetch')) {
+          message = '인터넷 연결을 확인해주세요.';
+        }
+        return { success: false, message };
       }
     },
 
