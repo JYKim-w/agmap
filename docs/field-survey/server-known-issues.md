@@ -45,6 +45,29 @@ leaseYn: formState.leaseYn ?? false,
 
 ---
 
+## 1-1. MyBatis null Numeric → VARCHAR 타입 불일치
+
+### 증상
+```
+PSQLException: "facility_area" 컬럼은 numeric 타입인데 character varying 타입이 들어옴
+```
+
+### 영향 범위
+`tb_survey_result`의 Numeric 컬럼: `facility_area`, `facility_ratio`
+
+### 서버 해결
+```xml
+#{facilityArea,jdbcType=NUMERIC}
+#{facilityRatio,jdbcType=NUMERIC}
+```
+
+### Mobile 대응
+```typescript
+facilityArea: formState.facilityArea ? Number(formState.facilityArea) : 0,
+```
+
+---
+
 ## 2. LocalDateTime 직렬화 — 배열 형태 반환
 
 ### 증상
