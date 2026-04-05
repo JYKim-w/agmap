@@ -97,11 +97,31 @@ export const useAuthStore = create<AuthState>((set, get) => {
         if (!raw) return;
 
         const { accessToken, refreshToken, user } = JSON.parse(raw);
-        if (accessToken && user) {
-          set({ accessToken, refreshToken, user, isAuthenticated: true });
+        if (!accessToken || !user) return;
+
+        // 토큰 유효성 검증 — 서버에 간단한 API 호출
+        const res = await fetch(`${require('@/lib/config').BASE_URL}/mobile/api/survey/my-assignments?_limit=1`, {
+          headers: { 'Authorization': `Bearer ${accessToken}` },
+        });
+
+        if (res.status === 401) {
+          // 토큰 만료 → 저장된 토큰 삭제
+          await AsyncStorage.removeItem(STORAGE_KEY);
+          return;
         }
+
+        set({ accessToken, refreshToken, user, isAuthenticated: true });
       } catch {
-        await AsyncStorage.removeItem(STORAGE_KEY);
+        // 네트워크 에러 시에도 저장된 토큰으로 진입 허용 (오프라인 대비)
+        try {
+          const raw = await AsyncStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const { accessToken, refreshToken, user } = JSON.parse(raw);
+            if (accessToken && user) {
+              set({ accessToken, refreshToken, user, isAuthenticated: true });
+            }
+          }
+        } catch {}
       }
     },
   };
