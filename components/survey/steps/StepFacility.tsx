@@ -26,6 +26,7 @@ export default function StepFacility({ error }: { error?: boolean }) {
           <FormSelect label="구체 유형" items={FACILITY_DETAIL} value={facilityDetail} onChange={(v) => setField('facilityDetail', v)} />
           <FormSelect label="허가 여부" items={PERMIT_STATUS} value={facilityPermitted} onChange={(v) => setField('facilityPermitted', v)} columns={3} />
           <FormNumberInput label="시설 면적" value={facilityArea} onChange={(v) => setField('facilityArea', v)} suffix="m²" />
+          <FormNumberInput label="점유 비율" value={facilityRatio} onChange={(v) => setField('facilityRatio', v)} suffix="%" />
         </>
       )}
     </FormSection>

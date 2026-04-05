@@ -86,6 +86,7 @@ export default function SurveyWizard() {
         surveyLat: formState.surveyLat,
         surveyLng: formState.surveyLng,
         surveyedAt: new Date().toISOString(),
+        validationWarnings: warnings.length > 0 ? JSON.stringify(warnings.map((w) => w.message)) : null,
         resultStatus: status,
       };
 

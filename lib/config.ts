@@ -14,7 +14,6 @@ export const API = {
   RESULT: '/mobile/api/survey/result',
   PHOTO_UPLOAD: '/mobile/api/survey/photo/upload',
   REJECTED: '/mobile/api/survey/rejected',
-  RESUBMIT: '/mobile/api/survey/resubmit',
 
   // 마스터코드 (Phase 3+)
   CODES: '/mobile/api/survey/codes',

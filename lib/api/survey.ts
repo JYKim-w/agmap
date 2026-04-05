@@ -1,7 +1,7 @@
 // 현장조사 API
 import { API } from '@/lib/config';
 import { api } from './client';
-import type { Assignment } from './types';
+import type { Assignment, SurveyResultInput } from './types';
 
 export async function getMyAssignments(date?: string, status?: string) {
   const params = new URLSearchParams();
@@ -21,13 +21,13 @@ export async function getAssignmentDetail(assignId: number) {
   return api.get<any>(`${API.ASSIGNMENT}/${assignId}`);
 }
 
-/** 조사 결과 제출 (신규 또는 수정) */
-export async function submitResult(data: Record<string, any>) {
+/** 조사 결과 제출 (신규) */
+export async function submitResult(data: SurveyResultInput) {
   return api.post<number>(API.RESULT, data);
 }
 
-/** 조사 결과 수정 */
-export async function updateResult(resultId: number, data: Record<string, any>) {
+/** 조사 결과 수정 (DRAFT) */
+export async function updateResult(resultId: number, data: SurveyResultInput) {
   return api.put<void>(`${API.RESULT}/${resultId}`, data);
 }
 
@@ -45,6 +45,6 @@ export async function uploadPhoto(resultId: number, photoType: string, uri: stri
 }
 
 /** 재제출 */
-export async function resubmitResult(resultId: number, data: Record<string, any>) {
+export async function resubmitResult(resultId: number, data: SurveyResultInput) {
   return api.post<void>(`${API.RESULT}/${resultId}/resubmit`, data);
 }
