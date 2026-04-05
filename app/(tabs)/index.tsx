@@ -19,6 +19,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { Assignment } from '@/lib/api/types';
 
+/** surveyedAt이 배열([2026,4,2,0,0]) 또는 문자열일 수 있음 */
+function formatDate(val: any): string {
+  if (!val) return '';
+  if (Array.isArray(val)) {
+    const [y, m, d, h, min] = val;
+    return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} ${String(h ?? 0).padStart(2, '0')}:${String(min ?? 0).padStart(2, '0')}`;
+  }
+  return String(val).replace('T', ' ').slice(0, 16);
+}
+
 // ─── Progress Card ─────────────────────────────────────────────
 function ProgressCard() {
   const assignments = useAssignmentStore((s) => s.assignments);
@@ -121,7 +131,7 @@ function ResultCard({ item, onResurvey }: { item: Assignment; onResurvey?: () =>
         <Text style={s.cardSummary}>{summary}</Text>
       ) : null}
       {item.surveyedAt && (
-        <Text style={s.cardDate}>제출: {String(item.surveyedAt).replace('T', ' ').slice(0, 16)}</Text>
+        <Text style={s.cardDate}>제출: {formatDate(item.surveyedAt)}</Text>
       )}
       {isRejected && onResurvey && (
         <Pressable style={s.resurveyBtn} onPress={onResurvey}>
