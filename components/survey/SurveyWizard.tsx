@@ -85,6 +85,7 @@ export default function SurveyWizard() {
         memo: formState.memo || null,
         surveyLat: formState.surveyLat,
         surveyLng: formState.surveyLng,
+        surveyedAt: new Date().toISOString(),
         resultStatus: status,
       };
 
