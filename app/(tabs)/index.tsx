@@ -103,7 +103,7 @@ function AssignmentCard({ item, onPress }: { item: Assignment; onPress?: () => v
 }
 
 // ─── Result Card (제출 현황) ───────────────────────────────────
-function ResultCard({ item }: { item: Assignment }) {
+function ResultCard({ item, onResurvey }: { item: Assignment; onResurvey?: () => void }) {
   const badgeType = getStatusBadgeType(item.resultId, item.resultStatus);
   const shortAddr = item.address?.split(' ').slice(-1)[0] ?? item.address;
   const summary = [item.surveyorOpinion, item.cropType, item.cropCondition].filter(Boolean).join(' · ');
@@ -122,6 +122,11 @@ function ResultCard({ item }: { item: Assignment }) {
       ) : null}
       {item.surveyedAt && (
         <Text style={s.cardDate}>제출: {String(item.surveyedAt).replace('T', ' ').slice(0, 16)}</Text>
+      )}
+      {isRejected && onResurvey && (
+        <Pressable style={s.resurveyBtn} onPress={onResurvey}>
+          <Text style={s.resurveyBtnText}>재조사</Text>
+        </Pressable>
       )}
     </View>
   );
@@ -198,7 +203,7 @@ export default function HomeScreen() {
         keyExtractor={(item, index) => `${tab}-${item.assignmentId}-${item.resultId}-${index}`}
         renderItem={({ item }) => tab === 0
           ? <AssignmentCard item={item} onPress={() => router.push(`/survey/${item.assignmentId}`)} />
-          : <ResultCard item={item} />
+          : <ResultCard item={item} onResurvey={item.resultStatus === 'REJECTED' ? () => router.push(`/survey/${item.assignmentId}`) : undefined} />
         }
         contentContainerStyle={s.listContent}
         refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} tintColor="#228be6" />}
@@ -277,6 +282,8 @@ const s = StyleSheet.create({
   cardSummary: { fontSize: 13, color: '#868e96' },
   cardDate: { fontSize: 12, color: '#ced4da', marginTop: 4 },
   rejectedReason: { fontSize: 13, color: '#fd7e14', fontWeight: '500', marginTop: 6 },
+  resurveyBtn: { marginTop: 10, paddingVertical: 8, borderRadius: 8, backgroundColor: '#228be6', alignItems: 'center' },
+  resurveyBtnText: { color: '#fff', fontSize: 14, fontWeight: '600' },
 
   // Empty
   empty: { paddingVertical: 48, alignItems: 'center' },

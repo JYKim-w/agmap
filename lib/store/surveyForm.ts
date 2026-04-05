@@ -1,5 +1,8 @@
-// 조사 폼 7단계 위저드 상태 관리
+// 조사 폼 위저드 상태 관리 + 자동 임시저장
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
+
+const DRAFT_KEY_PREFIX = 'survey_draft_';
 
 export interface SurveyFormData {
   // Step 1: 필지 정보 (읽기전용)
@@ -66,6 +69,12 @@ interface SurveyFormState extends SurveyFormData {
   reset: () => void;
   addPhoto: (photo: PhotoEntry) => void;
   removePhoto: (index: number) => void;
+  /** 로컬 임시저장 */
+  saveDraft: () => Promise<void>;
+  /** 로컬 임시저장 복원 — 있으면 true */
+  loadDraft: (assignmentId: number) => Promise<boolean>;
+  /** 로컬 임시저장 삭제 */
+  clearDraft: (assignmentId: number) => Promise<void>;
 }
 
 const INITIAL: SurveyFormData = {
@@ -108,18 +117,69 @@ export const useSurveyFormStore = create<SurveyFormState>((set) => ({
   currentStep: 1,
   resultStatus: 'DRAFT',
 
-  setField: (key, value) => set({ [key]: value } as any),
+  setField: (key, value) => {
+    set({ [key]: value } as any);
+    // 값 변경 시 자동 저장 (debounce 없이 즉시)
+    setTimeout(() => useSurveyFormStore.getState().saveDraft(), 0);
+  },
   setStep: (step) => set({ currentStep: Math.max(1, Math.min(TOTAL_STEPS, step)) }),
-  nextStep: () => set((s) => ({ currentStep: Math.min(TOTAL_STEPS, s.currentStep + 1) })),
-  prevStep: () => set((s) => ({ currentStep: Math.max(1, s.currentStep - 1) })),
+  nextStep: () => {
+    set((s) => ({ currentStep: Math.min(TOTAL_STEPS, s.currentStep + 1) }));
+    setTimeout(() => useSurveyFormStore.getState().saveDraft(), 0);
+  },
+  prevStep: () => {
+    set((s) => ({ currentStep: Math.max(1, s.currentStep - 1) }));
+    setTimeout(() => useSurveyFormStore.getState().saveDraft(), 0);
+  },
 
   initForm: (assignmentId, address, riskGrade) =>
     set({ ...INITIAL, currentStep: 1, resultStatus: 'DRAFT', assignmentId, address, riskGrade, startedAt: Date.now() }),
 
   reset: () => set({ ...INITIAL, currentStep: 1, resultStatus: 'DRAFT' }),
 
-  addPhoto: (photo) => set((s) => ({ photos: [...s.photos, photo] })),
-  removePhoto: (index) => set((s) => ({ photos: s.photos.filter((_, i) => i !== index) })),
+  addPhoto: (photo) => {
+    set((s) => ({ photos: [...s.photos, photo] }));
+    setTimeout(() => useSurveyFormStore.getState().saveDraft(), 0);
+  },
+  removePhoto: (index) => {
+    set((s) => ({ photos: s.photos.filter((_, i) => i !== index) }));
+    setTimeout(() => useSurveyFormStore.getState().saveDraft(), 0);
+  },
+
+  saveDraft: async () => {
+    const s = useSurveyFormStore.getState();
+    if (!s.assignmentId) return;
+    const key = `${DRAFT_KEY_PREFIX}${s.assignmentId}`;
+    const data: SurveyFormData & { currentStep: number } = {
+      assignmentId: s.assignmentId, address: s.address, riskGrade: s.riskGrade,
+      cultivationYn: s.cultivationYn, cropType: s.cropType, cropCondition: s.cropCondition,
+      cultivatorType: s.cultivatorType, leaseYn: s.leaseYn, lesseeInfo: s.lesseeInfo,
+      fallowYn: s.fallowYn, fallowPeriod: s.fallowPeriod, fallowReason: s.fallowReason, neglectLevel: s.neglectLevel,
+      facilityYn: s.facilityYn, facilityType: s.facilityType, facilityDetail: s.facilityDetail,
+      facilityPermitted: s.facilityPermitted, facilityArea: s.facilityArea, facilityRatio: s.facilityRatio,
+      conversionYn: s.conversionYn, conversionUse: s.conversionUse, conversionScale: s.conversionScale, conversionPermitted: s.conversionPermitted,
+      surveyorOpinion: s.surveyorOpinion, ownerContact: s.ownerContact, memo: s.memo,
+      photos: s.photos, surveyLat: s.surveyLat, surveyLng: s.surveyLng, startedAt: s.startedAt,
+      currentStep: s.currentStep,
+    };
+    await AsyncStorage.setItem(key, JSON.stringify(data));
+  },
+
+  loadDraft: async (assignmentId) => {
+    try {
+      const raw = await AsyncStorage.getItem(`${DRAFT_KEY_PREFIX}${assignmentId}`);
+      if (!raw) return false;
+      const data = JSON.parse(raw);
+      set({ ...data, resultStatus: 'DRAFT' as const });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  clearDraft: async (assignmentId) => {
+    await AsyncStorage.removeItem(`${DRAFT_KEY_PREFIX}${assignmentId}`);
+  },
 }));
 
 export default useSurveyFormStore;

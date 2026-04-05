@@ -105,14 +105,35 @@ export default function SurveyWizard() {
         }
       }
 
-      Toast.show({
-        type: 'success',
-        text1: status === 'SUBMITTED' ? '제출 완료' : '임시저장 완료',
-      });
-
       fetchMyAssignments();
+      if (formState.assignmentId) {
+        await useSurveyFormStore.getState().clearDraft(formState.assignmentId);
+      }
+
+      // 다음 미조사 건 찾기
+      const currentId = formState.assignmentId;
+      const allAssignments = useAssignmentStore.getState().assignments;
+      const nextUnsurveyed = allAssignments.find(
+        (a) => a.assignmentId !== currentId && !a.resultId
+      );
+
       formState.reset();
-      router.back();
+
+      if (status === 'SUBMITTED' && nextUnsurveyed) {
+        Toast.show({
+          type: 'success',
+          text1: '제출 완료',
+          text2: '다음 조사지로 이동합니다',
+        });
+        router.replace(`/survey/${nextUnsurveyed.assignmentId}`);
+      } else {
+        Toast.show({
+          type: 'success',
+          text1: status === 'SUBMITTED' ? '제출 완료' : '임시저장 완료',
+          text2: status === 'SUBMITTED' ? '모든 조사를 완료했습니다' : undefined,
+        });
+        router.back();
+      }
     } catch (e: any) {
       Toast.show({ type: 'error', text1: '서버 연결 실패', text2: e?.message });
     } finally {
@@ -123,17 +144,21 @@ export default function SurveyWizard() {
   useEffect(() => {
     const assignmentId = Number(id);
     const assignment = assignments.find((a) => a.assignmentId === assignmentId);
-    if (assignment) {
-      initForm(assignmentId, assignment.address, assignment.riskGrade);
+    if (!assignment) return;
+
+    (async () => {
+      // 로컬 draft 복원 시도
+      const loaded = await useSurveyFormStore.getState().loadDraft(assignmentId);
+      if (!loaded) {
+        initForm(assignmentId, assignment.address, assignment.riskGrade);
+      }
       // GPS 자동 기록
-      (async () => {
-        try {
-          const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
-          useSurveyFormStore.getState().setField('surveyLat', loc.coords.latitude);
-          useSurveyFormStore.getState().setField('surveyLng', loc.coords.longitude);
-        } catch {}
-      })();
-    }
+      try {
+        const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+        useSurveyFormStore.getState().setField('surveyLat', loc.coords.latitude);
+        useSurveyFormStore.getState().setField('surveyLng', loc.coords.longitude);
+      } catch {}
+    })();
   }, [id]);
 
   const renderStep = () => {
