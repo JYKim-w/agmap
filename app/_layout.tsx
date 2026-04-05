@@ -1,6 +1,6 @@
 import { useCameraPermissions } from 'expo-camera';
 import * as Location from 'expo-location';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
@@ -95,13 +95,21 @@ export default function RootLayout() {
     prepare();
   }, []);
 
+  const router = useRouter();
+
   useEffect(() => {
     if (isReady) {
       SplashScreen.hideAsync();
     }
   }, [isReady]);
 
-  // 준비 완료 전까지 스플래시 화면 유지
+  // 인증 상태 변화 감지 — 로그아웃/토큰만료 시 로그인 화면 이동
+  useEffect(() => {
+    if (isReady && !isAuthenticated) {
+      router.replace('/login');
+    }
+  }, [isReady, isAuthenticated]);
+
   if (!isReady) {
     return null;
   }

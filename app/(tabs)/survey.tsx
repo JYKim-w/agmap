@@ -2,7 +2,6 @@
 // 3개 진입점 통일: 홈 카드 탭 / 지도 조사 시작 / 조사 탭 직접 선택
 import StatusBadge, { getStatusBadgeType } from '@/components/StatusBadge';
 import useAssignmentStore from '@/lib/store/assignments';
-import useAuthStore from '@/lib/store/auth';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo } from 'react';
@@ -47,12 +46,11 @@ export default function SurveyTab() {
   const assignments = useAssignmentStore((s) => s.assignments);
   const isLoading = useAssignmentStore((s) => s.isLoading);
   const fetchMyAssignments = useAssignmentStore((s) => s.fetchMyAssignments);
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const router = useRouter();
 
-  useEffect(() => { if (isAuthenticated) fetchMyAssignments(); }, [isAuthenticated]);
+  useEffect(() => { fetchMyAssignments(); }, []);
 
-  const refresh = useCallback(() => { if (isAuthenticated) fetchMyAssignments(); }, [fetchMyAssignments, isAuthenticated]);
+  const refresh = useCallback(() => { fetchMyAssignments(); }, [fetchMyAssignments]);
 
   // 임시저장(DRAFT) → 미조사 순으로 정렬
   const surveyList = useMemo(() => {

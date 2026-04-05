@@ -181,14 +181,12 @@ export default function HomeScreen() {
   const searchQuery = useAssignmentStore((s) => s.searchQuery);
   const rejected = useAssignmentStore((s) => s.rejected);
   const user = useAuthStore((s) => s.user);
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const router = useRouter();
 
   const refresh = useCallback(() => {
-    if (!isAuthenticated) return;
     fetchMyAssignments();
     fetchRejected();
-  }, [fetchMyAssignments, fetchRejected, isAuthenticated]);
+  }, [fetchMyAssignments, fetchRejected]);
 
   useEffect(() => { refresh(); }, [refresh]);
 
