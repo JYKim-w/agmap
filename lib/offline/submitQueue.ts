@@ -9,6 +9,11 @@ import Toast from 'react-native-toast-message';
 
 const QUEUE_KEY = 'offline_submit_queue';
 const MAX_RETRIES = 5;
+const BACKOFF_MS = [0, 5000, 15000, 30000, 60000];
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export interface QueueItem {
   id: string;
@@ -76,6 +81,10 @@ export const useSubmitQueue = create<SubmitQueueState>((set, get) => ({
 
     for (const item of pending) {
       try {
+        // 지수 백오프 대기
+        const backoff = BACKOFF_MS[Math.min(item.retryCount, BACKOFF_MS.length - 1)];
+        if (backoff > 0) await delay(backoff);
+
         // 상태 업데이트
         set({
           queue: get().queue.map((q) =>

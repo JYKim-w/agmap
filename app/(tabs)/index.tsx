@@ -3,6 +3,7 @@
 import StatusBadge, { getStatusBadgeType } from '@/components/StatusBadge';
 import useAssignmentStore from '@/lib/store/assignments';
 import useAuthStore from '@/lib/store/auth';
+import { useSubmitQueue } from '@/lib/offline';
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -27,6 +28,21 @@ function formatDate(val: any): string {
     return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} ${String(h ?? 0).padStart(2, '0')}:${String(min ?? 0).padStart(2, '0')}`;
   }
   return String(val).replace('T', ' ').slice(0, 16);
+}
+
+// ─── Sync Pending Banner ───────────────────────────────────────
+function SyncPendingBanner() {
+  const queue = useSubmitQueue((s) => s.queue);
+  const processQueue = useSubmitQueue((s) => s.processQueue);
+  const pending = queue.filter((q) => q.status !== 'failed');
+  if (pending.length === 0) return null;
+  return (
+    <Pressable style={s.syncBanner} onPress={processQueue}>
+      <Ionicons name="sync-outline" size={16} color="#228be6" />
+      <Text style={s.syncText}>동기화 대기 {pending.length}건</Text>
+      <Text style={s.syncRetry}>탭하여 동기화</Text>
+    </Pressable>
+  );
 }
 
 // ─── Progress Card ─────────────────────────────────────────────
@@ -219,6 +235,7 @@ export default function HomeScreen() {
         refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} tintColor="#228be6" />}
         ListHeaderComponent={
           <>
+            <SyncPendingBanner />
             <ProgressCard />
             <RejectedBanner />
             <SegmentTabs active={tab} onChange={setTab} />
@@ -294,6 +311,12 @@ const s = StyleSheet.create({
   rejectedReason: { fontSize: 13, color: '#fd7e14', fontWeight: '500', marginTop: 6 },
   resurveyBtn: { marginTop: 10, paddingVertical: 8, borderRadius: 8, backgroundColor: '#228be6', alignItems: 'center' },
   resurveyBtnText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  syncBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: '#e7f5ff', borderRadius: 10, padding: 12, marginBottom: 12,
+  },
+  syncText: { flex: 1, fontSize: 14, fontWeight: '600', color: '#1864ab' },
+  syncRetry: { fontSize: 13, color: '#228be6' },
 
   // Empty
   empty: { paddingVertical: 48, alignItems: 'center' },
