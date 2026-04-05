@@ -181,8 +181,8 @@ export default function MapScreen() {
         style={{ flex: 1 }}
         logoEnabled={false}
         attributionEnabled={false}
-        rotateEnabled
-        pitchEnabled
+        rotateEnabled={false}
+        pitchEnabled={false}
         compassEnabled={false}
         mapStyle={mapStyle}
         onPress={onMapPress}
