@@ -53,11 +53,11 @@ export function useSurveyStatusMap(activeFilters: Set<SurveyStatus>) {
     }
 
     // ['match', ['get', 'pnu'], pnu1, color1, pnu2, color2, ..., fallback]
-    const fillColorExpr: any[] = fillPairs.length > 0
+    const fillColorExpr: any = fillPairs.length > 0
       ? ['match', ['get', 'pnu'], ...fillPairs, 'rgba(0,0,0,0)']
       : 'rgba(0,0,0,0)';
 
-    const lineColorExpr: any[] = linePairs.length > 0
+    const lineColorExpr: any = linePairs.length > 0
       ? ['match', ['get', 'pnu'], ...linePairs, 'rgba(0,0,0,0)']
       : 'rgba(0,0,0,0)';
 

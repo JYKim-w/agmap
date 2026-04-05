@@ -8,7 +8,6 @@ import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import { RefProvider } from './refContext';
 import appStatusStore from '@/store/appStatus';
 import usePermissionStore from '@/store/permissionStore';
 import useAuthStore from '@/lib/store/auth';
@@ -125,26 +124,24 @@ export default function RootLayout() {
   }
 
   return (
-    <RefProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <StatusBar style="dark" translucent backgroundColor="transparent" />
-        <OfflineBanner />
-        <Stack
-          screenOptions={{
-            animation: 'fade',
-            headerShown: false,
-            navigationBarColor: 'transparent',
-            navigationBarHidden: true,
-          }}
-          initialRouteName={isAuthenticated ? '(tabs)' : 'login/index'}
-        >
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="login/index" />
-          <Stack.Screen name="map/index" />
-          <Stack.Screen name="survey/[id]" options={{ animation: 'slide_from_bottom' }} />
-        </Stack>
-        <Toast />
-      </GestureHandlerRootView>
-    </RefProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <StatusBar style="dark" translucent backgroundColor="transparent" />
+      <OfflineBanner />
+      <Stack
+        screenOptions={{
+          animation: 'fade',
+          headerShown: false,
+          navigationBarColor: 'transparent',
+          navigationBarHidden: true,
+        }}
+        initialRouteName={isAuthenticated ? '(tabs)' : 'login/index'}
+      >
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="login/index" />
+        <Stack.Screen name="map/index" />
+        <Stack.Screen name="survey/[id]" options={{ animation: 'slide_from_bottom' }} />
+      </Stack>
+      <Toast />
+    </GestureHandlerRootView>
   );
 }
