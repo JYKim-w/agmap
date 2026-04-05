@@ -12,6 +12,9 @@ import { RefProvider } from './refContext';
 import appStatusStore from '@/store/appStatus';
 import usePermissionStore from '@/store/permissionStore';
 import useAuthStore from '@/lib/store/auth';
+import { useNetworkStore } from '@/lib/offline/networkStatus';
+import { useSubmitQueue } from '@/lib/offline/submitQueue';
+import OfflineBanner from '@/components/OfflineBanner';
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
@@ -83,6 +86,7 @@ export default function RootLayout() {
           checkPermissions(),
           checkVersion(),
           loadStoredToken(),
+          useSubmitQueue.getState().loadQueue(),
           new Promise((resolve) => setTimeout(resolve, 1000)),
         ]);
       } catch (e) {
@@ -103,6 +107,12 @@ export default function RootLayout() {
     }
   }, [isReady]);
 
+  // 네트워크 상태 리스너 시작
+  useEffect(() => {
+    const cleanup = useNetworkStore.getState().startListening();
+    return cleanup;
+  }, []);
+
   // 인증 상태 변화 감지 — 로그아웃/토큰만료 시 로그인 화면 이동
   useEffect(() => {
     if (isReady && !isAuthenticated) {
@@ -118,6 +128,7 @@ export default function RootLayout() {
     <RefProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <StatusBar style="dark" translucent backgroundColor="transparent" />
+        <OfflineBanner />
         <Stack
           screenOptions={{
             animation: 'fade',

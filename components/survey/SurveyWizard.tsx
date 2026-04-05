@@ -3,6 +3,8 @@
 import useSurveyFormStore from '@/lib/store/surveyForm';
 import { submitResult, updateResult, uploadPhoto, getAssignmentDetail } from '@/lib/api/survey';
 import useAssignmentStore from '@/lib/store/assignments';
+import { useNetworkStore } from '@/lib/offline/networkStatus';
+import { useSubmitQueue } from '@/lib/offline/submitQueue';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -90,31 +92,54 @@ export default function SurveyWizard() {
         resultStatus: status,
       };
 
-      // 기존 DRAFT가 있으면 update, 없으면 insert
+      // 오프라인이면 큐에 저장
+      const isConnected = useNetworkStore.getState().isConnected;
+      if (!isConnected) {
+        await useSubmitQueue.getState().enqueue(formState.assignmentId!, body as any, formState.photos);
+        if (formState.assignmentId) {
+          await useSurveyFormStore.getState().clearDraft(formState.assignmentId);
+        }
+        formState.reset();
+        router.back();
+        return;
+      }
+
+      // 온라인 — 기존 DRAFT가 있으면 update, 없으면 insert
       const assignment = assignments.find((a) => a.assignmentId === formState.assignmentId);
       const existingResultId = assignment?.resultId;
       const isDraftUpdate = existingResultId && assignment?.resultStatus === 'DRAFT';
 
       let resultId: number;
-      if (isDraftUpdate) {
-        const res = await updateResult(existingResultId, body);
-        resultId = existingResultId;
-      } else {
-        const res = await submitResult(body);
-        if (!res.success) {
-          Toast.show({ type: 'error', text1: '제출 실패', text2: res.message });
-          return;
+      try {
+        if (isDraftUpdate) {
+          await updateResult(existingResultId, body as any);
+          resultId = existingResultId;
+        } else {
+          const res = await submitResult(body as any);
+          if (!res.success) {
+            Toast.show({ type: 'error', text1: '제출 실패', text2: res.message });
+            return;
+          }
+          resultId = res.data;
         }
-        resultId = res.data;
-      }
 
-      // 사진 업로드
-      for (const photo of formState.photos) {
-        try {
-          await uploadPhoto(resultId, photo.photoType, photo.uri);
-        } catch (e) {
-          console.warn('Photo upload failed:', photo.photoType, e);
+        // 사진 업로드
+        for (const photo of formState.photos) {
+          try {
+            await uploadPhoto(resultId, photo.photoType, photo.uri);
+          } catch (e) {
+            if (__DEV__) console.warn('Photo upload failed:', photo.photoType, e);
+          }
         }
+      } catch (e) {
+        // 온라인인데 실패 → 큐에 저장 (일시적 서버 에러)
+        await useSubmitQueue.getState().enqueue(formState.assignmentId!, body as any, formState.photos);
+        if (formState.assignmentId) {
+          await useSurveyFormStore.getState().clearDraft(formState.assignmentId);
+        }
+        formState.reset();
+        router.back();
+        return;
       }
 
       fetchMyAssignments();

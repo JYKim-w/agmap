@@ -1,7 +1,12 @@
-// 할당 목록 상태 관리
+// 할당 목록 상태 관리 + 오프라인 캐시
+// Design Ref: field-survey-offline §6
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { getMyAssignments, getRejected } from '@/lib/api/survey';
 import type { Assignment } from '@/lib/api/types';
+
+const CACHE_KEY_ASSIGNMENTS = 'assignments_cache';
+const CACHE_KEY_REJECTED = 'rejected_cache';
 
 interface AssignmentState {
   assignments: Assignment[];
@@ -24,10 +29,19 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
     set({ isLoading: true });
     try {
       const res = await getMyAssignments(date);
-      console.log('[Assignments] API response:', JSON.stringify(res).slice(0, 500));
-      if (res.success) set({ assignments: res.data ?? [] });
+      if (res.success) {
+        const data = res.data ?? [];
+        set({ assignments: data });
+        // 캐시 저장
+        AsyncStorage.setItem(CACHE_KEY_ASSIGNMENTS, JSON.stringify(data));
+      }
     } catch (e) {
-      console.warn('[Assignments] fetchMyAssignments error:', e);
+      // 네트워크 실패 → 캐시에서 로드
+      try {
+        const cached = await AsyncStorage.getItem(CACHE_KEY_ASSIGNMENTS);
+        if (cached) set({ assignments: JSON.parse(cached) });
+      } catch {}
+      if (__DEV__) console.warn('[Assignments] fetchMyAssignments error:', e);
     } finally {
       set({ isLoading: false });
     }
@@ -36,9 +50,17 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
   fetchRejected: async () => {
     try {
       const res = await getRejected();
-      if (res.success) set({ rejected: res.data ?? [] });
+      if (res.success) {
+        const data = res.data ?? [];
+        set({ rejected: data });
+        AsyncStorage.setItem(CACHE_KEY_REJECTED, JSON.stringify(data));
+      }
     } catch (e) {
-      console.warn('fetchRejected error:', e);
+      try {
+        const cached = await AsyncStorage.getItem(CACHE_KEY_REJECTED);
+        if (cached) set({ rejected: JSON.parse(cached) });
+      } catch {}
+      if (__DEV__) console.warn('fetchRejected error:', e);
     }
   },
 
