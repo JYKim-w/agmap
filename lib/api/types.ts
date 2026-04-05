@@ -35,6 +35,7 @@ export interface AuthUser {
 export interface Assignment {
   resultId: number | null;
   assignmentId: number;
+  pnu: string;
   address: string;
   riskGrade: 'HIGH' | 'MEDIUM' | 'LOW';
   resultStatus: string | null;
