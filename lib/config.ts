@@ -17,4 +17,8 @@ export const API = {
 
   // 마스터코드 (Phase 3+)
   CODES: '/mobile/api/survey/codes',
+
+  // 공지사항 (v1.4)
+  NOTICES: '/mobile/api/notice',
+  NOTICE_DETAIL: '/mobile/api/notice', // /{id}
 } as const;

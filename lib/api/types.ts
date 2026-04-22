@@ -46,6 +46,29 @@ export interface Assignment {
   reviewComment?: string;
 }
 
+// 공지사항 (v1.4)
+export interface Notice {
+  id: number;
+  title: string;
+  content: string;
+  noticeType: 'EMERGENCY' | 'WEATHER' | 'SYSTEM' | 'GENERAL';
+  scope: 'GLOBAL' | 'MANAGER';
+  pinned: boolean;
+  authorId: number;
+  authorName: string;
+  ownerManagerId: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NoticePageResponse {
+  content: Notice[];
+  totalCount: number;
+  page: number;
+  size: number;
+  hasMore: boolean;
+}
+
 // 조사 결과 제출 입력
 export interface SurveyResultInput {
   assignmentId: number | null;

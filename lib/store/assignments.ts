@@ -13,10 +13,12 @@ interface AssignmentState {
   rejected: Assignment[];
   isLoading: boolean;
   searchQuery: string;
+  selectedAssignmentId: number | null;
 
   fetchMyAssignments: (date?: string) => Promise<void>;
   fetchRejected: () => Promise<void>;
   setSearchQuery: (q: string) => void;
+  setSelectedAssignment: (id: number | null) => void;
 }
 
 export const useAssignmentStore = create<AssignmentState>((set) => ({
@@ -24,6 +26,7 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
   rejected: [],
   isLoading: false,
   searchQuery: '',
+  selectedAssignmentId: null,
 
   fetchMyAssignments: async (date) => {
     set({ isLoading: true });
@@ -65,6 +68,7 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
   },
 
   setSearchQuery: (q) => set({ searchQuery: q }),
+  setSelectedAssignment: (id) => set({ selectedAssignmentId: id }),
 }));
 
 // 파생 값 selectors

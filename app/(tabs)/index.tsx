@@ -1,34 +1,30 @@
-// Design Ref: mockup/screens/home.html + home-submitted.html
-// 홈 탭 — 오늘의 조사 진행률 + 할당 목록 / 제출 현황
-import StatusBadge, { getStatusBadgeType } from '@/components/StatusBadge';
+// Design Ref: home-survey-ux.design.md §5.1 — 홈 탭 대시보드
+// 역할: 현황 파악 (Read-only). 배정 목록 없음.
 import useAssignmentStore from '@/lib/store/assignments';
 import useAuthStore from '@/lib/store/auth';
+import useNoticesStore, { selectPinnedNotice } from '@/lib/store/notices';
 import { useSubmitQueue } from '@/lib/offline';
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   ActivityIndicator,
-  FlatList,
   Pressable,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import type { Assignment } from '@/lib/api/types';
+import type { Notice } from '@/lib/api/types';
 
-/** surveyedAt이 배열([2026,4,2,0,0]) 또는 문자열일 수 있음 */
-function formatDate(val: any): string {
-  if (!val) return '';
-  if (Array.isArray(val)) {
-    const [y, m, d, h, min] = val;
-    return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} ${String(h ?? 0).padStart(2, '0')}:${String(min ?? 0).padStart(2, '0')}`;
-  }
-  return String(val).replace('T', ' ').slice(0, 16);
-}
+const NOTICE_TYPE_COLOR: Record<string, { bg: string; color: string; label: string }> = {
+  EMERGENCY: { bg: '#fff0f0', color: '#fa5252', label: '긴급' },
+  WEATHER:   { bg: '#fff9db', color: '#e67700', label: '날씨' },
+  SYSTEM:    { bg: '#f3f0ff', color: '#7048e8', label: '시스템' },
+  GENERAL:   { bg: '#f1f3f5', color: '#495057', label: '공지' },
+};
 
 // ─── Sync Pending Banner ───────────────────────────────────────
 function SyncPendingBanner() {
@@ -45,25 +41,19 @@ function SyncPendingBanner() {
   );
 }
 
-// ─── Progress Card ─────────────────────────────────────────────
-function ProgressCard() {
-  const assignments = useAssignmentStore((s) => s.assignments);
-  const total = assignments.length;
-  const completed = assignments.filter((a) => a.resultId !== null).length;
-  const remaining = total - completed;
-  const rate = total > 0 ? completed / total : 0;
+// ─── Pinned Notice Banner ──────────────────────────────────────
+function PinnedNoticeBanner({ notice }: { notice: Notice }) {
+  const theme = NOTICE_TYPE_COLOR[notice.noticeType] ?? NOTICE_TYPE_COLOR.GENERAL;
   return (
-    <View style={s.progressCard}>
-      <View style={s.progressTop}>
-        <Text style={s.progressTitle}>오늘의 조사</Text>
-        <Text style={s.progressCount}>{completed}/{total}</Text>
-      </View>
-      <View style={s.progressBar}>
-        <View style={[s.progressFill, { width: `${Math.round(rate * 100)}%` }]} />
-      </View>
-      <View style={s.progressLabels}>
-        <Text style={s.progressLabel}>완료 {completed}</Text>
-        <Text style={s.progressLabel}>남은 {remaining}</Text>
+    <View style={[s.noticeBanner, { backgroundColor: theme.bg, borderLeftColor: theme.color }]}>
+      <View style={s.noticeRow}>
+        <View style={[s.noticeTypeBadge, { backgroundColor: theme.color }]}>
+          <Text style={s.noticeTypeText}>{theme.label}</Text>
+        </View>
+        <Text style={[s.noticeTitle, { color: theme.color }]} numberOfLines={1}>
+          {notice.title}
+        </Text>
+        <Ionicons name="pin" size={14} color={theme.color} />
       </View>
     </View>
   );
@@ -72,151 +62,121 @@ function ProgressCard() {
 // ─── Rejected Banner ───────────────────────────────────────────
 function RejectedBanner() {
   const count = useAssignmentStore((s) => s.rejected.length);
+  const router = useRouter();
   if (count === 0) return null;
   return (
-    <Pressable style={s.rejectedBanner}>
-      <Text style={s.rejectedText}>⚠ 반려 {count}건 - 재조사 필요</Text>
+    <Pressable
+      style={s.rejectedBanner}
+      onPress={() => router.push('/(tabs)/survey')}
+    >
+      <Ionicons name="warning-outline" size={16} color="#e67700" />
+      <Text style={s.rejectedText}>반려 {count}건 — 재조사 필요</Text>
       <Text style={s.rejectedArrow}>›</Text>
     </Pressable>
   );
 }
 
-// ─── Segment Tabs ──────────────────────────────────────────────
-function SegmentTabs({ active, onChange }: { active: number; onChange: (i: number) => void }) {
-  return (
-    <View style={s.tabs}>
-      <Pressable style={[s.tab, active === 0 && s.tabActive]} onPress={() => onChange(0)}>
-        <Text style={[s.tabText, active === 0 && s.tabTextActive]}>할당 목록</Text>
-      </Pressable>
-      <Pressable style={[s.tab, active === 1 && s.tabActive]} onPress={() => onChange(1)}>
-        <Text style={[s.tabText, active === 1 && s.tabTextActive]}>제출 현황</Text>
-      </Pressable>
-    </View>
-  );
-}
-
-// ─── Search Bar ────────────────────────────────────────────────
-function SearchBar() {
-  const setSearchQuery = useAssignmentStore((s) => s.setSearchQuery);
-  return (
-    <View style={s.searchBar}>
-      <Ionicons name="search" size={14} color="#adb5bd" />
-      <TextInput
-        style={s.searchInput}
-        placeholder="주소로 검색"
-        placeholderTextColor="#ced4da"
-        onChangeText={setSearchQuery}
-      />
-    </View>
-  );
-}
-
-// ─── Assignment Card (할당 목록) ───────────────────────────────
-function AssignmentCard({ item, onPress }: { item: Assignment; onPress?: () => void }) {
-  const badgeType = getStatusBadgeType(item.resultId, item.resultStatus);
-  const shortAddr = item.address?.split(' ').slice(-1)[0] ?? item.address;
-  return (
-    <Pressable style={s.card} onPress={onPress}>
-      <View style={s.cardRow}>
-        <StatusBadge type={badgeType} />
-        <Text style={s.cardAddr}>{shortAddr}</Text>
-      </View>
-      <View style={s.cardMeta}>
-        {item.riskGrade && <StatusBadge type={item.riskGrade as any} />}
-      </View>
-    </Pressable>
-  );
-}
-
-// ─── Result Card (제출 현황) ───────────────────────────────────
-function ResultCard({ item, onResurvey }: { item: Assignment; onResurvey?: () => void }) {
-  const badgeType = getStatusBadgeType(item.resultId, item.resultStatus);
-  const shortAddr = item.address?.split(' ').slice(-1)[0] ?? item.address;
-  const summary = [item.surveyorOpinion, item.cropType, item.cropCondition].filter(Boolean).join(' · ');
-  const isRejected = item.resultStatus === 'REJECTED';
-
-  return (
-    <View style={[s.card, isRejected && s.cardRejected]}>
-      <View style={s.cardRow}>
-        <StatusBadge type={badgeType} />
-        <Text style={s.cardAddr}>{shortAddr}</Text>
-      </View>
-      {isRejected && item.reviewComment ? (
-        <Text style={s.rejectedReason}>사유: {item.reviewComment}</Text>
-      ) : summary ? (
-        <Text style={s.cardSummary}>{summary}</Text>
-      ) : null}
-      {item.surveyedAt && (
-        <Text style={s.cardDate}>제출: {formatDate(item.surveyedAt)}</Text>
-      )}
-      {isRejected && onResurvey && (
-        <Pressable style={s.resurveyBtn} onPress={onResurvey}>
-          <Text style={s.resurveyBtnText}>재조사</Text>
-        </Pressable>
-      )}
-    </View>
-  );
-}
-
-// ─── Status Counts (제출 현황 탭 상단) ─────────────────────────
-function StatusCounts() {
+// ─── KPI Cards ────────────────────────────────────────────────
+function KpiCards() {
   const assignments = useAssignmentStore((s) => s.assignments);
   const rejected = useAssignmentStore((s) => s.rejected);
-  const submitted = assignments.filter((a) => a.resultId && a.resultStatus && a.resultStatus !== 'DRAFT');
-  const counts = {
-    submitted: submitted.filter((a) => a.resultStatus === 'SUBMITTED').length,
-    reviewing: submitted.filter((a) => a.resultStatus === 'REVIEWING').length,
-    approved: submitted.filter((a) => a.resultStatus === 'APPROVED').length,
-    rejected: rejected.length,
-  };
-  const items = [
-    { label: '제출완료', count: counts.submitted, bg: '#e7f5ff', color: '#228be6' },
-    { label: '검수중', count: counts.reviewing, bg: '#f3f0ff', color: '#7048e8' },
-    { label: '승인', count: counts.approved, bg: '#ebfbee', color: '#2b8a3e' },
-    { label: '반려', count: counts.rejected, bg: '#fff4e6', color: '#e8590c' },
+
+  const total = assignments.length;
+  const completed = assignments.filter((a) => a.resultId !== null && a.resultStatus !== 'DRAFT').length;
+  const inProgress = assignments.filter((a) => a.resultStatus === 'DRAFT').length;
+  const remaining = assignments.filter((a) => !a.resultId).length;
+  const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  const kpis = [
+    { label: '전체', value: total, color: '#495057', bg: '#f8f9fa' },
+    { label: '미조사', value: remaining, color: '#228be6', bg: '#e7f5ff' },
+    { label: '임시저장', value: inProgress, color: '#7048e8', bg: '#f3f0ff' },
+    { label: '완료', value: completed, color: '#2b8a3e', bg: '#ebfbee' },
   ];
+
   return (
-    <View style={s.statusCounts}>
-      {items.map((it) => (
-        <View key={it.label} style={[s.statusCount, { backgroundColor: it.bg }]}>
-          <Text style={[s.statusNum, { color: it.color }]}>{it.count}</Text>
-          <Text style={s.statusLabel}>{it.label}</Text>
-        </View>
-      ))}
+    <View style={s.kpiSection}>
+      <View style={s.kpiHeader}>
+        <Text style={s.kpiTitle}>배정 현황</Text>
+        <Text style={s.kpiRate}>완료율 {rate}%</Text>
+      </View>
+      <View style={s.progressBar}>
+        <View style={[s.progressFill, { width: `${rate}%` }]} />
+      </View>
+      <View style={s.kpiRow}>
+        {kpis.map((k) => (
+          <View key={k.label} style={[s.kpiCard, { backgroundColor: k.bg }]}>
+            <Text style={[s.kpiValue, { color: k.color }]}>{k.value}</Text>
+            <Text style={s.kpiLabel}>{k.label}</Text>
+          </View>
+        ))}
+      </View>
     </View>
+  );
+}
+
+// ─── Stats Widget (이번주 실적) ────────────────────────────────
+function StatsWidget() {
+  const assignments = useAssignmentStore((s) => s.assignments);
+  const submitted = assignments.filter(
+    (a) => a.resultId && a.resultStatus && ['SUBMITTED', 'UNDER_REVIEW', 'APPROVED'].includes(a.resultStatus)
+  ).length;
+
+  return (
+    <View style={s.statsCard}>
+      <Text style={s.statsTitle}>이번주 실적</Text>
+      <View style={s.statsRow}>
+        <View style={s.statItem}>
+          <Text style={s.statValue}>{submitted}</Text>
+          <Text style={s.statLabel}>제출</Text>
+        </View>
+        <View style={s.statDivider} />
+        <View style={s.statItem}>
+          <Text style={[s.statValue, { color: '#2b8a3e' }]}>
+            {assignments.filter((a) => a.resultStatus === 'APPROVED').length}
+          </Text>
+          <Text style={s.statLabel}>승인</Text>
+        </View>
+        <View style={s.statDivider} />
+        <View style={s.statItem}>
+          <Text style={[s.statValue, { color: '#fa5252' }]}>
+            {assignments.filter((a) => a.resultStatus === 'REJECTED').length}
+          </Text>
+          <Text style={s.statLabel}>반려</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+// ─── CTA Button ───────────────────────────────────────────────
+function CtaButton() {
+  const router = useRouter();
+  return (
+    <Pressable style={s.ctaBtn} onPress={() => router.push('/(tabs)/survey')}>
+      <Ionicons name="clipboard-outline" size={18} color="#fff" />
+      <Text style={s.ctaBtnText}>조사 시작하기</Text>
+      <Ionicons name="chevron-forward" size={18} color="#fff" />
+    </Pressable>
   );
 }
 
 // ─── Main Screen ───────────────────────────────────────────────
 export default function HomeScreen() {
-  const [tab, setTab] = useState(0);
   const isLoading = useAssignmentStore((s) => s.isLoading);
   const fetchMyAssignments = useAssignmentStore((s) => s.fetchMyAssignments);
   const fetchRejected = useAssignmentStore((s) => s.fetchRejected);
-  const assignments = useAssignmentStore((s) => s.assignments);
-  const searchQuery = useAssignmentStore((s) => s.searchQuery);
-  const rejected = useAssignmentStore((s) => s.rejected);
+  const fetchNotices = useNoticesStore((s) => s.fetch);
+  const pinnedNotice = useNoticesStore(selectPinnedNotice);
   const user = useAuthStore((s) => s.user);
-  const router = useRouter();
 
   const refresh = useCallback(() => {
     fetchMyAssignments();
     fetchRejected();
-  }, [fetchMyAssignments, fetchRejected]);
+    fetchNotices();
+  }, [fetchMyAssignments, fetchRejected, fetchNotices]);
 
   useEffect(() => { refresh(); }, [refresh]);
-
-  const q = searchQuery.trim().toLowerCase();
-  const filteredList = q
-    ? assignments.filter((a) => a.address?.toLowerCase().includes(q))
-    : assignments;
-
-  const listData = tab === 0
-    ? filteredList.filter((a) => !a.resultId || a.resultStatus === 'DRAFT')
-    : [
-        ...assignments.filter((a) => a.resultId && a.resultStatus && a.resultStatus !== 'DRAFT'),
-        ...rejected,
-      ];
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
@@ -224,31 +184,17 @@ export default function HomeScreen() {
         <Text style={s.headerTitle}>안녕하세요, {user?.userName ?? '조사원'}님</Text>
       </View>
 
-      <FlatList
-        data={listData}
-        keyExtractor={(item, index) => `${tab}-${item.assignmentId}-${item.resultId}-${index}`}
-        renderItem={({ item }) => tab === 0
-          ? <AssignmentCard item={item} onPress={() => router.push(`/survey/${item.assignmentId}`)} />
-          : <ResultCard item={item} onResurvey={item.resultStatus === 'REJECTED' ? () => router.push(`/survey/${item.assignmentId}`) : undefined} />
-        }
-        contentContainerStyle={s.listContent}
+      <ScrollView
+        contentContainerStyle={s.content}
         refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} tintColor="#228be6" />}
-        ListHeaderComponent={
-          <>
-            <SyncPendingBanner />
-            <ProgressCard />
-            <RejectedBanner />
-            <SegmentTabs active={tab} onChange={setTab} />
-            <SearchBar />
-            {tab === 1 && <StatusCounts />}
-          </>
-        }
-        ListEmptyComponent={
-          <View style={s.empty}>
-            <Text style={s.emptyText}>{isLoading ? '' : tab === 0 ? '할당된 조사가 없습니다' : '제출 내역이 없습니다'}</Text>
-          </View>
-        }
-      />
+      >
+        <SyncPendingBanner />
+        {pinnedNotice && <PinnedNoticeBanner notice={pinnedNotice} />}
+        <RejectedBanner />
+        <KpiCards />
+        <StatsWidget />
+        <CtaButton />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -258,67 +204,58 @@ const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#f8f9fa' },
   header: { paddingHorizontal: 24, paddingVertical: 12 },
   headerTitle: { fontSize: 18, fontWeight: '700', color: '#212529' },
-  listContent: { paddingHorizontal: 16, paddingBottom: 24 },
+  content: { paddingHorizontal: 16, paddingBottom: 32, gap: 12 },
 
-  // Progress Card
-  progressCard: { backgroundColor: '#e7f5ff', borderRadius: 12, padding: 16, marginBottom: 16 },
-  progressTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 },
-  progressTitle: { fontSize: 17, fontWeight: '600', color: '#212529' },
-  progressCount: { fontSize: 20, fontWeight: '700', color: '#228be6' },
-  progressBar: { height: 8, backgroundColor: '#e9ecef', borderRadius: 4, overflow: 'hidden', marginBottom: 8 },
-  progressFill: { height: '100%', backgroundColor: '#228be6', borderRadius: 4 },
-  progressLabels: { flexDirection: 'row', justifyContent: 'space-between' },
-  progressLabel: { fontSize: 13, color: '#868e96' },
-
-  // Rejected Banner
-  rejectedBanner: {
-    backgroundColor: '#fff4e6', borderLeftWidth: 3, borderLeftColor: '#fd7e14',
-    borderRadius: 6, padding: 12, flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', marginBottom: 16,
-  },
-  rejectedText: { fontSize: 14, fontWeight: '600', color: '#343a40' },
-  rejectedArrow: { fontSize: 18, color: '#fd7e14' },
-
-  // Segment Tabs
-  tabs: { flexDirection: 'row', backgroundColor: '#f1f3f5', borderRadius: 8, padding: 3, marginBottom: 16 },
-  tab: { flex: 1, height: 36, borderRadius: 6, alignItems: 'center', justifyContent: 'center' },
-  tabActive: { backgroundColor: '#fff', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 2, elevation: 1 },
-  tabText: { fontSize: 14, fontWeight: '600', color: '#adb5bd' },
-  tabTextActive: { color: '#212529' },
-
-  // Search
-  searchBar: { flexDirection: 'row', alignItems: 'center', height: 40, backgroundColor: '#f1f3f5', borderRadius: 20, paddingHorizontal: 14, gap: 8, marginBottom: 16 },
-  searchInput: { flex: 1, fontSize: 14, color: '#212529' },
-
-  // Status Counts
-  statusCounts: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  statusCount: { flex: 1, borderRadius: 10, padding: 12, alignItems: 'center' },
-  statusNum: { fontSize: 20, fontWeight: '700' },
-  statusLabel: { fontSize: 12, color: '#868e96', marginTop: 2 },
-
-  // Cards
-  card: {
-    backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: '#e9ecef',
-    padding: 16, marginBottom: 8,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 2,
-  },
-  cardRejected: { borderLeftWidth: 3, borderLeftColor: '#fd7e14', backgroundColor: '#fff4e6' },
-  cardRow: { flexDirection: 'row', gap: 8, alignItems: 'center', marginBottom: 4 },
-  cardAddr: { fontSize: 16, fontWeight: '500', color: '#212529' },
-  cardMeta: { flexDirection: 'row', gap: 4, alignItems: 'center' },
-  cardSummary: { fontSize: 13, color: '#868e96' },
-  cardDate: { fontSize: 12, color: '#ced4da', marginTop: 4 },
-  rejectedReason: { fontSize: 13, color: '#fd7e14', fontWeight: '500', marginTop: 6 },
-  resurveyBtn: { marginTop: 10, paddingVertical: 8, borderRadius: 8, backgroundColor: '#228be6', alignItems: 'center' },
-  resurveyBtnText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  // Sync Banner
   syncBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#e7f5ff', borderRadius: 10, padding: 12, marginBottom: 12,
+    backgroundColor: '#e7f5ff', borderRadius: 10, padding: 12,
   },
   syncText: { flex: 1, fontSize: 14, fontWeight: '600', color: '#1864ab' },
   syncRetry: { fontSize: 13, color: '#228be6' },
 
-  // Empty
-  empty: { paddingVertical: 48, alignItems: 'center' },
-  emptyText: { fontSize: 14, color: '#adb5bd' },
+  // Notice Banner
+  noticeBanner: {
+    borderRadius: 10, padding: 12, borderLeftWidth: 3,
+  },
+  noticeRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  noticeTypeBadge: { borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2 },
+  noticeTypeText: { fontSize: 11, fontWeight: '700', color: '#fff' },
+  noticeTitle: { flex: 1, fontSize: 14, fontWeight: '600' },
+
+  // Rejected Banner
+  rejectedBanner: {
+    backgroundColor: '#fff4e6', borderLeftWidth: 3, borderLeftColor: '#fd7e14',
+    borderRadius: 10, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 8,
+  },
+  rejectedText: { flex: 1, fontSize: 14, fontWeight: '600', color: '#343a40' },
+  rejectedArrow: { fontSize: 18, color: '#fd7e14' },
+
+  // KPI Section
+  kpiSection: { backgroundColor: '#fff', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#e9ecef' },
+  kpiHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 },
+  kpiTitle: { fontSize: 16, fontWeight: '700', color: '#212529' },
+  kpiRate: { fontSize: 14, fontWeight: '600', color: '#228be6' },
+  progressBar: { height: 6, backgroundColor: '#e9ecef', borderRadius: 3, overflow: 'hidden', marginBottom: 12 },
+  progressFill: { height: '100%', backgroundColor: '#228be6', borderRadius: 3 },
+  kpiRow: { flexDirection: 'row', gap: 8 },
+  kpiCard: { flex: 1, borderRadius: 10, padding: 12, alignItems: 'center' },
+  kpiValue: { fontSize: 22, fontWeight: '700' },
+  kpiLabel: { fontSize: 12, color: '#868e96', marginTop: 2 },
+
+  // Stats Card
+  statsCard: { backgroundColor: '#fff', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#e9ecef' },
+  statsTitle: { fontSize: 16, fontWeight: '700', color: '#212529', marginBottom: 12 },
+  statsRow: { flexDirection: 'row', alignItems: 'center' },
+  statItem: { flex: 1, alignItems: 'center' },
+  statValue: { fontSize: 22, fontWeight: '700', color: '#212529' },
+  statLabel: { fontSize: 12, color: '#868e96', marginTop: 2 },
+  statDivider: { width: 1, height: 40, backgroundColor: '#e9ecef' },
+
+  // CTA Button
+  ctaBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: '#228be6', borderRadius: 12, paddingVertical: 16,
+  },
+  ctaBtnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
 });

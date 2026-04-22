@@ -1,7 +1,7 @@
 // 현장조사 API
 import { API } from '@/lib/config';
 import { api } from './client';
-import type { Assignment, SurveyResultInput } from './types';
+import type { Assignment, Notice, NoticePageResponse, SurveyResultInput } from './types';
 
 export async function getMyAssignments(date?: string, status?: string) {
   const params = new URLSearchParams();
@@ -47,4 +47,14 @@ export async function uploadPhoto(resultId: number, photoType: string, uri: stri
 /** 재제출 */
 export async function resubmitResult(resultId: number, data: SurveyResultInput) {
   return api.post<void>(`${API.RESULT}/${resultId}/resubmit`, data);
+}
+
+/** 공지 목록 조회 (페이지네이션) */
+export async function getNotices(page = 0, size = 20) {
+  return api.get<NoticePageResponse>(`${API.NOTICES}?page=${page}&size=${size}`);
+}
+
+/** 공지 상세 조회 — id가 유효한 숫자인지 반드시 확인 후 호출할 것 (Spring 500 방지) */
+export async function getNoticeDetail(id: number) {
+  return api.get<Notice>(`${API.NOTICE_DETAIL}/${id}`);
 }
