@@ -1,8 +1,7 @@
 // 환경 설정 — 서버 URL, API 경로
-// Phase 1: 개발 서버 고정. 추후 환경별 분리.
-
-// export const BASE_URL = 'http://211.214.194.88:5632';
-export const BASE_URL = 'http://juyoungk.iptime.org:18080';
+// APP_BASE_URL: eas.json 각 프로파일(development/preview/production)에서 주입
+// 로컬 개발 시 .env.local 에 APP_BASE_URL=http://... 설정
+export const BASE_URL = process.env.APP_BASE_URL ?? 'http://juyoungk.iptime.org:18080';
 
 export const API = {
   // 인증

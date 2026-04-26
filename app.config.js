@@ -2,6 +2,7 @@ import packageJson from './package.json';
 module.exports = ({ config }) => {
   const appVersion = packageJson.version;
   const easBuildNumber = process.env.EAS_BUILD_NUMBER || '1';
+  const isDev = !!process.env.EAS_BUILD_NUMBER === false || process.env.APP_BASE_URL?.startsWith('http://');
   const androidVersionCode = Number(easBuildNumber || 1);
   const iosBuildNumber = easBuildNumber;
   return {
@@ -32,10 +33,12 @@ module.exports = ({ config }) => {
             '필지 조사 시 현장 사진을 촬영하기 위해 카메라 사용이 필요합니다.',
           NSPhotoLibraryAddUsageDescription:
             '필지 조사 시 현장 사진을 업로드하기 위해 갤러리 접근이 필요합니다.',
-          // TODO: NSAppTransportSecurity 제거 — 서버 HTTPS 전환 완료 후 삭제
-          NSAppTransportSecurity: {
-            NSAllowsArbitraryLoads: true,
-          },
+          // HTTP 개발 서버 접근 허용 — development 빌드(APP_BASE_URL=http://...)에서만 활성화
+          ...(isDev && {
+            NSAppTransportSecurity: {
+              NSAllowsArbitraryLoads: true,
+            },
+          }),
           NSPrivacyCollectedDataTypes: [
             {
               NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypeLocationCoarseResolution',
