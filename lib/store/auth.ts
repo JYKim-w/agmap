@@ -1,6 +1,7 @@
 // 인증 상태 관리 — JWT 토큰 + 유저 정보
-// AsyncStorage에 영속화, 앱 시작 시 복원
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// SecureStore에 암호화 영속화, 앱 시작 시 복원
+import * as SecureStore from 'expo-secure-store';
+import { Alert } from 'react-native';
 import { create } from 'zustand';
 import { loginApi } from '@/lib/api/auth';
 import { configureClient } from '@/lib/api/client';
@@ -28,11 +29,14 @@ export const useAuthStore = create<AuthState>((set, get) => {
     onTokenRefreshed: (accessToken, refreshToken) => {
       const user = get().user;
       set({ accessToken, refreshToken });
-      // AsyncStorage 업데이트
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ accessToken, refreshToken, user }));
+      SecureStore.setItemAsync(STORAGE_KEY, JSON.stringify({ accessToken, refreshToken, user }));
     },
     onUnauthorized: () => {
       get().logout();
+    },
+    onForcedLogout: (message) => {
+      get().logout();
+      Alert.alert('로그인 필요', message);
     },
   });
 
@@ -52,8 +56,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
           return { success: false, message: res.message || '로그인 실패' };
         }
 
-        const { accessToken, refreshToken, userId, userName, role, companyName } = res.data;
-        const user: AuthUser = { userId, loginId: res.data.loginId, userName, role, companyName };
+        const { accessToken, refreshToken, userId, userName, role, companyName, regionCode } = res.data;
+        const user: AuthUser = { userId, loginId: res.data.loginId, userName, role, companyName, regionCode: regionCode ?? null };
 
         set({
           accessToken,
@@ -63,7 +67,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
           isLoading: false,
         });
 
-        await AsyncStorage.setItem(
+        await SecureStore.setItemAsync(
           STORAGE_KEY,
           JSON.stringify({ accessToken, refreshToken, user }),
         );
@@ -89,12 +93,12 @@ export const useAuthStore = create<AuthState>((set, get) => {
         user: null,
         isAuthenticated: false,
       });
-      await AsyncStorage.removeItem(STORAGE_KEY);
+      await SecureStore.deleteItemAsync(STORAGE_KEY);
     },
 
     loadStoredToken: async () => {
       try {
-        const raw = await AsyncStorage.getItem(STORAGE_KEY);
+        const raw = await SecureStore.getItemAsync(STORAGE_KEY);
         if (!raw) return;
 
         const { accessToken, refreshToken, user } = JSON.parse(raw);
@@ -103,7 +107,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
           set({ accessToken, refreshToken, user, isAuthenticated: true });
         }
       } catch {
-        await AsyncStorage.removeItem(STORAGE_KEY);
+        await SecureStore.deleteItemAsync(STORAGE_KEY);
       }
     },
   };
