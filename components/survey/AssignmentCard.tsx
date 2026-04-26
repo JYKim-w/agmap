@@ -1,10 +1,24 @@
 // Design Ref: home-survey-ux.design.md §5.2
 // 미완료 카드 (미조사 + DRAFT) — 조사 탭 사용
 import StatusBadge, { getStatusBadgeType } from '@/components/StatusBadge';
+import DDayBadge from '@/components/survey/DDayBadge';
 import { shortAddr, formatSurveyedAt } from '@/lib/utils/address';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Assignment } from '@/lib/api/types';
+
+const ASSIGN_STATUS_LABEL: Record<string, string> = {
+  ASSIGNED: '배정',
+  IN_PROGRESS: '진행중',
+  COMPLETED: '완료',
+  RETURNED: '반려',
+};
+
+const PRIORITY_STYLE: Record<number, { label: string; color: string }> = {
+  1: { label: '긴급', color: '#fa5252' },
+  2: { label: '우선', color: '#fd7e14' },
+  3: { label: '일반', color: '#868e96' },
+};
 
 interface AssignmentCardProps {
   item: Assignment;
@@ -15,12 +29,15 @@ interface AssignmentCardProps {
 export function AssignmentCard({ item, onPress, onMapPress }: AssignmentCardProps) {
   const badgeType = getStatusBadgeType(item.resultId, item.resultStatus);
   const isDraft = item.resultStatus === 'DRAFT';
+  const priorityStyle = item.priority ? PRIORITY_STYLE[item.priority] : null;
+  const assignLabel = item.assignStatus ? ASSIGN_STATUS_LABEL[item.assignStatus] ?? item.assignStatus : null;
 
   return (
     <Pressable style={[s.card, isDraft && s.cardDraft]} onPress={onPress}>
       <View style={s.cardRow}>
         <StatusBadge type={badgeType} />
         <Text style={s.cardAddr} numberOfLines={1}>{shortAddr(item.address)}</Text>
+        <DDayBadge dueDate={item.dueDate} />
         {onMapPress && (
           <Pressable style={s.mapBtn} onPress={onMapPress} hitSlop={8}>
             <Ionicons name="map-outline" size={14} color="#228be6" />
@@ -31,6 +48,16 @@ export function AssignmentCard({ item, onPress, onMapPress }: AssignmentCardProp
       </View>
       <View style={s.cardMeta}>
         {item.riskGrade && <StatusBadge type={item.riskGrade as any} />}
+        {assignLabel && (
+          <View style={s.assignBadge}>
+            <Text style={s.assignBadgeText}>{assignLabel}</Text>
+          </View>
+        )}
+        {priorityStyle && (
+          <View style={[s.priorityBadge, { borderColor: priorityStyle.color }]}>
+            <Text style={[s.priorityBadgeText, { color: priorityStyle.color }]}>{priorityStyle.label}</Text>
+          </View>
+        )}
         <Text style={s.cardAddrFull} numberOfLines={1}>{item.address}</Text>
       </View>
       {isDraft && (
@@ -52,6 +79,7 @@ interface ResultCardProps {
 export function ResultCard({ item, onResurvey, onMapPress }: ResultCardProps) {
   const badgeType = getStatusBadgeType(item.resultId, item.resultStatus);
   const isRejected = item.resultStatus === 'REJECTED';
+  const rejectReason = item.rejectComment ?? item.reviewComment;
   const summary = [item.surveyorOpinion, item.cropType, item.cropCondition].filter(Boolean).join(' · ');
 
   return (
@@ -66,8 +94,8 @@ export function ResultCard({ item, onResurvey, onMapPress }: ResultCardProps) {
           </Pressable>
         )}
       </View>
-      {isRejected && item.reviewComment ? (
-        <Text style={s.rejectedReason}>사유: {item.reviewComment}</Text>
+      {isRejected && rejectReason ? (
+        <Text style={s.rejectedReason}>사유: {rejectReason}</Text>
       ) : summary ? (
         <Text style={s.cardSummary}>{summary}</Text>
       ) : null}
@@ -106,6 +134,20 @@ const s = StyleSheet.create({
   cardSummary: { fontSize: 13, color: '#868e96', marginTop: 4 },
   cardDate: { fontSize: 12, color: '#ced4da', marginTop: 4 },
   rejectedReason: { fontSize: 13, color: '#fd7e14', fontWeight: '500', marginTop: 6 },
+  assignBadge: {
+    backgroundColor: '#f1f3f5',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  assignBadgeText: { fontSize: 11, color: '#495057', fontWeight: '600' },
+  priorityBadge: {
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+  },
+  priorityBadgeText: { fontSize: 11, fontWeight: '700' },
   draftBanner: {
     flexDirection: 'row',
     alignItems: 'center',

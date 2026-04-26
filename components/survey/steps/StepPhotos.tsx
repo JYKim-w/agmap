@@ -7,10 +7,10 @@ import * as ImagePicker from 'expo-image-picker';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 const PHOTO_TYPES: { type: PhotoEntry['photoType']; label: string; desc: string; required: boolean }[] = [
-  { type: 'OVERVIEW', label: '전경', desc: '필지 전체가 보이도록 촬영', required: true },
+  { type: 'PANORAMA', label: '전경', desc: '필지 전체가 보이도록 촬영', required: true },
   { type: 'CLOSEUP', label: '근경', desc: '작물/시설 클로즈업', required: true },
   { type: 'FACILITY', label: '시설물', desc: '시설물 있을 때 촬영', required: false },
-  { type: 'VIOLATION', label: '위반', desc: '위반 판단 시 증거', required: false },
+  { type: 'SIGNBOARD', label: '지번패드', desc: '지번 패드 또는 위반 증거', required: false },
   { type: 'ETC', label: '기타', desc: '기타 참고 사진', required: false },
 ];
 
@@ -50,10 +50,10 @@ export default function StepPhotos() {
       {PHOTO_TYPES.map((pt) => {
         // 조건부 표시
         if (pt.type === 'FACILITY' && !facilityYn) return null;
-        if (pt.type === 'VIOLATION' && surveyorOpinion !== 'VIOLATION') return null;
+        if (pt.type === 'SIGNBOARD' && surveyorOpinion !== 'SIGNBOARD') return null;
 
         const typePhotos = photos.filter((p) => p.photoType === pt.type);
-        const isRequired = pt.required || (pt.type === 'FACILITY' && facilityYn) || (pt.type === 'VIOLATION' && surveyorOpinion === 'VIOLATION');
+        const isRequired = pt.required || (pt.type === 'FACILITY' && facilityYn) || (pt.type === 'SIGNBOARD' && surveyorOpinion === 'SIGNBOARD');
         const hasPhoto = typePhotos.length > 0;
 
         return (

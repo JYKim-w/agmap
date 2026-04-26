@@ -21,6 +21,7 @@ export interface LoginData {
   userName: string;
   role: 'SURVEYOR' | 'MANAGER' | 'ADMIN';
   companyName: string;
+  regionCode: string | null;
 }
 
 export interface AuthUser {
@@ -29,6 +30,7 @@ export interface AuthUser {
   userName: string;
   role: 'SURVEYOR' | 'MANAGER' | 'ADMIN';
   companyName: string;
+  regionCode: string | null;
 }
 
 // 할당 + 조사결과 (my-assignments, rejected 공통)
@@ -37,13 +39,26 @@ export interface Assignment {
   assignmentId: number;
   pnu: string;
   address: string;
-  riskGrade: 'HIGH' | 'MEDIUM' | 'LOW';
-  resultStatus: string | null;
-  surveyedAt: string | number[] | null;
-  surveyorOpinion: string | null;
-  cropType: string | null;
-  cropCondition: string | null;
-  reviewComment?: string;
+  riskGrade: string;
+  assignStatus: 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'RETURNED' | string;
+  resultStatus: 'DRAFT' | 'SUBMITTED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | null;
+  priority: number;
+  dueDate: string;
+  lon: number | null;
+  lat: number | null;
+  surveyorName: string;
+  surveyedAt: string | null;
+  // 반려 목록 전용
+  rejectCode?: string | null;
+  rejectComment?: string | null;
+  rejectCount?: number;
+  validationWarnings?: string | null;
+  updatedAt?: string;
+  // 레거시 (서버 미반환, UI 호환용)
+  surveyorOpinion?: string | null;
+  cropType?: string | null;
+  cropCondition?: string | null;
+  reviewComment?: string | null;
 }
 
 // 공지사항 (v1.4)
@@ -51,7 +66,7 @@ export interface Notice {
   id: number;
   title: string;
   content: string;
-  noticeType: 'EMERGENCY' | 'WEATHER' | 'SYSTEM' | 'GENERAL';
+  noticeType: 'GENERAL' | 'URGENT' | 'GUIDE';
   scope: 'GLOBAL' | 'MANAGER';
   pinned: boolean;
   authorId: number;
@@ -62,11 +77,11 @@ export interface Notice {
 }
 
 export interface NoticePageResponse {
-  content: Notice[];
+  list: Notice[];
   totalCount: number;
   page: number;
   size: number;
-  hasMore: boolean;
+  totalPages: number;
 }
 
 // 조사 결과 제출 입력
@@ -86,8 +101,8 @@ export interface SurveyResultInput {
   facilityType: string | null;
   facilityDetail: string | null;
   facilityPermitted: string | null;
-  facilityArea: number;
-  facilityRatio: number;
+  facilityArea: number | null;
+  facilityRatio: number | null;
   conversionYn: boolean;
   conversionUse: string | null;
   conversionScale: string | null;
@@ -95,9 +110,8 @@ export interface SurveyResultInput {
   surveyorOpinion: string | null;
   ownerContact: string | null;
   memo: string | null;
+  surveyLocation: string;
   surveyLat: number | null;
   surveyLng: number | null;
   surveyedAt: string;
-  validationWarnings: string | null;
-  resultStatus: 'DRAFT' | 'SUBMITTED';
 }

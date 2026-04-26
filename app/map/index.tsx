@@ -1,10 +1,10 @@
-// Design Ref: §10.4 — Clean Slate 조사원 전용 지도 화면
-// Plan SC: SC-1~SC-7 전체 커버
+// Design Ref: field-survey-map-ux.design.md §2.1 — 조사원 전용 지도 화면 (v2.0)
+// Plan SC: FR-01~FR-09 전체 커버
 import MapLibreGL from '@maplibre/maplibre-react-native';
 import { area, length, polygon as turfPolygon, lineString as turfLineString } from '@turf/turf';
 import { Stack, useRouter } from 'expo-router';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Keyboard, StyleSheet, Text, View } from 'react-native';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Keyboard, StyleSheet, Text, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 import { SurveyStatusLayer } from '@/lib/map/components/SurveyStatusLayer';
@@ -19,18 +19,23 @@ import { MeasureCrosshair } from '@/lib/map/components/MeasureCrosshair';
 import { MeasureInfoCard } from '@/lib/map/components/MeasureInfoCard';
 import { MeasureControlBar } from '@/lib/map/components/MeasureControlBar';
 import { SearchBar } from '@/lib/map/components/SearchBar';
-import { useSurveyStatusMap } from '@/lib/map/hooks/useSurveyStatusMap';
-import { useParcelCentroid } from '@/lib/map/hooks/useParcelCentroid';
+import { useParcelStyle } from '@/lib/map/hooks/useParcelStyle';
+import { usePolygonGeoms } from '@/lib/map/hooks/usePolygonGeoms';
 import { useUserTracking } from '@/lib/map/hooks/useUserTracking';
+import { setupMapGlyphs } from '@/lib/map/utils/glyphsSetup';
 import { DEFAULT_CENTER, DEFAULT_ZOOM, KOREA_BOUNDS, VWORLD_KEY } from '@/lib/map/constants';
 import type { SurveyStatus } from '@/lib/map/types';
+import useAssignmentStore from '@/lib/store/assignments';
 import { useMapStateStore } from '@/store/mapStateStore';
 import useMeasureStore from '@/store/measureStore';
 import inspectInputStore from '@/store/inspectInputStore';
 
 MapLibreGL.setAccessToken(null);
 
-// --- Measure calculator (recomputes area/distance on point change) ---
+// 모듈 레벨 캐시 — 앱 세션 내 재렌더링 시 즉시 사용
+let _cachedGlyphsUrl: string | undefined;
+
+// --- Measure calculator ---
 const MeasureCalculator = memo(() => {
   const isMeasuring = useMeasureStore((s) => s.isMeasuring);
   const points = useMeasureStore((s) => s.measurePoints);
@@ -58,11 +63,13 @@ const MeasureCalculator = memo(() => {
   return null;
 });
 
-// --- Map style (VWorld raster sources) ---
-const mapStyle = JSON.stringify({
-  version: 8,
-  name: 'VWorld',
-  sources: {
+// --- Map style factory ---
+function buildMapStyle(glyphsUrl: string) {
+  return JSON.stringify({
+    version: 8,
+    name: 'VWorld',
+    glyphs: glyphsUrl,
+    sources: {
     'vworld-base': {
       type: 'raster',
       tiles: [`https://api.vworld.kr/req/wmts/1.0.0/${VWORLD_KEY}/Base/{z}/{y}/{x}.png`],
@@ -79,9 +86,9 @@ const mapStyle = JSON.stringify({
       tileSize: 256, scheme: 'xyz', minzoom: 6, maxzoom: 19,
     },
   },
-  glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
   layers: [],
-});
+  });
+}
 
 export default function MapScreen() {
   const router = useRouter();
@@ -89,14 +96,25 @@ export default function MapScreen() {
   const cameraRef = useRef<any>(null);
   const [cameraState, setCameraState] = useState<any>(null);
 
+  // 조사 탭에서 공유된 선택 상태
+  const selectedAssignmentId = useAssignmentStore((s) => s.selectedAssignmentId);
+  const setSelectedAssignment = useAssignmentStore((s) => s.setSelectedAssignment);
+  const assignments = useAssignmentStore((s) => s.assignments);
+
   // UI state
   const [mapType, setMapType] = useState<'base' | 'satellite'>('base');
   const [activeFilters, setActiveFilters] = useState<Set<SurveyStatus>>(new Set());
   const [selectedPnu, setSelectedPnu] = useState<string | null>(null);
   const [showLegend, setShowLegend] = useState(true);
 
-  // Status layer
-  const { statusMap, fillColorExpr, lineColorExpr } = useSurveyStatusMap(activeFilters);
+  // polygon fetch 래치: z≥14 최초 진입 시 true, 이후 영구 유지 (zoom-out 재요청 방지)
+  const [geomPrefetchEnabled, setGeomPrefetchEnabled] = useState(DEFAULT_ZOOM >= 14);
+
+  // 새 hook: useParcelStyle — centroid + urgency + style 통합 (0 API)
+  const { statusMap, centroidCollection } = useParcelStyle(activeFilters);
+
+  // 새 hook: usePolygonGeoms — z≥14 진입 시 백그라운드 prefetch, 표시는 z≥16
+  const polygonCollection = usePolygonGeoms(statusMap, geomPrefetchEnabled, activeFilters);
 
   // Map state
   const trackingMode = useMapStateStore((s) => s.trackingMode);
@@ -115,31 +133,52 @@ export default function MapScreen() {
   const resetMeasure = useMeasureStore((s) => s.reset);
   const { setOwnAr } = inspectInputStore();
 
-  // GPS tracking
+  const [glyphsUrl, setGlyphsUrl] = useState<string | undefined>(_cachedGlyphsUrl);
+  useEffect(() => {
+    if (_cachedGlyphsUrl) return;
+    setupMapGlyphs().then((url) => { _cachedGlyphsUrl = url; setGlyphsUrl(url); });
+  }, []);
+
   const { toggleTrackingMode, onUserTrackingModeChange, onLocationUpdate } =
     useUserTracking(cameraRef, setCameraState);
 
-  // Search — PNU centroid lookup
-  const { getCentroid } = useParcelCentroid();
+  // lon/lat 직접 조회 (geom API 대체) — Plan SC: FR-05
+  const getLonLat = useCallback((assignmentId: number): [number, number] | null => {
+    const a = assignments.find((a) => a.assignmentId === assignmentId);
+    if (a?.lon != null && a?.lat != null) return [a.lon, a.lat];
+    return null;
+  }, [assignments]);
+
+  // Plan SC-7: 조사 탭 지도버튼 → selectedAssignmentId → cameraRef 포커스
+  useEffect(() => {
+    if (!selectedAssignmentId) return;
+    const coord = getLonLat(selectedAssignmentId);
+    if (coord) {
+      setTrackingMode('off');
+      setCameraState({ centerCoordinate: coord, zoomLevel: 16, animationDuration: 800 });
+    }
+  }, [selectedAssignmentId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // --- Handlers ---
   const handleParcelPress = useCallback((pnu: string) => {
     if (statusMap.has(pnu)) setSelectedPnu(pnu);
   }, [statusMap]);
 
+  const handleClusterPress = useCallback((coords: [number, number], currentZoom: number) => {
+    setTrackingMode('off');
+    setCameraState({ centerCoordinate: coords, zoomLevel: currentZoom + 2, animationDuration: 400 });
+  }, [setTrackingMode]);
+
   const handleSearchSelect = useCallback(async (pnu: string) => {
     setTrackingMode('off');
-    const coord = await getCentroid(pnu);
+    const entry = statusMap.get(pnu);
+    if (!entry) return;
+    const coord = getLonLat(entry.assignmentId);
     if (coord) {
-      setCameraState({
-        centerCoordinate: coord,
-        zoomLevel: 16,
-        animationDuration: 800,
-      });
-      // 이동 후 팝업 표시
-      setTimeout(() => { if (statusMap.has(pnu)) setSelectedPnu(pnu); }, 900);
+      setCameraState({ centerCoordinate: coord, zoomLevel: 16, animationDuration: 800 });
+      setTimeout(() => setSelectedPnu(pnu), 900);
     }
-  }, [getCentroid, statusMap, setTrackingMode]);
+  }, [getLonLat, statusMap, setTrackingMode]);
 
   const handleStartSurvey = useCallback((assignmentId: number) => {
     setSelectedPnu(null);
@@ -189,8 +228,17 @@ export default function MapScreen() {
   const onMapPress = useCallback((event: any) => {
     if (isMeasuring) return;
     setSelectedPnu(null);
-    Keyboard.dismiss(); // 검색바 자동완성 닫기
+    Keyboard.dismiss();
   }, [isMeasuring]);
+
+  if (!glyphsUrl) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8f9fa' }}>
+        <Stack.Screen options={{ title: 'map', headerShown: false, gestureEnabled: false }} />
+        <ActivityIndicator size="large" color="#4dabf7" />
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -204,16 +252,21 @@ export default function MapScreen() {
         rotateEnabled={false}
         pitchEnabled={false}
         compassEnabled={false}
-        mapStyle={mapStyle}
+        mapStyle={buildMapStyle(glyphsUrl)}
         onPress={onMapPress}
         onRegionIsChanging={(e: any) => {
+          // Fix #2: isHighZoom 업데이트 제외 — onRegionIsChanging은 매 프레임 발화
           if (e.properties?.heading != null) setMapBearing(e.properties.heading);
-          if (e.properties?.zoomLevel != null) setMapZoom(e.properties.zoomLevel);
           if (isMeasuring && e.geometry?.coordinates) setCurrentCenter(e.geometry.coordinates);
         }}
         onRegionDidChange={(e: any) => {
+          const zoom = e.properties?.zoomLevel;
+          if (zoom != null) {
+            setMapZoom(zoom);
+            // 래치: 한 번 true가 되면 유지 — z≥14에서 polygon geom 백그라운드 prefetch 시작
+            if (zoom >= 14) setGeomPrefetchEnabled(true);
+          }
           if (e.properties?.heading != null) setMapBearing(e.properties.heading);
-          if (e.properties?.zoomLevel != null) setMapZoom(e.properties.zoomLevel);
           if (e.properties?.visibleBounds) {
             const [[maxLng, maxLat], [minLng, minLat]] = e.properties.visibleBounds;
             setMapBbox([minLng, minLat, maxLng, maxLat]);
@@ -224,9 +277,10 @@ export default function MapScreen() {
       >
         <VWorldBaseLayers mapType={mapType} />
         <SurveyStatusLayer
-          fillColorExpr={fillColorExpr}
-          lineColorExpr={lineColorExpr}
+          centroidCollection={centroidCollection}
+          polygonCollection={polygonCollection}
           onParcelPress={handleParcelPress}
+          onClusterPress={handleClusterPress}
         />
         <MeasureLayer />
 
@@ -321,14 +375,6 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 4,
   },
-  emptyTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#495057',
-    marginBottom: 4,
-  },
-  emptyDesc: {
-    fontSize: 13,
-    color: '#868e96',
-  },
+  emptyTitle: { fontSize: 15, fontWeight: '600', color: '#495057', marginBottom: 4 },
+  emptyDesc: { fontSize: 13, color: '#868e96' },
 });

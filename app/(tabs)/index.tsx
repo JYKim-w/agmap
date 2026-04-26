@@ -5,7 +5,7 @@ import useAuthStore from '@/lib/store/auth';
 import useNoticesStore, { selectPinnedNotice } from '@/lib/store/notices';
 import { useSubmitQueue } from '@/lib/offline';
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -20,10 +20,9 @@ import { useRouter } from 'expo-router';
 import type { Notice } from '@/lib/api/types';
 
 const NOTICE_TYPE_COLOR: Record<string, { bg: string; color: string; label: string }> = {
-  EMERGENCY: { bg: '#fff0f0', color: '#fa5252', label: '긴급' },
-  WEATHER:   { bg: '#fff9db', color: '#e67700', label: '날씨' },
-  SYSTEM:    { bg: '#f3f0ff', color: '#7048e8', label: '시스템' },
-  GENERAL:   { bg: '#f1f3f5', color: '#495057', label: '공지' },
+  URGENT:  { bg: '#fff0f0', color: '#fa5252', label: '긴급' },
+  GUIDE:   { bg: '#e7f5ff', color: '#228be6', label: '안내' },
+  GENERAL: { bg: '#f1f3f5', color: '#495057', label: '공지' },
 };
 
 // ─── Sync Pending Banner ───────────────────────────────────────
@@ -43,9 +42,13 @@ function SyncPendingBanner() {
 
 // ─── Pinned Notice Banner ──────────────────────────────────────
 function PinnedNoticeBanner({ notice }: { notice: Notice }) {
+  const router = useRouter();
   const theme = NOTICE_TYPE_COLOR[notice.noticeType] ?? NOTICE_TYPE_COLOR.GENERAL;
   return (
-    <View style={[s.noticeBanner, { backgroundColor: theme.bg, borderLeftColor: theme.color }]}>
+    <Pressable
+      style={[s.noticeBanner, { backgroundColor: theme.bg, borderLeftColor: theme.color }]}
+      onPress={() => router.push(`/notice/${notice.id}` as any)}
+    >
       <View style={s.noticeRow}>
         <View style={[s.noticeTypeBadge, { backgroundColor: theme.color }]}>
           <Text style={s.noticeTypeText}>{theme.label}</Text>
@@ -55,7 +58,7 @@ function PinnedNoticeBanner({ notice }: { notice: Notice }) {
         </Text>
         <Ionicons name="pin" size={14} color={theme.color} />
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -82,8 +85,8 @@ function KpiCards() {
   const rejected = useAssignmentStore((s) => s.rejected);
 
   const total = assignments.length;
-  const completed = assignments.filter((a) => a.resultId !== null && a.resultStatus !== 'DRAFT').length;
-  const inProgress = assignments.filter((a) => a.resultStatus === 'DRAFT').length;
+  const completed = assignments.filter((a) => !!a.resultId && a.resultStatus !== 'DRAFT').length;
+  const inProgress = assignments.filter((a) => !!a.resultId && a.resultStatus === 'DRAFT').length;
   const remaining = assignments.filter((a) => !a.resultId).length;
   const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
@@ -149,6 +152,65 @@ function StatsWidget() {
   );
 }
 
+// ─── Due Soon List ────────────────────────────────────────────
+function DueSoonList() {
+  const assignments = useAssignmentStore((s) => s.assignments);
+  const router = useRouter();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const dueSoon = assignments
+    .filter((a) => {
+      if (!a.dueDate) return false;
+      if (!!a.resultId && a.resultStatus !== 'DRAFT') return false; // 이미 제출됨
+      const due = new Date(a.dueDate);
+      due.setHours(0, 0, 0, 0);
+      const diff = Math.round((due.getTime() - today.getTime()) / 86400000);
+      return diff <= 7; // 7일 이내 + 기한 초과
+    })
+    .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+    .slice(0, 5);
+
+  if (dueSoon.length === 0) return null;
+
+  return (
+    <View style={s.dueCard}>
+      <View style={s.dueHeader}>
+        <Ionicons name="time-outline" size={16} color="#fa5252" />
+        <Text style={s.dueTitle}>기한 임박</Text>
+        <Text style={s.dueCount}>{dueSoon.length}건</Text>
+      </View>
+      {dueSoon.map((item) => {
+        const due = new Date(item.dueDate);
+        due.setHours(0, 0, 0, 0);
+        const diff = Math.round((due.getTime() - today.getTime()) / 86400000);
+        const label = diff === 0 ? 'D-Day' : diff > 0 ? `D-${diff}` : `D+${Math.abs(diff)}`;
+        const color = diff < 0 ? '#fa5252' : diff <= 3 ? '#fd7e14' : '#f08c00';
+        const isDraft = item.resultStatus === 'DRAFT';
+        return (
+          <Pressable
+            key={item.assignmentId}
+            style={s.dueRow}
+            onPress={() => router.push(`/survey/${item.assignmentId}` as any)}
+          >
+            <View style={[s.dueDday, { borderColor: color }]}>
+              <Text style={[s.dueDdayText, { color }]}>{label}</Text>
+            </View>
+            <Text style={s.dueAddr} numberOfLines={1}>{item.address}</Text>
+            {isDraft && (
+              <View style={s.dueDraftTag}>
+                <Text style={s.dueDraftText}>임시저장</Text>
+              </View>
+            )}
+            <Ionicons name="chevron-forward" size={14} color="#ced4da" />
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 // ─── CTA Button ───────────────────────────────────────────────
 function CtaButton() {
   const router = useRouter();
@@ -163,20 +225,24 @@ function CtaButton() {
 
 // ─── Main Screen ───────────────────────────────────────────────
 export default function HomeScreen() {
-  const isLoading = useAssignmentStore((s) => s.isLoading);
   const fetchMyAssignments = useAssignmentStore((s) => s.fetchMyAssignments);
   const fetchRejected = useAssignmentStore((s) => s.fetchRejected);
   const fetchNotices = useNoticesStore((s) => s.fetch);
   const pinnedNotice = useNoticesStore(selectPinnedNotice);
   const user = useAuthStore((s) => s.user);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const refresh = useCallback(() => {
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    await Promise.all([fetchMyAssignments(), fetchRejected(), fetchNotices()]);
+    setIsRefreshing(false);
+  }, [fetchMyAssignments, fetchRejected, fetchNotices]);
+
+  useEffect(() => {
     fetchMyAssignments();
     fetchRejected();
     fetchNotices();
-  }, [fetchMyAssignments, fetchRejected, fetchNotices]);
-
-  useEffect(() => { refresh(); }, [refresh]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
@@ -186,12 +252,13 @@ export default function HomeScreen() {
 
       <ScrollView
         contentContainerStyle={s.content}
-        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} tintColor="#228be6" />}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor="#228be6" />}
       >
         <SyncPendingBanner />
         {pinnedNotice && <PinnedNoticeBanner notice={pinnedNotice} />}
         <RejectedBanner />
         <KpiCards />
+        <DueSoonList />
         <StatsWidget />
         <CtaButton />
       </ScrollView>
@@ -242,6 +309,22 @@ const s = StyleSheet.create({
   kpiCard: { flex: 1, borderRadius: 10, padding: 12, alignItems: 'center' },
   kpiValue: { fontSize: 22, fontWeight: '700' },
   kpiLabel: { fontSize: 12, color: '#868e96', marginTop: 2 },
+
+  // Due Soon Card
+  dueCard: { backgroundColor: '#fff', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#e9ecef' },
+  dueHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
+  dueTitle: { flex: 1, fontSize: 16, fontWeight: '700', color: '#212529' },
+  dueCount: { fontSize: 13, fontWeight: '600', color: '#fa5252' },
+  dueRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingVertical: 9,
+    borderTopWidth: 1, borderTopColor: '#f1f3f5',
+  },
+  dueDday: { borderWidth: 1, borderRadius: 4, paddingHorizontal: 5, paddingVertical: 2, minWidth: 44, alignItems: 'center' },
+  dueDdayText: { fontSize: 11, fontWeight: '700' },
+  dueAddr: { flex: 1, fontSize: 14, color: '#343a40' },
+  dueDraftTag: { backgroundColor: '#e7f5ff', borderRadius: 4, paddingHorizontal: 5, paddingVertical: 2 },
+  dueDraftText: { fontSize: 11, color: '#228be6', fontWeight: '600' },
 
   // Stats Card
   statsCard: { backgroundColor: '#fff', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#e9ecef' },

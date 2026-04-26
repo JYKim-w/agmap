@@ -71,7 +71,7 @@ export default function StepConfirm() {
               <View key={i} style={s.photoThumb}>
                 <Image source={{ uri: p.uri }} style={s.photoImage} />
                 <View style={s.photoLabel}>
-                  <Text style={s.photoLabelText}>{p.photoType === 'OVERVIEW' ? '전경' : p.photoType === 'CLOSEUP' ? '근경' : p.photoType}</Text>
+                  <Text style={s.photoLabelText}>{p.photoType === 'PANORAMA' ? '전경' : p.photoType === 'CLOSEUP' ? '근경' : p.photoType === 'SIGNBOARD' ? '지번패드' : p.photoType}</Text>
                 </View>
               </View>
             ))}

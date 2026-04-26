@@ -18,14 +18,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Assignment } from '@/lib/api/types';
 
 // ─── Segment Control ──────────────────────────────────────────
-function SegmentControl({ active, onChange }: { active: number; onChange: (i: number) => void }) {
+function SegmentControl({
+  active, onChange, pendingCount, submittedCount,
+}: {
+  active: number;
+  onChange: (i: number) => void;
+  pendingCount: number;
+  submittedCount: number;
+}) {
   return (
     <View style={s.segment}>
       <Pressable style={[s.segBtn, active === 0 && s.segBtnActive]} onPress={() => onChange(0)}>
-        <Text style={[s.segText, active === 0 && s.segTextActive]}>미완료</Text>
+        <Text style={[s.segText, active === 0 && s.segTextActive]}>미완료 {pendingCount}</Text>
       </Pressable>
       <Pressable style={[s.segBtn, active === 1 && s.segBtnActive]} onPress={() => onChange(1)}>
-        <Text style={[s.segText, active === 1 && s.segTextActive]}>제출현황</Text>
+        <Text style={[s.segText, active === 1 && s.segTextActive]}>제출현황 {submittedCount}</Text>
       </Pressable>
     </View>
   );
@@ -80,23 +87,27 @@ export default function SurveyTab() {
 
   const assignments = useAssignmentStore((s) => s.assignments);
   const rejected = useAssignmentStore((s) => s.rejected);
-  const isLoading = useAssignmentStore((s) => s.isLoading);
   const fetchMyAssignments = useAssignmentStore((s) => s.fetchMyAssignments);
   const fetchRejected = useAssignmentStore((s) => s.fetchRejected);
   const setSelectedAssignment = useAssignmentStore((s) => s.setSelectedAssignment);
   const router = useRouter();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const refresh = useCallback(() => {
-    fetchMyAssignments();
-    fetchRejected();
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    await Promise.all([fetchMyAssignments(), fetchRejected()]);
+    setIsRefreshing(false);
   }, [fetchMyAssignments, fetchRejected]);
 
-  useEffect(() => { refresh(); }, [refresh]);
+  useEffect(() => {
+    fetchMyAssignments();
+    fetchRejected();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const q = search.trim().toLowerCase();
 
   const pendingList = useMemo(() => {
-    const drafts = assignments.filter((a) => a.resultStatus === 'DRAFT');
+    const drafts = assignments.filter((a) => !!a.resultId && a.resultStatus === 'DRAFT');
     const unsurveyed = assignments.filter((a) => !a.resultId);
     const list = [...drafts, ...unsurveyed];
     return q ? list.filter((a) => a.address?.toLowerCase().includes(q)) : list;
@@ -104,7 +115,7 @@ export default function SurveyTab() {
 
   const submittedList = useMemo(() => {
     const list = [
-      ...assignments.filter((a) => a.resultId && a.resultStatus && a.resultStatus !== 'DRAFT'),
+      ...assignments.filter((a) => a.resultId && a.resultStatus && a.resultStatus !== 'DRAFT' && a.resultStatus !== 'REJECTED'),
       ...rejected,
     ];
     return q ? list.filter((a) => a.address?.toLowerCase().includes(q)) : list;
@@ -143,10 +154,15 @@ export default function SurveyTab() {
           )
         }
         contentContainerStyle={s.listContent}
-        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} tintColor="#228be6" />}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor="#228be6" />}
         ListHeaderComponent={
           <View>
-            <SegmentControl active={tab} onChange={setTab} />
+            <SegmentControl
+              active={tab}
+              onChange={setTab}
+              pendingCount={pendingList.length}
+              submittedCount={submittedList.length}
+            />
             <SearchBar value={search} onChange={setSearch} />
             {tab === 1 && <StatusSummary assignments={assignments} rejected={rejected} />}
           </View>

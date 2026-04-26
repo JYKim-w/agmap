@@ -4,7 +4,9 @@ import { StyleSheet, Text, View } from 'react-native';
 type BadgeType =
   | 'unsurveyed' | 'in-progress' | 'completed' | 'rejected'
   | 'submitted' | 'reviewing' | 'approved'
-  | 'HIGH' | 'MEDIUM' | 'LOW';
+  | 'HIGH' | 'MEDIUM' | 'LOW'
+  | 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'RETURNED'
+  | 'priority-1' | 'priority-2' | 'priority-3';
 
 const BADGE_CONFIG: Record<string, { bg: string; color: string; label: string }> = {
   'unsurveyed':  { bg: '#fff5f5', color: '#fa5252', label: '미조사' },
@@ -17,6 +19,15 @@ const BADGE_CONFIG: Record<string, { bg: string; color: string; label: string }>
   'HIGH':        { bg: '#fff5f5', color: '#fa5252', label: 'HIGH' },
   'MEDIUM':      { bg: '#fff4e6', color: '#fd7e14', label: 'MEDIUM' },
   'LOW':         { bg: '#e7f5ff', color: '#339af0', label: 'LOW' },
+  // assignStatus
+  'ASSIGNED':    { bg: '#e7f5ff', color: '#228be6', label: '배정' },
+  'IN_PROGRESS': { bg: '#fff9db', color: '#f08c00', label: '진행중' },
+  'COMPLETED':   { bg: '#ebfbee', color: '#2b8a3e', label: '완료' },
+  'RETURNED':    { bg: '#fff4e6', color: '#e8590c', label: '반려' },
+  // priority
+  'priority-1':  { bg: '#fff0f6', color: '#c2255c', label: '긴급' },
+  'priority-2':  { bg: '#f8f9fa', color: '#495057', label: '보통' },
+  'priority-3':  { bg: '#f8f9fa', color: '#adb5bd', label: '낮음' },
 };
 
 export default function StatusBadge({ type, label }: { type: BadgeType; label?: string }) {
@@ -34,7 +45,7 @@ export function getStatusBadgeType(resultId: number | null, resultStatus: string
   switch (resultStatus) {
     case 'DRAFT': return 'in-progress';
     case 'SUBMITTED': return 'submitted';
-    case 'REVIEWING': return 'reviewing';
+    case 'UNDER_REVIEW': return 'reviewing';
     case 'APPROVED': return 'approved';
     case 'REJECTED': return 'rejected';
     default: return 'completed';

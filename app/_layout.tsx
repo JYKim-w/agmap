@@ -13,6 +13,8 @@ import usePermissionStore from '@/store/permissionStore';
 import useAuthStore from '@/lib/store/auth';
 import { useNetworkStore } from '@/lib/offline/networkStatus';
 import { useSubmitQueue } from '@/lib/offline/submitQueue';
+import useCodesStore from '@/lib/store/codes';
+import { registerDeviceToken } from '@/lib/api/survey';
 import OfflineBanner from '@/components/OfflineBanner';
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -34,6 +36,8 @@ export default function RootLayout() {
   const { setPermissions } = usePermissionStore();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const loadStoredToken = useAuthStore((s) => s.loadStoredToken);
+  const loadCodesFromCache = useCodesStore((s) => s.loadFromCache);
+  const fetchCodesFromServer = useCodesStore((s) => s.fetchFromServer);
   const { setInsets, reset } = appStatusStore();
   const insets = useSafeAreaInsets();
   useEffect(() => {
@@ -80,13 +84,18 @@ export default function RootLayout() {
 
   useEffect(() => {
     async function prepare() {
+      const timeout = new Promise<void>((resolve) => setTimeout(resolve, 5000));
       try {
-        await Promise.all([
-          checkPermissions(),
-          checkVersion(),
-          loadStoredToken(),
-          useSubmitQueue.getState().loadQueue(),
-          new Promise((resolve) => setTimeout(resolve, 1000)),
+        await Promise.race([
+          Promise.all([
+            checkPermissions(),
+            checkVersion(),
+            loadStoredToken(),
+            useSubmitQueue.getState().loadQueue(),
+            loadCodesFromCache(),
+            new Promise((resolve) => setTimeout(resolve, 1000)),
+          ]),
+          timeout,
         ]);
       } catch (e) {
         console.warn(e);
@@ -112,9 +121,14 @@ export default function RootLayout() {
     return cleanup;
   }, []);
 
-  // 인증 상태 변화 감지 — 로그아웃/토큰만료 시 로그인 화면 이동
+  // 인증 상태 변화 감지 — 로그인 후 서버 코드 로딩, 로그아웃 시 로그인 화면 이동
   useEffect(() => {
-    if (isReady && !isAuthenticated) {
+    if (!isReady) return;
+    if (isAuthenticated) {
+      fetchCodesFromServer();
+      // FCM 디바이스 토큰 등록 — expo-notifications 연동 시 실제 토큰으로 교체
+      // registerDeviceToken(fcmToken);
+    } else {
       router.replace('/login');
     }
   }, [isReady, isAuthenticated]);

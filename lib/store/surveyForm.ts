@@ -42,6 +42,7 @@ export interface SurveyFormData {
   surveyorOpinion: string | null;
   ownerContact: string | null;
   memo: string;
+  surveyLocation: string;
 
   // Step 7: 사진
   photos: PhotoEntry[];
@@ -54,12 +55,11 @@ export interface SurveyFormData {
 
 export interface PhotoEntry {
   uri: string;
-  photoType: 'OVERVIEW' | 'CLOSEUP' | 'FACILITY' | 'VIOLATION' | 'ETC';
+  photoType: 'PANORAMA' | 'CLOSEUP' | 'FACILITY' | 'SIGNBOARD' | 'ETC';
 }
 
 interface SurveyFormState extends SurveyFormData {
   currentStep: number;
-  resultStatus: 'DRAFT' | 'SUBMITTED';
 
   setField: <K extends keyof SurveyFormData>(key: K, value: SurveyFormData[K]) => void;
   setStep: (step: number) => void;
@@ -104,6 +104,7 @@ const INITIAL: SurveyFormData = {
   surveyorOpinion: null,
   ownerContact: null,
   memo: '',
+  surveyLocation: '현장',
   photos: [],
   surveyLat: null,
   surveyLng: null,
@@ -115,7 +116,6 @@ const TOTAL_STEPS = 8; // 7단계 폼 + 확인 화면
 export const useSurveyFormStore = create<SurveyFormState>((set) => ({
   ...INITIAL,
   currentStep: 1,
-  resultStatus: 'DRAFT',
 
   setField: (key, value) => {
     set({ [key]: value } as any);
@@ -133,9 +133,9 @@ export const useSurveyFormStore = create<SurveyFormState>((set) => ({
   },
 
   initForm: (assignmentId, address, riskGrade) =>
-    set({ ...INITIAL, currentStep: 1, resultStatus: 'DRAFT', assignmentId, address, riskGrade, startedAt: Date.now() }),
+    set({ ...INITIAL, currentStep: 1, assignmentId, address, riskGrade, startedAt: Date.now() }),
 
-  reset: () => set({ ...INITIAL, currentStep: 1, resultStatus: 'DRAFT' }),
+  reset: () => set({ ...INITIAL, currentStep: 1 }),
 
   addPhoto: (photo) => {
     set((s) => ({ photos: [...s.photos, photo] }));
@@ -158,7 +158,7 @@ export const useSurveyFormStore = create<SurveyFormState>((set) => ({
       facilityYn: s.facilityYn, facilityType: s.facilityType, facilityDetail: s.facilityDetail,
       facilityPermitted: s.facilityPermitted, facilityArea: s.facilityArea, facilityRatio: s.facilityRatio,
       conversionYn: s.conversionYn, conversionUse: s.conversionUse, conversionScale: s.conversionScale, conversionPermitted: s.conversionPermitted,
-      surveyorOpinion: s.surveyorOpinion, ownerContact: s.ownerContact, memo: s.memo,
+      surveyorOpinion: s.surveyorOpinion, ownerContact: s.ownerContact, memo: s.memo, surveyLocation: s.surveyLocation,
       photos: s.photos, surveyLat: s.surveyLat, surveyLng: s.surveyLng, startedAt: s.startedAt,
       currentStep: s.currentStep,
     };
@@ -170,7 +170,7 @@ export const useSurveyFormStore = create<SurveyFormState>((set) => ({
       const raw = await AsyncStorage.getItem(`${DRAFT_KEY_PREFIX}${assignmentId}`);
       if (!raw) return false;
       const data = JSON.parse(raw);
-      set({ ...data, resultStatus: 'DRAFT' as const });
+      set({ ...data });
       return true;
     } catch {
       return false;

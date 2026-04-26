@@ -1,9 +1,9 @@
 // Design Ref: home-survey-ux.design.md §5.4 — 내정보 탭
 // 역할: 계정 정보 + 공지사항 목록 (GLOBAL / MANAGER 섹션)
 import useAuthStore from '@/lib/store/auth';
-import useNoticesStore, { selectGlobalNotices, selectManagerNotices } from '@/lib/store/notices';
+import useNoticesStore from '@/lib/store/notices';
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -18,10 +18,9 @@ import { router } from 'expo-router';
 import type { Notice } from '@/lib/api/types';
 
 const NOTICE_TYPE_COLOR: Record<string, { bg: string; color: string; label: string }> = {
-  EMERGENCY: { bg: '#fff0f0', color: '#fa5252', label: '긴급' },
-  WEATHER:   { bg: '#fff9db', color: '#e67700', label: '날씨' },
-  SYSTEM:    { bg: '#f3f0ff', color: '#7048e8', label: '시스템' },
-  GENERAL:   { bg: '#f1f3f5', color: '#495057', label: '공지' },
+  URGENT:  { bg: '#fff0f0', color: '#fa5252', label: '긴급' },
+  GUIDE:   { bg: '#e7f5ff', color: '#228be6', label: '안내' },
+  GENERAL: { bg: '#f1f3f5', color: '#495057', label: '공지' },
 };
 
 function NoticeItem({ notice }: { notice: Notice }) {
@@ -66,12 +65,13 @@ export default function ProfileScreen() {
   const hasMore = useNoticesStore((s) => s.hasMore);
   const fetch = useNoticesStore((s) => s.fetch);
   const fetchMore = useNoticesStore((s) => s.fetchMore);
-  const globalNotices = useNoticesStore(selectGlobalNotices);
-  const managerNotices = useNoticesStore(selectManagerNotices);
+  const notices = useNoticesStore((s) => s.notices);
+  const globalNotices = useMemo(() => notices.filter((n) => n.scope === 'GLOBAL'), [notices]);
+  const managerNotices = useMemo(() => notices.filter((n) => n.scope === 'MANAGER'), [notices]);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { fetch(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onRefresh = useCallback(() => { fetch(); }, [fetch]);
+  const onRefresh = useCallback(() => { fetch(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>

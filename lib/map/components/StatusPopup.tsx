@@ -1,8 +1,9 @@
-// Design Ref: §5.4 — 필지 탭 팝업 + 조사 시작
-// Plan SC: SC-3, SC-4 — 팝업 표시 + 조사 시작 네비게이션
-import React, { memo } from 'react';
+// Design Ref: field-survey-map-ux.design.md §5.4 — StatusPopup
+// Plan SC: FR-07 (D-Day + 위험등급 + 반려횟수 + validationWarnings)
+import { Ionicons } from '@expo/vector-icons';
+import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { STATUS_COLORS, STATUS_LABELS, type ParcelStatusEntry } from '../types';
+import { STATUS_COLORS, STATUS_LABELS, URGENCY_STYLES, type ParcelStatusEntry } from '../types';
 
 interface Props {
   entry: ParcelStatusEntry;
@@ -10,14 +11,26 @@ interface Props {
   onClose: () => void;
 }
 
+const RISK_STYLE: Record<string, { bg: string; color: string; label: string }> = {
+  HIGH:   { bg: '#FFE3E3', color: '#C92A2A', label: '고위험' },
+  MEDIUM: { bg: '#FFF3BF', color: '#E67700', label: '중위험' },
+  LOW:    { bg: '#E6FCF5', color: '#2B8A3E', label: '저위험' },
+};
+
 export const StatusPopup = memo(({ entry, onStartSurvey, onClose }: Props) => {
   const color = STATUS_COLORS[entry.status];
+  const risk = RISK_STYLE[entry.riskGrade] ?? RISK_STYLE.LOW;
+  const urgency = URGENCY_STYLES[entry.urgencyLevel];
   const canStart = entry.status === 'NOT_SURVEYED' || entry.status === 'REJECTED' || entry.status === 'DRAFT';
+  const hasDDay = entry.dDayLabel.length > 0;
+  const hasReject = (entry.rejectCount ?? 0) >= 1;
+  const hasWarnings = !!entry.validationWarnings;
 
   return (
     <View style={styles.overlay}>
       <Pressable style={styles.backdrop} onPress={onClose} />
       <View style={styles.card}>
+        {/* 헤더 */}
         <View style={styles.header}>
           <Text style={styles.address} numberOfLines={2}>{entry.address}</Text>
           <Pressable onPress={onClose} hitSlop={12}>
@@ -25,25 +38,47 @@ export const StatusPopup = memo(({ entry, onStartSurvey, onClose }: Props) => {
           </Pressable>
         </View>
 
-        <View style={styles.row}>
+        {/* 배지 행: 상태 + D-Day + 위험등급 */}
+        <View style={styles.badgeRow}>
           <View style={[styles.badge, { backgroundColor: color.fill }]}>
             <Text style={styles.badgeText}>{STATUS_LABELS[entry.status]}</Text>
           </View>
-          <View style={[styles.riskBadge, {
-            backgroundColor: entry.riskGrade === 'HIGH' ? '#FFE3E3' : entry.riskGrade === 'MEDIUM' ? '#FFF3BF' : '#E6FCF5',
-          }]}>
-            <Text style={[styles.riskText, {
-              color: entry.riskGrade === 'HIGH' ? '#C92A2A' : entry.riskGrade === 'MEDIUM' ? '#E67700' : '#2B8A3E',
-            }]}>
-              {entry.riskGrade === 'HIGH' ? '고위험' : entry.riskGrade === 'MEDIUM' ? '중위험' : '저위험'}
-            </Text>
+
+          {hasDDay && (
+            <View style={[styles.badge, { backgroundColor: urgency.ringColor }]}>
+              <Text style={styles.badgeText}>{entry.dDayLabel}</Text>
+            </View>
+          )}
+
+          <View style={[styles.riskBadge, { backgroundColor: risk.bg }]}>
+            <Text style={[styles.riskText, { color: risk.color }]}>{risk.label}</Text>
           </View>
         </View>
 
+        {/* 반려횟수 */}
+        {hasReject && (
+          <View style={styles.infoRow}>
+            <Ionicons name="return-down-back" size={13} color="#e67700" />
+            <Text style={styles.infoText}>반려 {entry.rejectCount}회</Text>
+          </View>
+        )}
+
+        {/* validationWarnings */}
+        {hasWarnings && (
+          <View style={styles.infoRow}>
+            <Ionicons name="warning-outline" size={13} color="#e67700" />
+            <Text style={[styles.infoText, styles.warningText]} numberOfLines={2}>
+              {entry.validationWarnings}
+            </Text>
+          </View>
+        )}
+
+        {/* 조사일 */}
         {entry.surveyedAt && (
           <Text style={styles.date}>조사일: {entry.surveyedAt.split('T')[0]}</Text>
         )}
 
+        {/* 조사 시작/보기 버튼 */}
         <Pressable
           style={[styles.button, !canStart && styles.buttonDisabled]}
           onPress={() => canStart && onStartSurvey(entry.assignmentId)}
@@ -58,16 +93,16 @@ export const StatusPopup = memo(({ entry, onStartSurvey, onClose }: Props) => {
   );
 });
 
+StatusPopup.displayName = 'StatusPopup';
+
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'flex-end',
     alignItems: 'center',
-    paddingBottom: 180,
+    paddingBottom: 100,
   },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-  },
+  backdrop: { ...StyleSheet.absoluteFillObject },
   card: {
     backgroundColor: 'white',
     borderRadius: 16,
@@ -86,61 +121,29 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 10,
   },
-  address: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#1a1a1a',
-    flex: 1,
-    marginRight: 8,
-  },
-  close: {
-    fontSize: 18,
-    color: '#adb5bd',
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 8,
-  },
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  badgeText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: 'white',
-  },
-  riskBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  riskText: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  date: {
-    fontSize: 13,
-    color: '#868e96',
-    marginBottom: 12,
-  },
+  address: { fontSize: 15, fontWeight: '600', color: '#1a1a1a', flex: 1, marginRight: 8 },
+  close: { fontSize: 18, color: '#adb5bd' },
+
+  badgeRow: { flexDirection: 'row', gap: 6, marginBottom: 8, flexWrap: 'wrap' },
+  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
+  badgeText: { fontSize: 13, fontWeight: '600', color: 'white' },
+  riskBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
+  riskText: { fontSize: 13, fontWeight: '600' },
+
+  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 4 },
+  infoText: { fontSize: 13, color: '#868e96' },
+  warningText: { flex: 1, color: '#e67700' },
+
+  date: { fontSize: 13, color: '#868e96', marginBottom: 12, marginTop: 4 },
+
   button: {
     backgroundColor: '#339AF0',
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
+    marginTop: 8,
   },
-  buttonDisabled: {
-    backgroundColor: '#e9ecef',
-  },
-  buttonText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: 'white',
-  },
-  buttonTextDisabled: {
-    color: '#868e96',
-  },
+  buttonDisabled: { backgroundColor: '#e9ecef' },
+  buttonText: { fontSize: 15, fontWeight: '600', color: 'white' },
+  buttonTextDisabled: { color: '#868e96' },
 });

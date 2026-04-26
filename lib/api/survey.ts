@@ -21,12 +21,27 @@ export async function getAssignmentDetail(assignId: number) {
   return api.get<any>(`${API.ASSIGNMENT}/${assignId}`);
 }
 
-/** 조사 결과 제출 (신규) */
+/** 필지 GeoJSON 조회 — EPSG:4326 GeoJSON 문자열 또는 null */
+export async function getAssignmentGeom(assignId: number) {
+  return api.get<string | null>(`${API.ASSIGNMENT}/${assignId}/geom`);
+}
+
+/** 임시저장 신규 생성 — POST /result/draft (M13 v1.3) */
+export async function saveDraft(data: SurveyResultInput) {
+  return api.post<number>(API.RESULT_DRAFT, data);
+}
+
+/** DRAFT → SUBMITTED 전환 — POST /result/{id}/submit (M14 v1.3) */
+export async function submitDraft(resultId: number) {
+  return api.post<void>(`${API.RESULT}/${resultId}/submit`);
+}
+
+/** 조사 결과 즉시 제출 (신규, SUBMITTED) */
 export async function submitResult(data: SurveyResultInput) {
   return api.post<number>(API.RESULT, data);
 }
 
-/** 조사 결과 수정 (DRAFT) */
+/** 조사 결과 수정 (DRAFT 또는 SUBMITTED, v1.3~) */
 export async function updateResult(resultId: number, data: SurveyResultInput) {
   return api.put<void>(`${API.RESULT}/${resultId}`, data);
 }
@@ -49,6 +64,32 @@ export async function resubmitResult(resultId: number, data: SurveyResultInput) 
   return api.post<void>(`${API.RESULT}/${resultId}/resubmit`, data);
 }
 
+export interface CodeItem {
+  codeId?: number;
+  codeGroup?: string;
+  codeValue: string;
+  codeLabel: string;
+  sortOrder: number;
+  useYn?: boolean;
+}
+
+/** 마스터코드 조회 */
+export async function getCodes(codeGroup: string) {
+  return api.get<CodeItem[]>(`${API.CODES}?codeGroup=${codeGroup}`);
+}
+
+export interface MyStats {
+  total_assigned: number;
+  completed: number;
+  rejected: number;
+  pending: number;
+}
+
+/** 내 실적 집계 */
+export async function getMyStats(period: 'daily' | 'weekly' | 'monthly' = 'weekly') {
+  return api.get<MyStats>(`${API.MY_STATS}?period=${period}`);
+}
+
 /** 공지 목록 조회 (페이지네이션) */
 export async function getNotices(page = 0, size = 20) {
   return api.get<NoticePageResponse>(`${API.NOTICES}?page=${page}&size=${size}`);
@@ -57,4 +98,9 @@ export async function getNotices(page = 0, size = 20) {
 /** 공지 상세 조회 — id가 유효한 숫자인지 반드시 확인 후 호출할 것 (Spring 500 방지) */
 export async function getNoticeDetail(id: number) {
   return api.get<Notice>(`${API.NOTICE_DETAIL}/${id}`);
+}
+
+/** FCM 디바이스 토큰 등록 */
+export async function registerDeviceToken(deviceToken: string) {
+  return api.put<null>(API.DEVICE_TOKEN, { deviceToken });
 }

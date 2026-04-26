@@ -21,7 +21,7 @@ interface AssignmentState {
   setSelectedAssignment: (id: number | null) => void;
 }
 
-export const useAssignmentStore = create<AssignmentState>((set) => ({
+export const useAssignmentStore = create<AssignmentState>((set, get) => ({
   assignments: [],
   rejected: [],
   isLoading: false,
@@ -29,6 +29,7 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
   selectedAssignmentId: null,
 
   fetchMyAssignments: async (date) => {
+    if (get().isLoading) return;
     set({ isLoading: true });
     try {
       const res = await getMyAssignments(date);
@@ -94,7 +95,7 @@ export const selectStatusCounts = (s: AssignmentState) => {
   const submitted = selectSubmitted(s);
   return {
     submitted: submitted.filter((a) => a.resultStatus === 'SUBMITTED').length,
-    reviewing: submitted.filter((a) => a.resultStatus === 'REVIEWING').length,
+    reviewing: submitted.filter((a) => a.resultStatus === 'UNDER_REVIEW').length,
     approved: submitted.filter((a) => a.resultStatus === 'APPROVED').length,
     rejected: s.rejected.length,
   };

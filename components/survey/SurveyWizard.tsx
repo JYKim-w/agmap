@@ -1,7 +1,7 @@
 // Design Ref: mockup/screens/survey-step*.html
 // 조사 위저드 — 7단계 폼
 import useSurveyFormStore from '@/lib/store/surveyForm';
-import { submitResult, updateResult, uploadPhoto, getAssignmentDetail } from '@/lib/api/survey';
+import { saveDraft, submitDraft, submitResult, updateResult, uploadPhoto, getAssignmentDetail } from '@/lib/api/survey';
 import useAssignmentStore from '@/lib/store/assignments';
 import { useNetworkStore } from '@/lib/offline/networkStatus';
 import { useSubmitQueue } from '@/lib/offline/submitQueue';
@@ -76,8 +76,8 @@ export default function SurveyWizard() {
         facilityType: formState.facilityType,
         facilityDetail: formState.facilityDetail,
         facilityPermitted: formState.facilityPermitted,
-        facilityArea: formState.facilityArea ? Number(formState.facilityArea) : 0,
-        facilityRatio: formState.facilityRatio ? Number(formState.facilityRatio) : 0,
+        facilityArea: formState.facilityArea ? Number(formState.facilityArea) : null,
+        facilityRatio: formState.facilityRatio ? Number(formState.facilityRatio) : null,
         conversionYn: formState.conversionYn ?? false,
         conversionUse: formState.conversionUse,
         conversionScale: formState.conversionScale,
@@ -85,11 +85,10 @@ export default function SurveyWizard() {
         surveyorOpinion: formState.surveyorOpinion,
         ownerContact: formState.ownerContact,
         memo: formState.memo || null,
+        surveyLocation: formState.surveyLocation,
         surveyLat: formState.surveyLat,
         surveyLng: formState.surveyLng,
         surveyedAt: new Date().toISOString(),
-        validationWarnings: warnings.length > 0 ? JSON.stringify(warnings.map((w) => w.message)) : null,
-        resultStatus: status,
       };
 
       // 오프라인이면 큐에 저장
@@ -104,23 +103,51 @@ export default function SurveyWizard() {
         return;
       }
 
-      // 온라인 — 기존 DRAFT가 있으면 update, 없으면 insert
+      // 온라인 — v1.3 플로우
+      // DRAFT 저장: POST /result/draft (M13)
+      // DRAFT → SUBMITTED: POST /result/{id}/submit (M14, body 없음)
+      // DRAFT 재수정: PUT /result/{id}
+      // 신규 즉시 제출: POST /result
       const assignment = assignments.find((a) => a.assignmentId === formState.assignmentId);
       const existingResultId = assignment?.resultId;
-      const isDraftUpdate = existingResultId && assignment?.resultStatus === 'DRAFT';
+      const existingIsDraft = existingResultId && assignment?.resultStatus === 'DRAFT';
 
       let resultId: number;
       try {
-        if (isDraftUpdate) {
-          await updateResult(existingResultId, body as any);
-          resultId = existingResultId;
-        } else {
-          const res = await submitResult(body as any);
-          if (!res.success) {
-            Toast.show({ type: 'error', text1: '제출 실패', text2: res.message });
-            return;
+        if (status === 'DRAFT') {
+          if (existingResultId) {
+            // 기존 결과(DRAFT/SUBMITTED) 수정
+            await updateResult(existingResultId, body as any);
+            resultId = existingResultId;
+          } else {
+            // 신규 DRAFT 저장 (M13)
+            const res = await saveDraft(body as any);
+            if (!res.success) {
+              Toast.show({ type: 'error', text1: '임시저장 실패', text2: res.message });
+              return;
+            }
+            resultId = res.data;
           }
-          resultId = res.data;
+        } else {
+          // SUBMITTED
+          if (existingIsDraft) {
+            // DRAFT → SUBMITTED 전환 (M14, body 없음)
+            await updateResult(existingResultId, body as any); // 내용 먼저 저장
+            await submitDraft(existingResultId);
+            resultId = existingResultId;
+          } else if (existingResultId) {
+            // 기존 SUBMITTED 수정
+            await updateResult(existingResultId, body as any);
+            resultId = existingResultId;
+          } else {
+            // 신규 즉시 제출
+            const res = await submitResult(body as any);
+            if (!res.success) {
+              Toast.show({ type: 'error', text1: '제출 실패', text2: res.message });
+              return;
+            }
+            resultId = res.data;
+          }
         }
 
         // 사진 업로드

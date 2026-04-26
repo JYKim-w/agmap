@@ -32,7 +32,7 @@ function validateRequired(form: SurveyFormData): ValidationWarning[] {
 /** 사진 검증 — OVERVIEW + CLOSEUP 최소 2장 */
 function validatePhotos(form: SurveyFormData): ValidationWarning[] {
   const warnings: ValidationWarning[] = [];
-  const hasOverview = form.photos.some((p) => p.photoType === 'OVERVIEW');
+  const hasOverview = form.photos.some((p) => p.photoType === 'PANORAMA');
   const hasCloseup = form.photos.some((p) => p.photoType === 'CLOSEUP');
 
   if (!hasOverview) {
@@ -46,8 +46,8 @@ function validatePhotos(form: SurveyFormData): ValidationWarning[] {
   if (form.facilityYn === true && !form.photos.some((p) => p.photoType === 'FACILITY')) {
     warnings.push({ type: 'photo', message: '시설물 사진이 필요합니다', blocking: false });
   }
-  if (form.surveyorOpinion === 'VIOLATION' && !form.photos.some((p) => p.photoType === 'VIOLATION')) {
-    warnings.push({ type: 'photo', message: '위반 사진이 필요합니다', blocking: false });
+  if (form.surveyorOpinion === 'VIOLATION' && !form.photos.some((p) => p.photoType === 'SIGNBOARD')) {
+    warnings.push({ type: 'photo', message: '위반 증거 사진이 필요합니다', blocking: false });
   }
 
   return warnings;

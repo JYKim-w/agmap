@@ -26,10 +26,10 @@ export const useNoticesStore = create<NoticesState>((set, get) => ({
       const res = await getNotices(0, 20);
       if (res.success && res.data) {
         set({
-          notices: res.data.content,
+          notices: res.data.list,
           totalCount: res.data.totalCount,
           page: 0,
-          hasMore: res.data.hasMore,
+          hasMore: 0 < res.data.totalPages - 1,
         });
       }
     } catch (e) {
@@ -48,10 +48,10 @@ export const useNoticesStore = create<NoticesState>((set, get) => ({
       const res = await getNotices(nextPage, 20);
       if (res.success && res.data) {
         set({
-          notices: [...notices, ...res.data.content],
+          notices: [...notices, ...res.data.list],
           totalCount: res.data.totalCount,
           page: nextPage,
-          hasMore: res.data.hasMore,
+          hasMore: nextPage < res.data.totalPages - 1,
         });
       }
     } catch (e) {

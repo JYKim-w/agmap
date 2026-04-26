@@ -32,6 +32,7 @@ let getToken: (() => string | null) | null = null;
 let getRefreshToken: (() => string | null) | null = null;
 let onTokenRefreshed: ((accessToken: string, refreshToken: string) => void) | null = null;
 let onUnauthorized: (() => void) | null = null;
+let onForcedLogout: ((message: string) => void) | null = null;
 
 /** 토큰 갱신 중 중복 호출 방지 */
 let refreshPromise: Promise<boolean> | null = null;
@@ -41,11 +42,13 @@ export function configureClient(opts: {
   getRefreshToken: () => string | null;
   onTokenRefreshed: (accessToken: string, refreshToken: string) => void;
   onUnauthorized: () => void;
+  onForcedLogout?: (message: string) => void;
 }) {
   getToken = opts.getToken;
   getRefreshToken = opts.getRefreshToken;
   onTokenRefreshed = opts.onTokenRefreshed;
   onUnauthorized = opts.onUnauthorized;
+  onForcedLogout = opts.onForcedLogout ?? null;
 }
 
 // ---------------------------------------------------------------------------
@@ -114,17 +117,24 @@ async function request<T>(
     body: body ? JSON.stringify(body) : undefined,
   });
 
-  // 401 → 토큰 갱신 시도 → 재시도
-  if (res.status === 401 && !_isRetry) {
-    const refreshed = await refreshOnce();
-    if (refreshed) {
-      return request<T>(method, path, body, true);
-    }
-    onUnauthorized?.();
-    throw new Error('Unauthorized');
-  }
-
   if (res.status === 401) {
+    const text = await res.text().catch(() => '');
+    try {
+      const json = JSON.parse(text);
+      // 강제 로그아웃 — refresh 시도 없이 즉시 처리
+      if (typeof json.code === 'string' && json.code.startsWith('FORCED_LOGOUT_')) {
+        onForcedLogout?.(json.message ?? '재로그인이 필요합니다.');
+        onUnauthorized?.();
+        throw new Error(json.message ?? 'Unauthorized');
+      }
+    } catch (e) {
+      if (e instanceof Error && e.message !== 'Unauthorized') throw e;
+    }
+    // 일반 401 → 토큰 갱신 시도
+    if (!_isRetry) {
+      const refreshed = await refreshOnce();
+      if (refreshed) return request<T>(method, path, body, true);
+    }
     onUnauthorized?.();
     throw new Error('Unauthorized');
   }
@@ -161,16 +171,22 @@ async function uploadFile<T>(
     body: formData,
   });
 
-  if (res.status === 401 && !_isRetry) {
-    const refreshed = await refreshOnce();
-    if (refreshed) {
-      return uploadFile<T>(path, formData, true);
-    }
-    onUnauthorized?.();
-    throw new Error('Unauthorized');
-  }
-
   if (res.status === 401) {
+    const text = await res.text().catch(() => '');
+    try {
+      const json = JSON.parse(text);
+      if (typeof json.code === 'string' && json.code.startsWith('FORCED_LOGOUT_')) {
+        onForcedLogout?.(json.message ?? '재로그인이 필요합니다.');
+        onUnauthorized?.();
+        throw new Error(json.message ?? 'Unauthorized');
+      }
+    } catch (e) {
+      if (e instanceof Error && e.message !== 'Unauthorized') throw e;
+    }
+    if (!_isRetry) {
+      const refreshed = await refreshOnce();
+      if (refreshed) return uploadFile<T>(path, formData, true);
+    }
     onUnauthorized?.();
     throw new Error('Unauthorized');
   }
