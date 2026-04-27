@@ -182,7 +182,7 @@ export default function MapScreen() {
 
   const handleStartSurvey = useCallback((assignmentId: number) => {
     setSelectedPnu(null);
-    router.push(`/(tabs)/survey/${assignmentId}` as any);
+    router.push(`/survey/${assignmentId}` as any);
   }, [router]);
 
   const onPressCompass = useCallback(async () => {

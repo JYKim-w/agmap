@@ -30,10 +30,13 @@ export const StatusPopup = memo(({ entry, onStartSurvey, onClose }: Props) => {
     <View style={styles.overlay}>
       <Pressable style={styles.backdrop} onPress={onClose} />
       <View style={styles.card}>
-        {/* 헤더 */}
+        {/* 핸들바 */}
+        <View style={styles.handle} />
+
+        {/* 주소 + 닫기 */}
         <View style={styles.header}>
           <Text style={styles.address} numberOfLines={2}>{entry.address}</Text>
-          <Pressable onPress={onClose} hitSlop={12}>
+          <Pressable onPress={onClose} hitSlop={16} style={styles.closeBtn}>
             <Text style={styles.close}>✕</Text>
           </Pressable>
         </View>
@@ -55,27 +58,24 @@ export const StatusPopup = memo(({ entry, onStartSurvey, onClose }: Props) => {
           </View>
         </View>
 
-        {/* 반려횟수 */}
-        {hasReject && (
-          <View style={styles.infoRow}>
-            <Ionicons name="return-down-back" size={13} color="#e67700" />
-            <Text style={styles.infoText}>반려 {entry.rejectCount}회</Text>
+        {/* 반려횟수 + 경고 */}
+        {(hasReject || hasWarnings) && (
+          <View style={styles.infoBox}>
+            {hasReject && (
+              <View style={styles.infoRow}>
+                <Ionicons name="return-down-back" size={13} color="#e67700" />
+                <Text style={styles.infoText}>반려 {entry.rejectCount}회</Text>
+              </View>
+            )}
+            {hasWarnings && (
+              <View style={styles.infoRow}>
+                <Ionicons name="warning-outline" size={13} color="#e67700" />
+                <Text style={[styles.infoText, styles.warningText]} numberOfLines={1}>
+                  {entry.validationWarnings}
+                </Text>
+              </View>
+            )}
           </View>
-        )}
-
-        {/* validationWarnings */}
-        {hasWarnings && (
-          <View style={styles.infoRow}>
-            <Ionicons name="warning-outline" size={13} color="#e67700" />
-            <Text style={[styles.infoText, styles.warningText]} numberOfLines={2}>
-              {entry.validationWarnings}
-            </Text>
-          </View>
-        )}
-
-        {/* 조사일 */}
-        {entry.surveyedAt && (
-          <Text style={styles.date}>조사일: {entry.surveyedAt.split('T')[0]}</Text>
         )}
 
         {/* 조사 시작/보기 버튼 */}
@@ -99,21 +99,31 @@ const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: 100,
   },
-  backdrop: { ...StyleSheet.absoluteFillObject },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  },
   card: {
     backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 16,
-    width: '85%',
-    maxWidth: 340,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 28,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.12,
     shadowRadius: 12,
-    elevation: 8,
+    elevation: 16,
+  },
+  handle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#dee2e6',
+    alignSelf: 'center',
+    marginBottom: 12,
   },
   header: {
     flexDirection: 'row',
@@ -121,29 +131,81 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 10,
   },
-  address: { fontSize: 15, fontWeight: '600', color: '#1a1a1a', flex: 1, marginRight: 8 },
-  close: { fontSize: 18, color: '#adb5bd' },
+  address: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#212529',
+    flex: 1,
+    marginRight: 8,
+  },
+  closeBtn: {
+    paddingTop: 2,
+  },
+  close: {
+    fontSize: 16,
+    color: '#adb5bd',
+  },
 
-  badgeRow: { flexDirection: 'row', gap: 6, marginBottom: 8, flexWrap: 'wrap' },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
-  badgeText: { fontSize: 13, fontWeight: '600', color: 'white' },
-  riskBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
-  riskText: { fontSize: 13, fontWeight: '600' },
+  badgeRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginBottom: 10,
+    flexWrap: 'wrap',
+  },
+  badge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  badgeText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: 'white',
+  },
+  riskBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  riskText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
 
-  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 4 },
-  infoText: { fontSize: 13, color: '#868e96' },
-  warningText: { flex: 1, color: '#e67700' },
-
-  date: { fontSize: 13, color: '#868e96', marginBottom: 12, marginTop: 4 },
+  infoBox: {
+    gap: 3,
+    marginBottom: 10,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  infoText: {
+    fontSize: 13,
+    color: '#868e96',
+  },
+  warningText: {
+    flex: 1,
+    color: '#e67700',
+  },
 
   button: {
-    backgroundColor: '#339AF0',
-    paddingVertical: 12,
+    backgroundColor: '#228be6',
+    paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 4,
   },
-  buttonDisabled: { backgroundColor: '#e9ecef' },
-  buttonText: { fontSize: 15, fontWeight: '600', color: 'white' },
-  buttonTextDisabled: { color: '#868e96' },
+  buttonDisabled: {
+    backgroundColor: '#e9ecef',
+  },
+  buttonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: 'white',
+  },
+  buttonTextDisabled: {
+    color: '#868e96',
+  },
 });
