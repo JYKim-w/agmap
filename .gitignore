@@ -45,6 +45,8 @@ ios/
 .agent/
 .bkit/
 .claude/
+.claude/settings.local.json
 
 # Debug tools
 ReactotronConfig.js
+
